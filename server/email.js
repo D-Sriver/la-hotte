@@ -6,7 +6,7 @@ const escapeHtml = (text) => String(text).replace(/[&<>"']/g, (c) => ({ '&': '&a
 export function emailLayout({ title, paragraphs, button }) {
   const body = paragraphs.map((p) => `<p style="margin:0 0 14px;font-size:16px;line-height:1.5;color:#141a2e">${escapeHtml(p)}</p>`).join('');
   const cta = button
-    ? `<p style="margin:24px 0 0"><a href="${escapeHtml(button.url)}" style="display:inline-block;padding:12px 22px;border-radius:999px;background:#e5383b;color:#fff;font-weight:700;text-decoration:none">${escapeHtml(button.label)}</a></p>`
+    ? `<p style="margin:24px 0 0"><a href="${escapeHtml(button.url)}" style="display:inline-block;padding:12px 22px;border-radius:999px;background:#d93236;color:#fff;font-weight:700;text-decoration:none">${escapeHtml(button.label)}</a></p>`
     : '';
   return `<!doctype html><html lang="fr"><body style="margin:0;padding:24px;background:#eceef3;font-family:-apple-system,Segoe UI,sans-serif">
 <div style="max-width:520px;margin:0 auto;padding:28px;border-radius:24px;background:#fff">

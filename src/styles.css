@@ -5,10 +5,11 @@
   --ink: #141a2e;
   --ink-soft: #4f566a;
   --line: #e3e6ee;
-  --red: #e5383b;
+  --red: #d93236;          /* blanc dessus : 4,7:1 (AA) */
   --red-deep: #b9232a;
   --green: #17845d;
   --green-soft: #dcf3e8;
+  --green-ink: #0f6b4b;     /* texte vert sur fond clair ou vert pâle : 5,6:1 */
   --gold: #f6b93b;
   --night: #172040;
   --pink: #f49ac1;
@@ -35,6 +36,8 @@
     --ink-soft: #b9bed0;
     --line: #272c45;
     --green-soft: #133527;
+    --green-ink: #5fd6a0;
+    --danger: #ff7b7d;
     --cream: #2a2416;
     --night: #26305c;
     --focus: #8ea6ff;
@@ -362,11 +365,11 @@ a.tile:active { transform: scale(0.97); }
 .invite-code { font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; letter-spacing: 0.05em; color: var(--ink); white-space: nowrap; }
 .invite-actions { display: flex; align-items: center; gap: 0.25rem; margin-top: 0.1rem; }
 .invite-actions .button { display: inline-flex; align-items: center; gap: 0.3rem; }
-.invite-done { min-height: 1em; color: var(--green); font-size: 0.8rem; font-weight: 700; }
+.invite-done { min-height: 1em; color: var(--green-ink); font-size: 0.8rem; font-weight: 700; }
 .invite-done:empty { display: none; }
 /* Seul dans la famille : la carte prend toute la largeur et passe au vert. */
 .invite-card-alone { grid-column: 1 / -1; border: 0; box-shadow: inset 0 0 0 2px var(--green); background: var(--green-soft); }
-.invite-card-alone .invite-title { color: var(--green); font-size: 1.1rem; }
+.invite-card-alone .invite-title { color: var(--green-ink); font-size: 1.1rem; }
 .invite-card-alone .invite-code { font-size: 1.5rem; }
 /* « Ce que j'offre » vide : un bouton vers la liste de la prochaine occasion. */
 .giving-empty { display: grid; gap: 0.9rem; justify-items: start; }
@@ -381,7 +384,7 @@ a.tile:active { transform: scale(0.97); }
 .code-bar-code { font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; letter-spacing: 0.06em; }
 .code-bar-actions { display: flex; align-items: center; gap: 0.3rem; }
 .code-bar-actions .button { display: inline-flex; align-items: center; gap: 0.35rem; }
-.code-bar .code-done { flex-basis: 100%; min-height: 0; color: var(--green); }
+.code-bar .code-done { flex-basis: 100%; min-height: 0; color: var(--green-ink); }
 .code-bar .code-done:empty { display: none; }
 .code-bar-highlight { background: var(--green-soft); box-shadow: inset 0 0 0 2px var(--green); }
 @media (max-width: 40rem) {
@@ -676,6 +679,7 @@ a.tile:active { transform: scale(0.97); }
 @media (prefers-color-scheme: dark) { .tile-head { background: var(--night); color: #fff; } }
 /* L'en-tête d'une personne reprend la couleur de sa tuile, texte blanc ou noir selon le fond. */
 .tile-head.tone-red { background: var(--red); color: #fff; }
+.tile-head .muted { color: inherit; }
 .tile-head.tone-night { background: var(--night); color: #fff; }
 .tile-head.tone-green { background: var(--green); color: #fff; }
 .tile-head.tone-gold { background: var(--gold); color: #2b1d00; }
@@ -739,7 +743,7 @@ a.tile:active { transform: scale(0.97); }
 .muted { color: var(--ink-soft); }
 .small { font-size: 0.95rem; }
 .error { color: var(--danger); font-weight: 600; }
-.success { color: var(--green); font-weight: 600; }
+.success { color: var(--green-ink); font-weight: 600; }
 
 /* ---------- Avatars ---------- */
 .avatar {
@@ -792,9 +796,9 @@ a.tile:active { transform: scale(0.97); }
 .badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.15rem 0.55rem; border-radius: 999px; font-size: 0.78rem; font-weight: 700; }
 .badge-secret { background: var(--pink); color: #3a0d22; }
 .badge-favorite { background: var(--gold); color: #2b1d00; }
-.badge-group { background: var(--green-soft); color: var(--green); }
+.badge-group { background: var(--green-soft); color: var(--green-ink); }
 .badge-bought { background: var(--cream); color: #6b4a00; }
-.badge-taken { background: var(--green-soft); color: var(--green); }
+.badge-taken { background: var(--green-soft); color: var(--green-ink); }
 .badge-warn { background: #ffe0b2; color: #6b3a00; }
 .wish-taken { opacity: 0.6; }
 .wish-bought .wish-title { text-decoration: line-through; text-decoration-color: var(--ink-soft); }
@@ -815,7 +819,7 @@ a.tile:active { transform: scale(0.97); }
 .group-done .progress span { background: var(--green); }
 .progress-text { font-size: 0.9rem; color: var(--ink-soft); }
 .progress-text strong { color: var(--ink); font-size: 1.05rem; }
-.group-done .progress-text strong { color: var(--green); }
+.group-done .progress-text strong { color: var(--green-ink); }
 .group-organizer { display: flex; align-items: center; gap: 0.4rem; margin: 0; font-size: 0.88rem; color: inherit; opacity: 0.8; text-wrap: pretty; }
 .group-organizer .icon { flex: none; }
 .chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0; padding: 0; list-style: none; }
@@ -949,11 +953,11 @@ input:focus, textarea:focus { outline: none; border-color: var(--focus); backgro
 .button-bought { background: var(--gold); color: #2b1d00; }
 .button-buy { background: var(--cream); color: #6b4a00; box-shadow: inset 0 0 0 1.5px var(--gold); }
 .button-leave { background: transparent; color: var(--red-deep); }
-.button-leave:hover { background: rgb(229 56 59 / 0.08); }
-.button-done { background: var(--green-soft); color: var(--green); }
+.button-leave:hover { background: rgb(217 50 54 / 0.08); }
+.button-done { background: var(--green-soft); color: var(--green-ink); }
 .button-done .icon { animation: icon-in 260ms cubic-bezier(.2, .8, .3, 1) both; }
 @keyframes icon-in { from { opacity: 0; transform: scale(0.25); filter: blur(4px); } }
-.icon-button { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 12px; background: none; color: var(--ink-soft); cursor: pointer; }
+.icon-button { font: inherit; display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 12px; background: none; color: var(--ink-soft); cursor: pointer; }
 .icon-button:hover { color: var(--ink); background: var(--tile); }
 .icon-button-danger:hover { color: var(--danger); }
 .icon-button:active { transform: scale(0.96); }
@@ -1276,9 +1280,21 @@ a.wish-photo:not(.is-framed):active img { transform: scale(0.98); }
 .switch-row input.switch:disabled { opacity: 0.6; }
 @media (prefers-reduced-motion: reduce) { .switch, .switch-row input.switch::after { transition: none; } }
 
+/* Les contrôles prennent la police du site (sinon Arial). */
+button, input, select, textarea { font: inherit; }
+
 /* ---------- Gérard : confirmations dans la page, menus avec un mot ---------- */
 .confirm-group { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; padding: 0.75rem; border-radius: var(--r-inner); background: var(--tile); }
 .confirm-group p { flex: 1 1 100%; margin: 0; text-wrap: pretty; }
 .more-toggle { display: inline-flex; align-items: center; gap: 0.3rem; border: 1px solid rgb(128 128 140 / 0.4); }
 .declined-invite { display: grid; gap: 0.6rem; margin-bottom: 1rem; }
 .declined-invite p { margin: 0; }
+
+/* Un élément sélectionné au clavier ne passe jamais sous la barre d'onglets flottante. */
+html { scroll-padding-top: 1rem; scroll-padding-bottom: calc(var(--tab-h) + 2rem); }
+
+/* Zones à toucher d'au moins 44 px sur écran tactile. */
+@media (pointer: coarse) {
+  .logo, .link-more, .button-small, .segmented button, .family-switch select { min-height: 44px; }
+  .icon-button { width: 44px; height: 44px; }
+}

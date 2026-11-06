@@ -1,6 +1,19 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
+// Polices hébergées sur le site (pas d'appel à Google) : latin, et latin étendu pour « œ » (cœur…).
+import '@fontsource/unbounded/latin-700.css';
+import '@fontsource/unbounded/latin-ext-700.css';
+import '@fontsource/unbounded/latin-800.css';
+import '@fontsource/unbounded/latin-ext-800.css';
+import '@fontsource/onest/latin-400.css';
+import '@fontsource/onest/latin-ext-400.css';
+import '@fontsource/onest/latin-500.css';
+import '@fontsource/onest/latin-ext-500.css';
+import '@fontsource/onest/latin-600.css';
+import '@fontsource/onest/latin-ext-600.css';
+import '@fontsource/onest/latin-700.css';
+import '@fontsource/onest/latin-ext-700.css';
 import './styles.css';
 
 // Pas d'animations d'entrée au tout premier affichage : on retire la classe après deux images.
