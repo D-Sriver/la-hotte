@@ -30,7 +30,13 @@ function WishRow({ wish, onChanged }) {
 
   return (
     <li className={`wish${taken ? ' wish-taken' : ''}`}>
-      <span className="wish-thumb"><Icon name={wish.url ? 'link' : 'gift'} size={20} /></span>
+      {wish.has_photo ? (
+        <a className="wish-thumb wish-photo" href={api.photoUrl(wish.id)} target="_blank" rel="noopener noreferrer" aria-label={`Voir la photo de « ${wish.title} »`}>
+          <img src={api.photoUrl(wish.id)} alt="" loading="lazy" />
+        </a>
+      ) : (
+        <span className="wish-thumb"><Icon name={wish.url ? 'link' : 'gift'} size={20} /></span>
+      )}
       <div className="wish-main">
         <p className="wish-title">
           {wish.url ? <a href={wish.url} target="_blank" rel="noopener noreferrer">{wish.title}</a> : wish.title}

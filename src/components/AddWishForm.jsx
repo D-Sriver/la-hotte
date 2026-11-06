@@ -1,14 +1,29 @@
 import { useState } from 'react';
 import { api } from '../api.js';
 import Icon from './Icon.jsx';
+import { shrinkPhoto } from '../photo.js';
 
 export default function AddWishForm({ ownerId, forSomeoneElse, onAdded }) {
-  const empty = { title: '', url: '', price: '', note: '' };
+  const empty = { title: '', url: '', price: '', note: '', photo: '' };
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(empty);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value });
+
+  async function pickPhoto(e) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setError('');
+    try {
+      setForm((f) => ({ ...f, photo: '' }));
+      const photo = await shrinkPhoto(file);
+      setForm((f) => ({ ...f, photo }));
+    } catch (err) {
+      setError(err.message);
+    }
+  }
 
   async function submit(e) {
     e.preventDefault();
@@ -55,6 +70,20 @@ export default function AddWishForm({ ownerId, forSomeoneElse, onAdded }) {
           <span className="field-label">Note</span>
           <input value={form.note} onChange={set('note')} placeholder="Couleur, taille, édition…" maxLength={500} />
         </label>
+      </div>
+      <div className="field">
+        <span className="field-label">Photo</span>
+        {form.photo ? (
+          <div className="photo-preview">
+            <img src={form.photo} alt="" />
+            <button type="button" className="button button-quiet button-small" onClick={() => setForm({ ...form, photo: '' })}>Retirer</button>
+          </div>
+        ) : (
+          <label className="photo-pick">
+            <Icon name="camera" size={18} />Ajouter une photo
+            <input type="file" accept="image/*" onChange={pickPhoto} />
+          </label>
+        )}
       </div>
       <div className="form-actions">
         <button className="button" disabled={saving}>{saving ? 'Ajout…' : 'Ajouter'}</button>

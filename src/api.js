@@ -23,5 +23,6 @@ export const api = {
   addWish: (wish) => request('/wishes', { method: 'POST', body: wish }),
   deleteWish: (id) => request(`/wishes/${id}`, { method: 'DELETE' }),
   toggleReserve: (id) => request(`/wishes/${id}/reserve`, { method: 'POST' }),
+  photoUrl: (id) => `/api/wishes/${id}/photo${devAs ? `?as=${encodeURIComponent(devAs)}` : ''}`,
   findIdeas: (query) => request('/ideas', { method: 'POST', body: query }),
 };

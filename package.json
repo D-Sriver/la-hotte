@@ -9,6 +9,7 @@
     "db:local": "wrangler d1 execute la-hotte --local --file=schema.sql",
     "db:remote": "wrangler d1 execute la-hotte --remote --file=schema.sql",
     "db:migrate:remote": "wrangler d1 execute la-hotte --remote --file=migrations/001_join_code.sql",
+    "db:migrate:photo": "wrangler d1 execute la-hotte --remote --file=migrations/002_wish_photo.sql",
     "preview": "npm run build && wrangler pages dev",
     "deploy": "npm run build && wrangler pages deploy"
   },

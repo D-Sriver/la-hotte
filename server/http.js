@@ -27,3 +27,11 @@ export function cleanUrl(value) {
     return null;
   }
 }
+
+// Photo envoyée par le navigateur, déjà réduite en JPEG. On refuse tout le reste.
+const PHOTO_PREFIX = 'data:image/jpeg;base64,';
+export function cleanPhoto(value) {
+  if (typeof value !== 'string' || !value.startsWith(PHOTO_PREFIX)) return null;
+  if (value.length > 700_000) return null;
+  return /^[A-Za-z0-9+/=]+$/.test(value.slice(PHOTO_PREFIX.length)) ? value : null;
+}

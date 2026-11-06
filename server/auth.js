@@ -9,7 +9,8 @@ let jwks;
  */
 export async function getEmail(request, env) {
   if (env.DEV_MODE === '1') {
-    return request.headers.get('x-dev-email') || env.DEV_EMAIL || null;
+    // ?as= aussi, pour les <img> qui ne peuvent pas envoyer d'en-tête.
+    return request.headers.get('x-dev-email') || new URL(request.url).searchParams.get('as') || env.DEV_EMAIL || null;
   }
   const token = request.headers.get('Cf-Access-Jwt-Assertion');
   if (!token || !env.ACCESS_TEAM_DOMAIN || !env.ACCESS_AUD) return null;

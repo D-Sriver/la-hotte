@@ -7,7 +7,7 @@ export async function visibleWishes(db, ownerId, viewerId) {
   if (ownerId === viewerId) {
     const { results } = await db
       .prepare(
-        `SELECT id, title, url, price, note, created_at
+        `SELECT id, title, url, price, note, photo IS NOT NULL AS has_photo, created_at
          FROM wishes WHERE owner_id = ?1 AND added_by = ?1
          ORDER BY created_at DESC`,
       )
@@ -18,7 +18,7 @@ export async function visibleWishes(db, ownerId, viewerId) {
 
   const { results } = await db
     .prepare(
-      `SELECT w.id, w.title, w.url, w.price, w.note, w.created_at,
+      `SELECT w.id, w.title, w.url, w.price, w.note, w.photo IS NOT NULL AS has_photo, w.created_at,
               w.added_by, a.name AS added_by_name,
               w.reserved_by, r.name AS reserved_by_name
        FROM wishes w
@@ -36,6 +36,7 @@ export async function visibleWishes(db, ownerId, viewerId) {
     url: w.url,
     price: w.price,
     note: w.note,
+    has_photo: w.has_photo,
     created_at: w.created_at,
     secret: w.added_by !== ownerId,
     added_by_name: w.added_by_name,

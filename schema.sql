@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS wishes (
   url         TEXT,
   price       TEXT,
   note        TEXT DEFAULT '',
+  photo       TEXT,                 -- image JPEG en data URL, réduite côté navigateur
   reserved_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
   reserved_at TEXT,
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
