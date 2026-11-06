@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS wishes (
   url         TEXT,
   price       TEXT,
   note        TEXT DEFAULT '',
-  photo       TEXT,                 -- image JPEG en data URL, réduite côté navigateur
+  photo       TEXT,                 -- ancienne photo unique, remplacée par wish_photos
   favorite    INTEGER NOT NULL DEFAULT 0, -- coup de cœur du propriétaire
   reserved_by INTEGER REFERENCES users(id) ON DELETE SET NULL, -- celui qui offre, ou qui organise si group_gift
   reserved_at TEXT,
@@ -124,3 +124,14 @@ CREATE TABLE IF NOT EXISTS push_subscriptions (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_push_user ON push_subscriptions(user_id);
+
+-- Photos d'une envie (carrousel). position 0 = couverture.
+CREATE TABLE IF NOT EXISTS wish_photos (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  wish_id    INTEGER NOT NULL REFERENCES wishes(id) ON DELETE CASCADE,
+  photo      TEXT NOT NULL,
+  frame      TEXT,                  -- recadrage "x,y,zoom" (NULL = image entière)
+  position   INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_wish_photos ON wish_photos(wish_id, position);

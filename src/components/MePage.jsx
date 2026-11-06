@@ -43,7 +43,7 @@ export default function MePage({ me }) {
           <h2 className="section-title">Mes envies{wishes ? <span className="count">{wishes.length}</span> : null}</h2>
         </div>
         {wishes
-          ? <WishList wishes={wishes} emptyText="Liste vide. Le Père Noël va improviser… tu es sûr ?" onChanged={load} />
+          ? <WishList wishes={wishes} emptyText="Liste vide. Ajoute une envie, sinon ce sera la surprise totale !" onChanged={load} />
           : <Skeleton rows={2} />}
         <AddWishForm ownerId={me.id} onAdded={load} />
       </section>

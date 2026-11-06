@@ -10,9 +10,11 @@ et ce qui est déjà sur sa liste. Varie les idées (pas 5 fois le même type d'
 Réponds UNIQUEMENT avec un tableau JSON, sans texte avant ni après, de cette forme :
 [{"title": "Nom précis du produit", "why": "une phrase qui relie l'idée à ses goûts", "price": "≈ 35 €", "where": "type de boutique en France", "search": "requête courte pour le trouver en ligne"}]`;
 
-function buildPrompt({ person, wishes, budget, note }) {
+const OCCASIONS = { christmas: 'pour Noël', birthday: 'pour son anniversaire' };
+
+function buildPrompt({ person, wishes, budget, note, occasion }) {
   const lines = [
-    `Propose 5 idées de cadeaux pour ${person.name}.`,
+    `Propose 5 idées de cadeaux pour ${person.name}${OCCASIONS[occasion] ? ` ${OCCASIONS[occasion]}` : ''}.`,
     `Ce qu'il/elle aime : ${person.likes || 'non précisé'}`,
     `À éviter : ${person.dislikes || 'rien de précisé'}`,
     `Possède déjà : ${person.owns || 'non précisé'}`,

@@ -57,6 +57,6 @@ export const api = {
   pushUnsubscribe: (endpoint) => request('/push', { method: 'DELETE', body: { endpoint } }),
   pushTest: () => request('/push/test', { method: 'POST' }),
   preview: (url) => request('/preview', { method: 'POST', body: { url } }),
-  photoUrl: (id) => `/api/wishes/${id}/photo${devAs ? `?as=${encodeURIComponent(devAs)}` : ''}`,
+  photoUrl: (wishId, photoId) => `/api/wishes/${wishId}/photo?p=${photoId}${devAs ? `&as=${encodeURIComponent(devAs)}` : ''}`,
   findIdeas: (query) => request('/ideas', { method: 'POST', body: query }),
 };

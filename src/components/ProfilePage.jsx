@@ -26,7 +26,7 @@ export default function ProfilePage({ me, onSaved, onFamiliesChanged }) {
     });
   }, { scope: bar, dependencies: [done] });
   return (
-    <div className="bento-page" ref={scope}>
+    <div className="bento-page profile-page" ref={scope}>
       <header className="tile tile-profile-hero">
         <div className="profile-header">
           <Avatar name={me.name} index={me.id} size="lg" />
@@ -51,12 +51,15 @@ export default function ProfilePage({ me, onSaved, onFamiliesChanged }) {
 
       <FamiliesPanel me={me} onChanged={onFamiliesChanged} />
 
-      <NotificationsPanel />
+      {/* Sur grand écran, à droite de « Mes familles » plutôt qu'en dessous. */}
+      <div className="profile-side">
+        <NotificationsPanel />
 
-      <section className="tile section">
-        <h2 className="section-title">Mon compte</h2>
-        <LogoutButton email={me.email} emailLogin={me.email_login} />
-      </section>
+        <section className="tile section">
+          <h2 className="section-title">Mon compte</h2>
+          <LogoutButton email={me.email} emailLogin={me.email_login} />
+        </section>
+      </div>
     </div>
   );
 }

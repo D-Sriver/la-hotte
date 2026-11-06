@@ -1,31 +1,21 @@
 import { useEffect, useState } from 'react';
 import { copyText, shareFamily } from '../share.js';
 import { api } from '../api.js';
-import { christmasLine, daysUntilChristmas, GREETINGS, pick, toneOf } from '../fun.js';
+import { birthdayLine, christmasLine, daysUntilBirthday, deName, daysUntilChristmas, greetingsFor, nextOccasion, toneOf } from '../fun.js';
 import Gift3D from './Gift3D.jsx';
 import Icon from './Icon.jsx';
 import CountUp from './CountUp.jsx';
 import { zoomInto } from '../zoom.js';
 import { usePageIntro, useStagger } from '../motion.js';
 
-// Dans combien de jours tombe un anniversaire (« MM-JJ »).
-function daysToBirthday(monthDay) {
-  if (!monthDay) return null;
-  const [month, day] = monthDay.split('-').map(Number);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  let next = new Date(today.getFullYear(), month - 1, day);
-  if (next < today) next = new Date(today.getFullYear() + 1, month - 1, day);
-  return Math.round((next - today) / 86_400_000);
-}
 const birthdayLabel = (days) => (days === 0 ? 'Anniv. aujourd’hui !' : days === 1 ? 'Anniv. demain' : `Anniv. dans ${days} j`);
 
 const countLabel = (n) => (n === 0 ? 'Liste vide' : n === 1 ? '1 idée' : `${n} idées`);
 
 const euros = (n) => `${n.toLocaleString('fr-FR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })} €`;
 
-// Le code de la famille sur une ligne : à copier ou à partager pour inviter quelqu'un.
-function FamilyCodeBar({ family, highlight }) {
+// Dernière carte de la grille : inviter quelqu'un, là où apparaissent les personnes.
+function InviteCard({ family, alone }) {
   const [done, setDone] = useState('');
   const confirm = (message) => {
     setDone(message);
@@ -33,12 +23,11 @@ function FamilyCodeBar({ family, highlight }) {
   };
 
   return (
-    <section className={`tile tile-wide code-bar${highlight ? ' code-bar-highlight' : ''}`} aria-label="Inviter dans la famille">
-      <div className="code-bar-text">
-        <span className="muted small">{highlight ? 'Invite la famille avec ce code' : `Code de « ${family.name} »`}</span>
-        <strong className="code-bar-code num">{family.code}</strong>
-      </div>
-      <div className="code-bar-actions">
+    <div className={`tile invite-card${alone ? ' invite-card-alone' : ''}`}>
+      <p className="invite-title"><Icon name="plus" size={18} />{alone ? 'Invite ta famille' : 'Inviter'}</p>
+      <p className="invite-code num" aria-label={`Code de « ${family.name} » : ${family.code}`}>{family.code}</p>
+      {alone && <p className="muted small">Envoie ce code : chacun se connecte avec son email et rejoint « {family.name} ».</p>}
+      <div className="invite-actions">
         <button
           className="icon-button"
           aria-label="Copier le code"
@@ -50,16 +39,16 @@ function FamilyCodeBar({ family, highlight }) {
           className="button button-small button-go"
           onClick={() => shareFamily(family).then((r) => r === 'copied' && confirm('Invitation copiée'))}
         >
-          <Icon name="share" size={16} />Inviter
+          <Icon name="share" size={16} />Partager
         </button>
       </div>
-      <span className="code-done" role="status">{done}</span>
-    </section>
+      <span className="invite-done" role="status">{done}</span>
+    </div>
   );
 }
 
 // « Ce que j'offre » en résumé : combien, quel budget, et les prochains à acheter.
-function GivingSummary({ gifts }) {
+function GivingSummary({ gifts, suggestion }) {
   const list = useStagger(gifts?.length || 0);
   if (!gifts) return <section className="tile giving skeleton-tile" />;
   const total = gifts.reduce((sum, g) => sum + (g.my_share || 0), 0);
@@ -73,7 +62,15 @@ function GivingSummary({ gifts }) {
         {gifts.length > 0 && <a className="link-more" href="#/cadeaux">Tout voir<Icon name="chevron" size={16} /></a>}
       </div>
       {gifts.length === 0 ? (
-        <p className="muted small">Rien de réservé pour l’instant. Ouvre la liste de quelqu’un et touche « Je réserve ».</p>
+        <div className="giving-empty">
+          <p className="muted small">Rien de réservé pour l’instant. Ouvre la liste de quelqu’un et touche « Je réserve ».</p>
+          {/* L'occasion la plus proche : on propose d'aller voir sa liste tout de suite. */}
+          {suggestion && (
+            <a className="button button-accent giving-cta" href={`#/p/${suggestion.id}`}>
+              <Icon name="gift" size={18} />Voir la liste {deName(suggestion.name)}
+            </a>
+          )}
+        </div>
       ) : (
         <>
           <p className="giving-stats">
@@ -99,8 +96,7 @@ export default function Home({ me }) {
   const [people, setPeople] = useState(null);
   const [gifts, setGifts] = useState(null);
   const [error, setError] = useState('');
-  const [greeting] = useState(() => pick(GREETINGS));
-  const days = daysUntilChristmas();
+  const [luck] = useState(() => Math.random());
   const scope = usePageIntro(people !== null || error !== '');
 
   useEffect(() => {
@@ -111,6 +107,17 @@ export default function Home({ me }) {
   }, []);
 
   const alone = people?.length === 0;
+  // Le prochain événement de la famille : un anniversaire (le mien compris) ou Noël, le plus proche.
+  // On attend d'avoir la famille pour ne pas afficher Noël puis changer d'avis.
+  const occasion = people || error
+    ? nextOccasion([...(people || []), { name: me.name, birthday: me.birthday, isMe: true }])
+    : null;
+  const christmasDays = daysUntilChristmas();
+  const suggestion = occasion?.kind === 'birthday' && !occasion.isMe
+    ? people?.find((p) => p.name === occasion.name)
+    : people?.find((p) => p.wish_count > 0) || people?.[0];
+  const greetings = greetingsFor(occasion || { kind: 'birthday' });
+  const greeting = greetings[Math.floor(luck * greetings.length)];
   // Les cartes des personnes arrivent l'une après l'autre (portée limitée à la grille, nettoyée par useGSAP).
   const grid = useStagger(people?.length || 0);
 
@@ -119,8 +126,20 @@ export default function Home({ me }) {
       <section className="tile tile-hero">
         <div className="hero-text">
           <p className="hero-hello">{greeting} {me.name}</p>
-          <p className="hero-days"><CountUp value={days} /> jours</p>
-          <p className="hero-sub">avant Noël. {christmasLine(days)}</p>
+          {occasion && (
+            <>
+              <p className="hero-days"><CountUp value={occasion.days} /> jour{occasion.days > 1 ? 's' : ''}</p>
+              <p className="hero-sub">
+                {occasion.kind === 'christmas'
+                  ? <>avant Noël. {christmasLine(occasion.days)}</>
+                  : <>avant {occasion.isMe ? 'ton anniversaire' : `l’anniversaire ${deName(occasion.name)}`}. {birthdayLine(occasion.days, occasion.isMe)}</>}
+              </p>
+              {/* Un anniversaire passe en premier : Noël reste rappelé, en plus petit. */}
+              {occasion.kind === 'birthday' && (
+                <p className="hero-next">Puis Noël dans {christmasDays} jour{christmasDays > 1 ? 's' : ''}</p>
+              )}
+            </>
+          )}
         </div>
         <Gift3D />
       </section>
@@ -130,17 +149,10 @@ export default function Home({ me }) {
       {error && <p className="error tile tile-wide" role="alert">{error}</p>}
       {!people && !error && <div className="tile tile-wide skeleton-tile" />}
 
-      {alone && (
-        <div className="tile tile-wide tile-cream empty">
-          <p className="empty-title">Personne d’autre pour l’instant</p>
-          <p className="muted">Envoie le code ci-dessous à la famille : chacun se connecte avec son email et rejoint « {me.family.name} ».</p>
-        </div>
-      )}
-
-      {people?.length > 0 && (
+      {people && (
         <div className="people-grid tile-wide" ref={grid}>
           {people.map((p) => {
-            const birthday = daysToBirthday(p.birthday);
+            const birthday = daysUntilBirthday(p.birthday);
             return (
               <a
                 key={p.id}
@@ -161,12 +173,11 @@ export default function Home({ me }) {
               </a>
             );
           })}
+          <InviteCard family={me.family} alone={alone} />
         </div>
       )}
 
-      <GivingSummary gifts={gifts} />
-
-      <FamilyCodeBar family={me.family} highlight={alone} />
+      <GivingSummary gifts={gifts} suggestion={suggestion} />
     </div>
   );
 }

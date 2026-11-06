@@ -188,6 +188,7 @@ a.tile:active { transform: scale(0.97); }
   line-height: 1;
 }
 .hero-days .num { display: block; font-size: clamp(4.5rem, 16vw, 6.5rem); letter-spacing: -0.06em; line-height: 0.9; }
+.hero-next { display: inline-block; margin-top: 0.5rem; padding: 0.2rem 0.65rem; border-radius: 999px; background: rgb(255 255 255 / 0.18); font-size: 0.85rem; font-weight: 700; }
 .hero-sub { margin-top: 0.6rem; max-width: 18rem; opacity: 0.9; text-wrap: pretty; }
 /* Le texte s'arrête avant le paquet 3D au lieu de passer dessous. */
 .tile-hero .hero-sub { max-width: min(18rem, calc(100% - 9.5rem)); }
@@ -253,6 +254,47 @@ a.tile:active { transform: scale(0.97); }
   .form-actions-sticky { bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px) + 1.25rem); }
 }
 
+/* ---------- Recadrage de la photo ---------- */
+.framer { display: grid; gap: 0.5rem; }
+.framer-view { cursor: grab; touch-action: none; user-select: none; }
+.framer-view:active { cursor: grabbing; }
+.framer-view img { pointer-events: none; }
+.framer-hint { position: absolute; left: 50%; bottom: 0.6rem; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.7rem; border-radius: 999px; background: rgb(20 26 46 / 0.75); color: #fff; font-size: 0.8rem; font-weight: 700; transform: translateX(-50%); pointer-events: none; white-space: nowrap; }
+.framer-tools { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.framer-zoom { display: flex; align-items: center; gap: 0.4rem; flex: 1 1 9rem; color: var(--ink-soft); }
+.framer-zoom input { flex: 1; accent-color: var(--red); min-height: 32px; }
+
+/* ---------- Carrousel de photos ---------- */
+.carousel { position: relative; flex: 1 1 100%; grid-column: 1 / -1; }
+/* Le format est porté par le cadre, pas par chaque photo : Safari calcule mal un aspect-ratio
+   sur un élément d'une rangée qui défile (hauteur nulle, photo invisible sur iPhone). */
+.carousel-track { display: flex; width: 100%; aspect-ratio: 16 / 10; max-height: 240px; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 12px; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+.carousel-track::-webkit-scrollbar { display: none; }
+.carousel-slide.wish-photo-box { flex: 0 0 100%; width: 100%; height: 100%; aspect-ratio: auto; max-height: none; scroll-snap-align: center; scroll-snap-stop: always; border-radius: 0; outline: 0; }
+.carousel-slide:first-child { border-radius: 12px 0 0 12px; }
+.carousel-slide:last-child { border-radius: 0 12px 12px 0; }
+.carousel-slide:only-child { border-radius: 12px; }
+.carousel-dots { position: absolute; left: 50%; bottom: 0.5rem; display: flex; gap: 5px; padding: 4px 7px; border-radius: 999px; background: rgb(20 26 46 / 0.45); transform: translateX(-50%); pointer-events: none; }
+.carousel-dots span { width: 6px; height: 6px; border-radius: 50%; background: rgb(255 255 255 / 0.5); transition: background-color 200ms ease, transform 200ms ease; }
+.carousel-dots .is-active { background: #fff; transform: scale(1.25); }
+.carousel-arrow { position: absolute; top: 50%; display: grid; place-items: center; width: 36px; height: 36px; margin-top: -18px; border: 0; border-radius: 50%; background: rgb(255 255 255 / 0.92); color: #141a2e; box-shadow: 0 2px 8px rgb(20 26 46 / 0.2); cursor: pointer; opacity: 0; transition: opacity 200ms ease, transform 120ms ease; }
+.carousel-prev { left: 0.5rem; }
+.carousel-next { right: 0.5rem; }
+.carousel:hover .carousel-arrow:not(:disabled), .carousel-arrow:focus-visible { opacity: 1; }
+.carousel-arrow:active { transform: scale(0.92); }
+.carousel-arrow:disabled { pointer-events: none; }
+/* Sur téléphone, on fait défiler du doigt : pas de flèches. */
+@media (hover: none) { .carousel-arrow { display: none; } }
+
+/* Vignettes du formulaire */
+.photo-strip { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.photo-thumb { position: relative; width: 56px; height: 56px; padding: 0; border: 0; border-radius: 12px; background: #fff; overflow: hidden; cursor: pointer; box-shadow: inset 0 0 0 1px var(--line); }
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.photo-thumb.is-selected { box-shadow: 0 0 0 3px var(--red); }
+.photo-thumb:active { transform: scale(0.95); }
+.photo-thumb-cover { position: absolute; top: 3px; left: 3px; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--gold); color: #2b1d00; }
+.photo-pick-small { justify-content: center; width: 56px; height: 56px; padding: 0; border-radius: 12px; }
+
 /* ---------- Menu « ⋯ » des envies ---------- */
 .tile.section, .tile-form { overflow: visible; } /* sinon le menu est coupé et le bouton flottant ne colle pas */
 .more { position: relative; }
@@ -266,6 +308,10 @@ a.tile:active { transform: scale(0.97); }
 .more-item { display: flex; align-items: center; gap: 0.6rem; width: 100%; min-height: 44px; padding: 0 0.8rem; border: 0; border-radius: 10px; background: none; color: var(--ink); font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
 .more-item:hover, .more-item:focus-visible { background: var(--bg); }
 .more-item-danger { color: var(--danger); }
+
+.head-birthday { display: inline-flex; align-items: center; gap: 0.35rem; margin-top: 0.4rem; padding: 0.2rem 0.65rem; border-radius: 999px; background: rgb(255 255 255 / 0.85); color: #141a2e; font-size: 0.85rem; font-weight: 700; }
+
+.profile-side, .person-side { display: grid; gap: var(--gap); align-content: start; }
 
 /* ---------- En-tête compact des pages ---------- */
 .page-head { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem 1rem; flex-wrap: wrap; padding: 1.1rem 1.25rem; }
@@ -283,6 +329,13 @@ a.tile:active { transform: scale(0.97); }
 /* ---------- Page Famille : l'essentiel visible tout de suite ---------- */
 .home .tile-hero { grid-column: 1 / -1; grid-row: auto; min-height: 14rem; }
 .home .giving { grid-column: 1 / -1; display: flex; flex-direction: column; }
+/* Sur grand écran : « Ce que j'offre » à côté du compte à rebours, au lieu d'un bandeau à moitié vide. */
+@media (min-width: 52rem) {
+  .home .tile-hero { grid-column: 1 / span 2; grid-row: 1; }
+  .home .giving { grid-column: 3 / span 2; grid-row: 1; }
+  .home .tile-hero .hero-sub { max-width: calc(100% - 9rem); }
+  .home .gift3d { --size: 88px; right: 0.75rem; bottom: 1rem; }
+}
 .home .bento-title { margin-top: 0.75rem; }
 /* Les personnes en grille compacte : 2 colonnes sur téléphone, plus sur grand écran. */
 .people-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: var(--gap); }
@@ -303,6 +356,22 @@ a.tile:active { transform: scale(0.97); }
 .giving-list .is-bought .icon { color: var(--green); }
 .giving-list .is-bought .giving-title { text-decoration: line-through; text-decoration-color: var(--ink-soft); }
 .giving-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+/* Carte « Inviter » au bout de la grille des personnes. */
+.invite-card { display: flex; flex-direction: column; justify-content: center; gap: 0.3rem; min-height: 7.5rem; padding: 0.9rem 1rem; background: transparent; box-shadow: inset 0 0 0 2px var(--line); border: 2px dashed var(--ink-soft); border-color: rgb(93 100 120 / 0.35); }
+.invite-title { display: flex; align-items: center; gap: 0.35rem; font-weight: 700; color: var(--ink-soft); }
+.invite-code { font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; letter-spacing: 0.05em; color: var(--ink); white-space: nowrap; }
+.invite-actions { display: flex; align-items: center; gap: 0.25rem; margin-top: 0.1rem; }
+.invite-actions .button { display: inline-flex; align-items: center; gap: 0.3rem; }
+.invite-done { min-height: 1em; color: var(--green); font-size: 0.8rem; font-weight: 700; }
+.invite-done:empty { display: none; }
+/* Seul dans la famille : la carte prend toute la largeur et passe au vert. */
+.invite-card-alone { grid-column: 1 / -1; border: 0; box-shadow: inset 0 0 0 2px var(--green); background: var(--green-soft); }
+.invite-card-alone .invite-title { color: var(--green); font-size: 1.1rem; }
+.invite-card-alone .invite-code { font-size: 1.5rem; }
+/* « Ce que j'offre » vide : un bouton vers la liste de la prochaine occasion. */
+.giving-empty { display: grid; gap: 0.9rem; justify-items: start; }
+.giving-cta { display: inline-flex; align-items: center; gap: 0.45rem; }
+
 /* Le code de la famille sur une seule ligne. */
 .code-bar { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; padding: 0.85rem 0.9rem 0.85rem 1.2rem; }
 .code-bar-text { display: grid; flex: 1; min-width: 0; }
@@ -590,6 +659,13 @@ a.tile:active { transform: scale(0.97); }
   .bento-page:has(> .page-head) > .ideas { grid-row: 2 / span 4; }
   /* Ce que j'offre : une carte par personne, sur les deux colonnes. */
   .gifts-page > .section:not(.ideas) { grid-column: auto; }
+  /* Page d'une personne : sa liste à gauche ; ses goûts puis les idées à droite, sous les yeux. */
+  .bento-page.person-page > .section.person-list { grid-column: 1; grid-row: 3; }
+  .bento-page.person-page > .person-side { grid-column: 2; grid-row: 3; }
+  /* Profil : « Mes familles » à gauche, notifications et compte à droite. */
+  .profile-page > .tile-form { grid-column: 1 / -1; }
+  .profile-page > .section { grid-column: 1; }
+  .profile-page > .profile-side { grid-column: 2; }
 }
 
 .tile-head { background: var(--ink); color: var(--tile); }
@@ -693,8 +769,12 @@ a.tile:active { transform: scale(0.97); }
 .wish-list { list-style: none; padding: 0; margin: 0 0 0.75rem; display: grid; gap: 8px; }
 .wish { display: flex; flex-wrap: wrap; align-items: center; gap: 0.85rem; padding: 0.75rem; border-radius: var(--r-inner); background: var(--bg); }
 /* Photo du cadeau : en grand, au-dessus du texte, sur fond blanc (les photos produit le sont souvent). */
-.wish-photo { flex: 1 1 100%; display: grid; place-items: center; height: 200px; padding: 0.5rem; border-radius: 12px; background: #fff; overflow: hidden; outline: 1px solid rgb(0 0 0 / 0.06); outline-offset: -1px; }
-.wish-photo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.wish-photo { flex: 1 1 100%; }
+/* Même cadre partout (listes et recadrage) : ce qu'on règle est ce que voit la famille. */
+.wish-photo-box { position: relative; display: block; aspect-ratio: 16 / 10; max-height: 240px; width: 100%; padding: 0.5rem; border-radius: 12px; background: #fff; overflow: hidden; outline: 1px solid rgb(0 0 0 / 0.06); outline-offset: -1px; }
+.wish-photo-box img { display: block; width: 100%; height: 100%; object-fit: contain; }
+/* Recadrée : la photo remplit le cadre, sans marge blanche. */
+.wish-photo-box.is-framed { padding: 0; }
 .wish-main { flex: 1 1 10rem; min-width: 0; }
 .wish-actions:empty { display: none; }
 .wish-title { font-weight: 600; overflow-wrap: anywhere; }
@@ -1111,8 +1191,8 @@ input:focus, textarea:focus { outline: none; border-color: var(--focus); backgro
 .button-bought .icon { animation: icon-in 260ms cubic-bezier(.2, .8, .3, 1) both; }
 /* La photo réagit au survol et au toucher. */
 .wish-photo img { transition: transform 300ms cubic-bezier(.2, .8, .3, 1); }
-a.wish-photo:hover img { transform: scale(1.04); }
-a.wish-photo:active img { transform: scale(0.98); }
+a.wish-photo:not(.is-framed):hover img { transform: scale(1.04); }
+a.wish-photo:not(.is-framed):active img { transform: scale(0.98); }
 .wish-actions .button, .add-button, .photo-pick, .icon-button { transition: transform 120ms ease, background-color 200ms ease, color 200ms ease, box-shadow 200ms ease; }
 .add-button:active, .photo-pick:active, .chip:active { transform: scale(0.97); }
 
@@ -1123,7 +1203,7 @@ a.wish-photo:active img { transform: scale(0.98); }
 @media (max-width: 40rem) {
   /* Téléphone : photo, texte, cagnotte et boutons empilés sur toute la largeur. */
   .wish { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 0.6rem; padding: 0.75rem; }
-  .wish-photo { height: 180px; }
+  .wish-photo-box, .carousel-track { max-height: 210px; }
   .wish-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0; }
   .wish-actions .button { flex: 1 1 7.5rem; justify-content: center; min-height: 44px; padding: 0.4rem 0.6rem; white-space: nowrap; }
   /* « À plusieurs » reste secondaire : il ne prend que sa place. */

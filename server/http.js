@@ -35,3 +35,12 @@ export function cleanPhoto(value) {
   if (value.length > 700_000) return null;
   return /^[A-Za-z0-9+/=]+$/.test(value.slice(PHOTO_PREFIX.length)) ? value : null;
 }
+
+// Recadrage d'une photo : "x,y,zoom", x et y en % (0 à 100), zoom de 1 à 3. Sinon null (image entière).
+export function cleanFrame(value) {
+  const parts = String(value ?? '').split(',').map(Number);
+  if (parts.length !== 3 || parts.some((n) => !Number.isFinite(n))) return null;
+  const [x, y, zoom] = parts;
+  const clamp = (n, min, max) => Math.round(Math.min(max, Math.max(min, n)) * 10) / 10;
+  return `${clamp(x, 0, 100)},${clamp(y, 0, 100)},${clamp(zoom, 1, 3)}`;
+}

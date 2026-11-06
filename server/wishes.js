@@ -1,3 +1,5 @@
+import { PHOTOS_JSON, parsePhotos } from './photos.js';
+
 /**
  * Règle de secret, au même endroit pour toute l'app :
  * - pour soi-même : uniquement ses propres envies, sans aucune info de réservation ;
@@ -11,18 +13,18 @@ export async function visibleWishes(db, ownerId, viewerId, familyId, { archived 
   if (ownerId === viewerId) {
     const { results } = await db
       .prepare(
-        `SELECT id, title, url, price, note, favorite, photo IS NOT NULL AS has_photo, created_at, received_at
-         FROM wishes WHERE owner_id = ?1 AND added_by = ?1 AND family_id IS NULL AND ${receivedFilter}
-         ORDER BY ${archived ? 'received_at DESC' : 'favorite DESC, created_at DESC'}`,
+        `SELECT w.id, w.title, w.url, w.price, w.note, w.favorite, ${PHOTOS_JSON} AS photos, w.created_at, w.received_at
+         FROM wishes w WHERE w.owner_id = ?1 AND w.added_by = ?1 AND w.family_id IS NULL AND w.${receivedFilter}
+         ORDER BY ${archived ? 'w.received_at DESC' : 'w.favorite DESC, w.created_at DESC'}`,
       )
       .bind(ownerId)
       .all();
-    return results.map((w) => ({ ...w, favorite: !!w.favorite, mine: true, can_edit: true }));
+    return results.map((w) => ({ ...w, photos: parsePhotos(w.photos), favorite: !!w.favorite, mine: true, can_edit: true }));
   }
 
   const { results } = await db
     .prepare(
-      `SELECT w.id, w.title, w.url, w.price, w.note, w.favorite, w.photo IS NOT NULL AS has_photo, w.created_at,
+      `SELECT w.id, w.title, w.url, w.price, w.note, w.favorite, ${PHOTOS_JSON} AS photos, w.created_at,
               w.added_by, a.name AS added_by_name,
               w.reserved_by, CASE WHEN rm.user_id IS NULL THEN NULL ELSE r.name END AS reserved_by_name,
               w.group_gift, w.bought,
@@ -55,7 +57,7 @@ export async function visibleWishes(db, ownerId, viewerId, familyId, { archived 
       price: w.price,
       note: w.note,
       favorite: !!w.favorite,
-      has_photo: w.has_photo,
+      photos: parsePhotos(w.photos),
       created_at: w.created_at,
       secret: w.added_by !== ownerId,
       added_by_name: w.added_by_name,

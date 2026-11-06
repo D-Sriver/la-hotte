@@ -16,6 +16,7 @@
     "db:migrate:families": "wrangler d1 execute la-hotte --remote --file=migrations/006_families.sql",
     "db:migrate:more": "wrangler d1 execute la-hotte --remote --file=migrations/008_more.sql",
     "db:migrate:push": "wrangler d1 execute la-hotte --remote --file=migrations/009_push.sql",
+    "db:migrate:photos": "wrangler d1 execute la-hotte --remote --file=migrations/010_photos.sql",
     "db:reset:lists": "wrangler d1 execute la-hotte --remote --file=migrations/007_reset_lists.sql",
     "preview": "npm run build && wrangler pages dev",
     "deploy": "npm run build && wrangler pages deploy",

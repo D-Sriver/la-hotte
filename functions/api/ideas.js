@@ -28,6 +28,7 @@ export async function onRequestPost({ request, env, data }) {
       person,
       wishes,
       budget: clean(body.budget, 60),
+      occasion: body.occasion === 'birthday' ? 'birthday' : 'christmas',
       note: clean(body.note, 300),
     });
     if (!ideas.length) return fail(502, 'Aucune idée exploitable cette fois. Relance la recherche.');

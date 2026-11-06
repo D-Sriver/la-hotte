@@ -3,6 +3,7 @@ import { api } from '../api.js';
 import Icon from './Icon.jsx';
 import WishForm from './WishForm.jsx';
 import { burst, toneOf } from '../fun.js';
+import PhotoCarousel from './PhotoCarousel.jsx';
 import { gsap, MOTION_OK, useStagger } from '../motion.js';
 
 const hostOf = (url) => {
@@ -330,11 +331,7 @@ function WishRow({ wish, onChanged }) {
 
   return (
     <li ref={row} className={`wish${taken ? ' wish-taken' : ''}${wish.favorite ? ' wish-favorite' : ''}`}>
-      {!!wish.has_photo && (
-        <a className="wish-photo" href={api.photoUrl(wish.id)} target="_blank" rel="noopener noreferrer" aria-label={`Voir la photo de « ${wish.title} » en grand`}>
-          <img src={api.photoUrl(wish.id)} alt="" loading="lazy" />
-        </a>
-      )}
+      {wish.photos?.length > 0 && <PhotoCarousel wishId={wish.id} photos={wish.photos} title={wish.title} />}
       <div className="wish-main">
         <p className="wish-title">
           {wish.url ? <a href={wish.url} target="_blank" rel="noopener noreferrer">{wish.title}</a> : wish.title}

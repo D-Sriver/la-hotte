@@ -1,15 +1,22 @@
 import { useState } from 'react';
 import { api } from '../api.js';
 import Icon from './Icon.jsx';
-import { pick } from '../fun.js';
+import { occasionFor, pick } from '../fun.js';
 import { useStagger } from '../motion.js';
 
-const ELF_LINES = [
-  'Les lutins fouillent les rayons…',
-  'Un lutin compare les prix…',
-  'On secoue le Père Noël pour avoir des idées…',
-  'Les rennes votent…',
-];
+// Le ton suit l'occasion : les lutins à Noël, plus sobre pour un anniversaire.
+const WORDING = {
+  christmas: {
+    button: 'Demander aux lutins',
+    busy: 'Les lutins cherchent…',
+    lines: ['Les lutins fouillent les rayons…', 'Un lutin compare les prix…', 'On secoue le Père Noël pour avoir des idées…', 'Les rennes votent…'],
+  },
+  birthday: {
+    button: 'Trouver des idées',
+    busy: 'On cherche…',
+    lines: ['On fouille les rayons…', 'On compare les prix…', 'On cherche la perle rare…', 'On allume les bougies…'],
+  },
+};
 
 export default function IdeasPanel({ person, onAdded }) {
   const [budget, setBudget] = useState(person.budget_hint || '');
@@ -17,13 +24,15 @@ export default function IdeasPanel({ person, onAdded }) {
   const [state, setState] = useState({ loading: false, ideas: [], error: '', remaining: null });
   const [added, setAdded] = useState({});
   const listRef = useStagger(state.ideas.length);
+  const occasion = occasionFor(person);
+  const words = WORDING[occasion.kind];
 
   async function search(e) {
     e.preventDefault();
     setState({ loading: true, ideas: [], error: '', remaining: null });
     setAdded({});
     try {
-      const data = await api.findIdeas({ person_id: person.id, budget, note });
+      const data = await api.findIdeas({ person_id: person.id, budget, note, occasion: occasion.kind });
       setState({ loading: false, ideas: data.ideas, error: '', remaining: data.remaining });
     } catch (err) {
       setState({ loading: false, ideas: [], error: err.message, remaining: null });
@@ -51,7 +60,9 @@ export default function IdeasPanel({ person, onAdded }) {
 
   return (
     <section className="tile section ideas">
-      <h2 className="section-title ideas-title">En panne d’idée&nbsp;?</h2>
+      <h2 className="section-title ideas-title">
+        {occasion.kind === 'birthday' && !forMe ? `Une idée pour son anniversaire ?` : 'En panne d’idée\u00a0?'}
+      </h2>
       <p className="muted small">
         {forMe
           ? 'L’IA propose des idées à partir de ton profil, pour t’inspirer ta liste. Prix approximatifs : vérifie avec « Chercher en ligne ».'
@@ -71,12 +82,12 @@ export default function IdeasPanel({ person, onAdded }) {
         <div className="form-actions">
           <button className="button button-accent" disabled={state.loading}>
             <Icon name={state.loading ? 'search' : 'sparkle'} size={18} />
-            {state.loading ? 'Les lutins cherchent…' : 'Demander aux lutins'}
+            {state.loading ? words.busy : words.button}
           </button>
         </div>
       </form>
 
-      {state.loading && <p className="loading-line" role="status"><span className="spinner spinner-small" />{pick(ELF_LINES)}</p>}
+      {state.loading && <p className="loading-line" role="status"><span className="spinner spinner-small" />{pick(words.lines)}</p>}
       {state.error && <p className="error" role="alert">{state.error}</p>}
 
       {state.ideas.length > 0 && (

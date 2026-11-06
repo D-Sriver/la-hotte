@@ -3,6 +3,7 @@ import { api } from '../api.js';
 import Icon from './Icon.jsx';
 import Skeleton from './Skeleton.jsx';
 import PageHead from './PageHead.jsx';
+import { frameStyle, parseFrame } from '../photoFrame.js';
 import { usePageIntro } from '../motion.js';
 
 const euros = (n) => `${n.toLocaleString('fr-FR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })} €`;
@@ -71,7 +72,11 @@ export default function GiftsPage() {
           <ul className="wish-list">
             {person.gifts.map((g) => (
               <li key={g.id} className={`wish${g.bought ? ' wish-bought' : ''}`}>
-                {!!g.has_photo && <span className="wish-photo"><img src={api.photoUrl(g.id)} alt="" loading="lazy" /></span>}
+                {g.cover && (
+                  <span className={`wish-photo wish-photo-box${g.cover.frame ? ' is-framed' : ''}`}>
+                    <img src={api.photoUrl(g.id, g.cover.id)} alt="" loading="lazy" style={frameStyle(parseFrame(g.cover.frame))} />
+                  </span>
+                )}
                 <div className="wish-main">
                   <p className="wish-title">
                     {g.url ? <a href={g.url} target="_blank" rel="noopener noreferrer">{g.title}</a> : g.title}
