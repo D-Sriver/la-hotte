@@ -28,6 +28,8 @@ cp .dev.vars.example .dev.vars
 npm run db:local                 # crée la base locale et applique les migrations
 npm run preview                  # http://localhost:8788
 npm test                         # tests (règles de secret, idées, budget, rappels), sans rien installer de plus
+npm run lint                     # ESLint (erreurs réelles, règles des hooks React)
+npm run format                   # Prettier (mise en forme du code)
 ```
 
 Ajoute `?as=bjarni@test.fr` à l'URL pour jouer un autre membre (uniquement avec `DEV_MODE=1`).

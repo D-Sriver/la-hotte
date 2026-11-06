@@ -25,6 +25,44 @@
   --font-display: 'Unbounded', 'Arial Black', system-ui, sans-serif;
   --font-body: 'Onest', -apple-system, 'Segoe UI', system-ui, sans-serif;
   --tab-h: 72px;
+
+  /* Échelle de texte : 5 tailles, pas plus (les grands titres gardent leur clamp). */
+  --fs-xs: 0.8rem; /* badges, dates */
+  --fs-sm: 0.94rem; /* aides, petits boutons, méta */
+  --fs-md: 1rem; /* texte courant */
+  --fs-lg: 1.2rem; /* titres de carte */
+  --fs-xl: 1.5rem; /* titres de section */
+
+  /* Arrondis : 4 rayons. */
+  --r-sm: 12px;
+  --r-pill: 999px;
+
+  /* Superpositions, de bas en haut. */
+  --z-raised: 1;
+  --z-above: 2;
+  --z-float: 5;
+  --z-sticky: 20;
+  --z-menu: 30;
+  --z-nav: 50;
+  --z-overlay: 100;
+  --z-top: 200;
+
+  /* Couleurs secondaires nommées (textes sur fonds clairs fixes, avertissements, dorures du paquet). */
+  --ink-dark: #141a2e; /* reste foncé même en mode sombre (sur fond clair) */
+  --gold-ink: #2b1d00;
+  --pink-ink: #3a0d22;
+  --warn-soft: #ffe0b2;
+  --warn-ink: #6b3a00;
+  --gold-deep: #d9921a;
+  --gold-mid: #e4a52a;
+  --gold-light: #ffd56b;
+  --gold-shine: #ffe08a;
+  --gold-pale: #fff1b8;
+  --gold-glow: #fff8d6;
+  --gold-halo: #fff4c2;
+  --cream-strong: #fff1cc;
+  --peach: #ffe9d6;
+  --pine: #0f5c40;
   color-scheme: light;
 }
 
@@ -56,7 +94,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: var(--fs-md);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -70,7 +108,7 @@ p {
 :focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 3px;
-  border-radius: 10px;
+  border-radius: var(--r-sm);
 }
 .icon {
   flex-shrink: 0;
@@ -97,11 +135,11 @@ p {
   text-decoration: none;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.15rem;
+  font-size: var(--fs-lg);
   letter-spacing: -0.02em;
 }
 .logo img {
-  border-radius: 10px;
+  border-radius: var(--r-sm);
 }
 
 .tabs {
@@ -110,22 +148,22 @@ p {
   gap: 4px;
   padding: 4px;
   background: var(--tile);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   box-shadow: var(--tile-shadow);
 }
 .tab {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-raised);
   display: flex;
   align-items: center;
   gap: 0.4rem;
   min-height: 40px;
   padding: 0 1rem;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   color: var(--ink-soft);
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: var(--fs-sm);
   transition:
     background-color 150ms ease,
     color 150ms ease,
@@ -145,7 +183,7 @@ p {
   position: absolute;
   left: 0;
   top: 0;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--ink);
   pointer-events: none;
 }
@@ -159,7 +197,7 @@ p {
     position: fixed;
     left: 50%;
     bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
-    z-index: 30;
+    z-index: var(--z-menu);
     transform: translateX(-50%);
     padding: 6px;
     box-shadow:
@@ -172,7 +210,7 @@ p {
     min-height: 52px;
     min-width: 64px;
     padding: 0 0.6rem;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     justify-content: center;
   }
   .page {
@@ -253,7 +291,7 @@ a.tile:active {
 /* Le texte ne doit jamais intercepter le clic sur le paquet. */
 .hero-text {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-raised);
   pointer-events: none;
 }
 .hero-hello {
@@ -264,7 +302,7 @@ a.tile:active {
   margin-top: 0.4rem;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.6rem;
+  font-size: var(--fs-xl);
   letter-spacing: -0.03em;
   line-height: 1;
 }
@@ -278,9 +316,9 @@ a.tile:active {
   display: inline-block;
   margin-top: 0.5rem;
   padding: 0.2rem 0.65rem;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgb(255 255 255 / 0.18);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   font-weight: 700;
 }
 .hero-sub {
@@ -352,7 +390,7 @@ a.tile:active {
   position: relative;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.45rem;
+  font-size: var(--fs-xl);
   letter-spacing: -0.03em;
   line-height: 1.1;
   overflow-wrap: anywhere;
@@ -377,7 +415,7 @@ a.tile:active {
 }
 .tone-gold {
   background: var(--gold);
-  color: #2b1d00;
+  color: var(--gold-ink);
 }
 .tone-green {
   background: var(--green);
@@ -385,7 +423,7 @@ a.tile:active {
 }
 .tone-pink {
   background: var(--pink);
-  color: #3a0d22;
+  color: var(--pink-ink);
 }
 .tone-gold .tile-arrow,
 .tone-pink .tile-arrow {
@@ -399,7 +437,7 @@ a.tile:active {
 .empty-title {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: var(--fs-lg);
   letter-spacing: -0.02em;
 }
 .skeleton-tile {
@@ -429,10 +467,10 @@ a.tile:active {
 /* ---------- Enregistrer le profil : toujours à portée de pouce quand on a modifié ---------- */
 .form-actions-sticky {
   position: sticky;
-  z-index: 5;
+  z-index: var(--z-float);
   bottom: 1rem;
   padding: 0.6rem 0.7rem;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--tile);
   box-shadow:
     0 10px 30px -8px rgb(20 26 46 / 0.35),
@@ -475,10 +513,10 @@ a.tile:active {
   align-items: center;
   gap: 0.35rem;
   padding: 0.3rem 0.7rem;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgb(20 26 46 / 0.75);
   color: #fff;
-  font-size: 0.8rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
   transform: translateX(-50%);
   pointer-events: none;
@@ -520,7 +558,7 @@ a.tile:active {
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
-  border-radius: 12px;
+  border-radius: var(--r-sm);
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
 }
@@ -539,13 +577,13 @@ a.tile:active {
   outline: 0;
 }
 .carousel-slide:first-child {
-  border-radius: 12px 0 0 12px;
+  border-radius: var(--r-sm) 0 0 var(--r-sm);
 }
 .carousel-slide:last-child {
   border-radius: 0 12px 12px 0;
 }
 .carousel-slide:only-child {
-  border-radius: 12px;
+  border-radius: var(--r-sm);
 }
 .carousel-dots {
   position: absolute;
@@ -554,7 +592,7 @@ a.tile:active {
   display: flex;
   gap: 5px;
   padding: 4px 7px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgb(20 26 46 / 0.45);
   transform: translateX(-50%);
   pointer-events: none;
@@ -583,7 +621,7 @@ a.tile:active {
   border: 0;
   border-radius: 50%;
   background: rgb(255 255 255 / 0.92);
-  color: #141a2e;
+  color: var(--ink-dark);
   box-shadow: 0 2px 8px rgb(20 26 46 / 0.2);
   cursor: pointer;
   opacity: 0;
@@ -627,7 +665,7 @@ a.tile:active {
   height: 56px;
   padding: 0;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--r-sm);
   background: #fff;
   overflow: hidden;
   cursor: pointer;
@@ -654,14 +692,14 @@ a.tile:active {
   height: 18px;
   border-radius: 50%;
   background: var(--gold);
-  color: #2b1d00;
+  color: var(--gold-ink);
 }
 .photo-pick-small {
   justify-content: center;
   width: 56px;
   height: 56px;
   padding: 0;
-  border-radius: 12px;
+  border-radius: var(--r-sm);
 }
 
 /* ---------- Menu « ⋯ » des envies ---------- */
@@ -674,12 +712,12 @@ a.tile:active {
 }
 .more-menu {
   position: absolute;
-  z-index: 20;
+  z-index: var(--z-sticky);
   top: calc(100% + 4px);
   right: 0;
   min-width: 12rem;
   padding: 0.35rem;
-  border-radius: 16px;
+  border-radius: var(--r-inner);
   background: var(--tile);
   box-shadow:
     0 14px 34px -10px rgb(20 26 46 / 0.4),
@@ -701,7 +739,7 @@ a.tile:active {
   min-height: 44px;
   padding: 0 0.8rem;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--r-sm);
   background: none;
   color: var(--ink);
   font: inherit;
@@ -723,10 +761,10 @@ a.tile:active {
   gap: 0.35rem;
   margin-top: 0.4rem;
   padding: 0.2rem 0.65rem;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgb(255 255 255 / 0.85);
-  color: #141a2e;
-  font-size: 0.85rem;
+  color: var(--ink-dark);
+  font-size: var(--fs-sm);
   font-weight: 700;
 }
 
@@ -747,8 +785,8 @@ a.tile:active {
   padding: 1.1rem 1.25rem;
 }
 .page-head-gold {
-  background: linear-gradient(135deg, #ffd56b, var(--gold));
-  color: #2b1d00;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  color: var(--gold-ink);
 }
 .page-head-green {
   background: linear-gradient(135deg, #22a676, var(--green));
@@ -771,7 +809,7 @@ a.tile:active {
   display: flex;
   flex-wrap: wrap;
   gap: 0.15rem 0.5rem;
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
   font-weight: 600;
   opacity: 0.85;
 }
@@ -780,7 +818,7 @@ a.tile:active {
   margin-right: 0.5rem;
 }
 .page-head-sub {
-  font-size: 0.88rem;
+  font-size: var(--fs-sm);
   opacity: 0.8;
   text-wrap: pretty;
 }
@@ -790,10 +828,10 @@ a.tile:active {
   gap: 0.35rem;
   min-height: 40px;
   padding: 0 0.7rem 0 0.85rem;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgb(255 255 255 / 0.6);
   color: inherit;
-  font-size: 0.88rem;
+  font-size: var(--fs-sm);
   font-weight: 700;
   text-decoration: none;
 }
@@ -806,7 +844,7 @@ a.tile:active {
   gap: 0.4rem;
   padding: 0 0.3rem;
   color: var(--ink-soft);
-  font-size: 0.88rem;
+  font-size: var(--fs-sm);
 }
 
 /* ---------- Page Famille : l'essentiel visible tout de suite ---------- */
@@ -859,16 +897,16 @@ a.tile:active {
   bottom: -0.25em;
 }
 .people-grid .person-name {
-  font-size: 1.25rem;
+  font-size: var(--fs-lg);
 }
 .people-grid .person-meta {
   margin-top: 0;
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
 }
 .people-grid .person-birthday {
   position: relative;
   margin-top: 0.35rem;
-  font-size: 0.74rem;
+  font-size: var(--fs-xs);
 }
 /* « Ce que j'offre » */
 .giving .section-head {
@@ -880,9 +918,9 @@ a.tile:active {
   gap: 0.1rem;
   min-height: 40px;
   padding: 0 0.3rem 0 0.7rem;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
   text-decoration: none;
 }
 .link-more:hover {
@@ -894,11 +932,11 @@ a.tile:active {
   gap: 0.4rem 1.2rem;
   margin-bottom: 0.6rem;
   color: var(--ink-soft);
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
 }
 .giving-stats strong {
   color: var(--ink);
-  font-size: 1.15rem;
+  font-size: var(--fs-lg);
 }
 .giving-list {
   display: grid;
@@ -913,7 +951,7 @@ a.tile:active {
   align-items: center;
   gap: 0.5rem;
   padding: 0.55rem 0.7rem;
-  border-radius: 12px;
+  border-radius: var(--r-sm);
   background: var(--bg);
 }
 .giving-list .icon {
@@ -955,7 +993,7 @@ a.tile:active {
 .invite-code {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.15rem;
+  font-size: var(--fs-lg);
   letter-spacing: 0.05em;
   color: var(--ink);
   white-space: nowrap;
@@ -974,7 +1012,7 @@ a.tile:active {
 .invite-done {
   min-height: 1em;
   color: var(--green-ink);
-  font-size: 0.8rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 .invite-done:empty {
@@ -989,10 +1027,10 @@ a.tile:active {
 }
 .invite-card-alone .invite-title {
   color: var(--green-ink);
-  font-size: 1.1rem;
+  font-size: var(--fs-lg);
 }
 .invite-card-alone .invite-code {
-  font-size: 1.5rem;
+  font-size: var(--fs-xl);
 }
 /* « Ce que j'offre » vide : un bouton vers la liste de la prochaine occasion. */
 .giving-empty {
@@ -1035,7 +1073,7 @@ a.tile:active {
 .code-bar-code {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.3rem;
+  font-size: var(--fs-lg);
   letter-spacing: 0.06em;
 }
 .code-bar-actions {
@@ -1069,7 +1107,7 @@ a.tile:active {
     font-size: clamp(3.4rem, 15vw, 5rem);
   }
   .home .hero-sub {
-    font-size: 0.92rem;
+    font-size: var(--fs-sm);
     margin-top: 0.4rem;
   }
   .home .gift3d {
@@ -1097,9 +1135,16 @@ a.tile:active {
   --lift: 0px;
   --paper: #1c9467;
   --paper-dark: #12704e;
-  --ribbon: linear-gradient(90deg, #d9921a, #ffd56b 45%, #fff1b8 50%, #ffd56b 55%, #d9921a);
+  --ribbon: linear-gradient(
+    90deg,
+    var(--gold-deep),
+    var(--gold-light) 45%,
+    var(--gold-pale) 50%,
+    var(--gold-light) 55%,
+    var(--gold-deep)
+  );
   position: absolute;
-  z-index: 2;
+  z-index: var(--z-above);
   right: 1.5rem;
   bottom: 1.75rem;
   width: calc(var(--size) * 1.6);
@@ -1115,7 +1160,7 @@ a.tile:active {
 .gift3d:focus-visible {
   outline: 3px solid #fff;
   outline-offset: 4px;
-  border-radius: 24px;
+  border-radius: var(--r-tile);
 }
 /* Le couvercle se soulève au survol, seulement avec une vraie souris (sur mobile, :hover reste collé). */
 /* Au survol (ou quand on appuie sur mobile), le paquet tremble d'impatience. */
@@ -1189,11 +1234,11 @@ a.tile:active {
     linear-gradient(
       90deg,
       transparent 41%,
-      #d9921a 41%,
-      #ffd56b 46%,
-      #fff1b8 50%,
-      #ffd56b 54%,
-      #d9921a 59%,
+      var(--gold-deep) 41%,
+      var(--gold-light) 46%,
+      var(--gold-pale) 50%,
+      var(--gold-light) 54%,
+      var(--gold-deep) 59%,
       transparent 59%
     ),
     radial-gradient(circle at 25% 25%, rgb(255 255 255 / 0.22) 0 3.5px, transparent 4.5px) 0 0 / 22px 22px,
@@ -1207,8 +1252,22 @@ a.tile:active {
 .gift3d-bottom {
   background:
     linear-gradient(135deg, rgb(255 255 255 / 0.3), transparent 45%),
-    linear-gradient(90deg, transparent 41%, #e4a52a 41%, #ffe08a 50%, #e4a52a 59%, transparent 59%),
-    linear-gradient(0deg, transparent 41%, #e4a52a 41%, #ffe08a 50%, #e4a52a 59%, transparent 59%),
+    linear-gradient(
+      90deg,
+      transparent 41%,
+      var(--gold-mid) 41%,
+      var(--gold-shine) 50%,
+      var(--gold-mid) 59%,
+      transparent 59%
+    ),
+    linear-gradient(
+      0deg,
+      transparent 41%,
+      var(--gold-mid) 41%,
+      var(--gold-shine) 50%,
+      var(--gold-mid) 59%,
+      transparent 59%
+    ),
     radial-gradient(circle at 25% 25%, rgb(255 255 255 / 0.22) 0 3.5px, transparent 4.5px) 0 0 / 22px 22px,
     var(--paper);
 }
@@ -1334,7 +1393,7 @@ a.tile:active {
 
 /* L'intérieur : carton vert sombre, plus foncé vers le fond. */
 .gift3d .gift3d-inner {
-  background: linear-gradient(180deg, #0f5c40, #093a29);
+  background: linear-gradient(180deg, var(--pine), #093a29);
   box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.25);
   filter: none;
 }
@@ -1345,7 +1404,7 @@ a.tile:active {
   background: radial-gradient(circle at 50% 50%, #0c4a33, #062a1d);
 }
 .gift3d .gift3d-lid .gift3d-inner {
-  background: linear-gradient(0deg, #0f5c40, #0a412d);
+  background: linear-gradient(0deg, var(--pine), #0a412d);
 }
 
 /* Nœud : deux boucles de ruban évidées en croix (visibles sous tous les angles),
@@ -1389,7 +1448,7 @@ a.tile:active {
   top: 0;
   border: 0;
   border-radius: 2px 2px 0 0;
-  background: linear-gradient(90deg, #d9921a, #ffe08a 50%, #d9921a);
+  background: linear-gradient(90deg, var(--gold-deep), var(--gold-shine) 50%, var(--gold-deep));
   clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
   box-shadow: none;
   transform-origin: 50% 0;
@@ -1408,7 +1467,7 @@ a.tile:active {
   width: var(--k);
   height: var(--k);
   border-radius: 40%;
-  background: radial-gradient(circle at 35% 30%, #fff4c2, #f2b632 45%, #b97a0c);
+  background: radial-gradient(circle at 35% 30%, var(--gold-halo), #f2b632 45%, #b97a0c);
   transform: rotateX(-18deg);
 }
 
@@ -1440,13 +1499,13 @@ a.tile:active {
   width: 8px;
   height: 8px;
   animation-delay: 1.2s;
-  background: #ffe08a;
+  background: var(--gold-shine);
 }
 .gift3d-sparkle:nth-of-type(4) {
   top: 46%;
   right: 0;
   animation-delay: 1.8s;
-  background: #ffe08a;
+  background: var(--gold-shine);
 }
 .gift3d-sparkle:nth-of-type(5) {
   top: 0;
@@ -1524,7 +1583,7 @@ a.tile:active {
   height: calc(var(--size) * 1.6);
   margin: calc(var(--size) * -0.8) 0 0 calc(var(--size) * -0.8);
   border-radius: 50%;
-  background: radial-gradient(circle, #fff8d6 0, rgb(255 213 107 / 0.7) 30%, transparent 65%);
+  background: radial-gradient(circle, var(--gold-glow) 0, rgb(255 213 107 / 0.7) 30%, transparent 65%);
   opacity: 0;
   transform: scale(0.2);
   pointer-events: none;
@@ -1659,11 +1718,11 @@ a.tile:active {
 }
 .tile-head.tone-gold {
   background: var(--gold);
-  color: #2b1d00;
+  color: var(--gold-ink);
 }
 .tile-head.tone-pink {
   background: var(--pink);
-  color: #3a0d22;
+  color: var(--pink-ink);
 }
 .tile-head.tone-red .muted,
 .tile-head.tone-night .muted,
@@ -1678,11 +1737,11 @@ a.tile:active {
 .tile-head.tone-green .avatar,
 .tile-head.tone-night .avatar {
   --a: #fff;
-  color: #141a2e;
+  color: var(--ink-dark);
 }
 .tile-head.tone-gold .avatar,
 .tile-head.tone-pink .avatar {
-  --a: #141a2e;
+  --a: var(--ink-dark);
   color: #fff;
 }
 .title {
@@ -1712,7 +1771,7 @@ a.tile:active {
   justify-self: start;
   min-height: 44px;
   padding: 0 1rem 0 0.6rem;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--tile);
   box-shadow: var(--tile-shadow);
   text-decoration: none;
@@ -1735,7 +1794,7 @@ a.tile:active {
   margin: 0 0 0.9rem;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.15rem;
+  font-size: var(--fs-lg);
   letter-spacing: -0.03em;
   text-wrap: balance;
 }
@@ -1745,10 +1804,10 @@ a.tile:active {
 .count {
   min-width: 1.7rem;
   padding: 0 0.5rem;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--bg);
   font-family: var(--font-body);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   font-weight: 700;
   line-height: 1.7rem;
   text-align: center;
@@ -1758,7 +1817,7 @@ a.tile:active {
   color: var(--ink-soft);
 }
 .small {
-  font-size: 0.95rem;
+  font-size: var(--fs-sm);
 }
 .error {
   color: var(--danger);
@@ -1777,17 +1836,17 @@ a.tile:active {
   flex-shrink: 0;
   width: 52px;
   height: 52px;
-  border-radius: 18px;
+  border-radius: var(--r-inner);
   background: var(--a);
   color: #fff;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.4rem;
+  font-size: var(--fs-xl);
 }
 .avatar-lg {
   width: 76px;
   height: 76px;
-  border-radius: 24px;
+  border-radius: var(--r-tile);
   font-size: 2.2rem;
 }
 .avatar-pine {
@@ -1795,11 +1854,11 @@ a.tile:active {
 }
 .avatar-amber {
   --a: var(--gold);
-  color: #2b1d00;
+  color: var(--gold-ink);
 }
 .avatar-plum {
   --a: var(--pink);
-  color: #3a0d22;
+  color: var(--pink-ink);
 }
 .avatar-sky {
   --a: #3b5bdb;
@@ -1820,7 +1879,7 @@ a.tile:active {
 }
 .profile dt {
   color: var(--ink-soft);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   font-weight: 600;
 }
 .profile dd {
@@ -1858,7 +1917,7 @@ a.tile:active {
   max-height: 240px;
   width: 100%;
   padding: 0.5rem;
-  border-radius: 12px;
+  border-radius: var(--r-sm);
   background: #fff;
   overflow: hidden;
   outline: 1px solid rgb(0 0 0 / 0.06);
@@ -1895,7 +1954,7 @@ a.tile:active {
 .wish-meta {
   margin-top: 0.1rem;
   color: var(--ink-soft);
-  font-size: 0.88rem;
+  font-size: var(--fs-sm);
   overflow-wrap: anywhere;
   font-variant-numeric: tabular-nums;
 }
@@ -1927,17 +1986,17 @@ a.tile:active {
   align-items: center;
   gap: 0.3rem;
   padding: 0.15rem 0.55rem;
-  border-radius: 999px;
-  font-size: 0.78rem;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 .badge-secret {
   background: var(--pink);
-  color: #3a0d22;
+  color: var(--pink-ink);
 }
 .badge-favorite {
   background: var(--gold);
-  color: #2b1d00;
+  color: var(--gold-ink);
 }
 .badge-group {
   background: var(--green-soft);
@@ -1945,15 +2004,15 @@ a.tile:active {
 }
 .badge-bought {
   background: var(--cream);
-  color: #6b4a00;
+  color: var(--gold-ink);
 }
 .badge-taken {
   background: var(--green-soft);
   color: var(--green-ink);
 }
 .badge-warn {
-  background: #ffe0b2;
-  color: #6b3a00;
+  background: var(--warn-soft);
+  color: var(--warn-ink);
 }
 .wish-taken {
   opacity: 0.6;
@@ -1983,8 +2042,9 @@ a.tile:active {
   display: grid;
   gap: 0.55rem;
   padding: 0.8rem;
-  border-radius: 14px;
-  background: var(--cream);
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  box-shadow: inset 0 0 0 1px var(--line);
 }
 .group-done {
   background: var(--green-soft);
@@ -1992,7 +2052,7 @@ a.tile:active {
 .progress {
   position: relative;
   height: 14px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgb(20 26 46 / 0.08);
   overflow: hidden;
 }
@@ -2001,24 +2061,19 @@ a.tile:active {
   height: 100%;
   border-radius: inherit;
   transform-origin: left center;
-  background:
-    repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.22) 0 8px, transparent 8px 16px),
-    linear-gradient(90deg, var(--red), var(--gold) 55%, var(--green));
-  background-size:
-    200% 100%,
-    100% 100%;
+  background: var(--gold);
   transition: transform 600ms cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 .group-done .progress span {
   background: var(--green);
 }
 .progress-text {
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
   color: var(--ink-soft);
 }
 .progress-text strong {
   color: var(--ink);
-  font-size: 1.05rem;
+  font-size: var(--fs-md);
 }
 .group-done .progress-text strong {
   color: var(--green-ink);
@@ -2028,7 +2083,7 @@ a.tile:active {
   align-items: center;
   gap: 0.4rem;
   margin: 0;
-  font-size: 0.88rem;
+  font-size: var(--fs-sm);
   color: inherit;
   opacity: 0.8;
   text-wrap: pretty;
@@ -2049,9 +2104,9 @@ a.tile:active {
   align-items: center;
   gap: 0.35rem;
   padding: 0.2rem 0.6rem 0.2rem 0.2rem;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--tile);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   box-shadow: 0 1px 2px rgb(20 26 46 / 0.06);
 }
 .chip strong {
@@ -2063,7 +2118,7 @@ a.tile:active {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   font-weight: 800;
 }
 .my-amount {
@@ -2072,7 +2127,7 @@ a.tile:active {
   gap: 0.4rem;
   padding-top: 0.55rem;
   border-top: 1px dashed rgb(20 26 46 / 0.15);
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
   font-weight: 600;
 }
 .my-amount input {
@@ -2080,7 +2135,7 @@ a.tile:active {
   min-height: 40px;
   padding: 0.3rem 0.6rem;
   border: 1.5px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--r-sm);
   background: var(--tile);
   font-variant-numeric: tabular-nums;
 }
@@ -2089,7 +2144,7 @@ a.tile:active {
   outline-offset: 1px;
 }
 .wish-favorite {
-  box-shadow: inset 0 0 0 2px var(--gold);
+  box-shadow: inset 0 0 0 1.5px rgb(246 185 59 / 0.55);
 }
 .wish-editing {
   list-style: none;
@@ -2158,11 +2213,12 @@ a.tile:active {
   display: flex;
   align-items: center;
   gap: 0.45rem;
+  margin-bottom: 0.75rem;
   padding: 0.6rem 0.8rem;
-  border-radius: 12px;
-  background: var(--pink);
-  color: #3a0d22;
-  font-size: 0.9rem;
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--pink) 22%, var(--tile));
+  color: var(--ink);
+  font-size: var(--fs-sm);
   font-weight: 600;
 }
 
@@ -2172,7 +2228,7 @@ a.tile:active {
   color: #fff;
 }
 .ideas .section-title {
-  font-size: 1.5rem;
+  font-size: var(--fs-xl);
 }
 .ideas > .muted {
   color: rgb(255 255 255 / 0.72);
@@ -2192,7 +2248,7 @@ a.tile:active {
 }
 .ideas .button-accent {
   background: var(--gold);
-  color: #2b1d00;
+  color: var(--gold-ink);
 }
 .ideas .button-accent:hover:not(:disabled) {
   background: #ffc95c;
@@ -2215,7 +2271,7 @@ a.tile:active {
 }
 .idea-why {
   margin-top: 0.3rem;
-  font-size: 0.93rem;
+  font-size: var(--fs-sm);
   text-wrap: pretty;
 }
 .idea-actions {
@@ -2250,7 +2306,7 @@ a.tile:active {
   width: 40px;
   height: 40px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgb(255 255 255 / 0.08);
   color: rgb(255 255 255 / 0.75);
   cursor: pointer;
@@ -2272,7 +2328,7 @@ a.tile:active {
 }
 .idea-rate.is-on {
   background: var(--gold);
-  color: #2b1d00;
+  color: var(--gold-ink);
 }
 .idea-history {
   margin-top: 1rem;
@@ -2293,7 +2349,7 @@ a.tile:active {
   color: rgb(255 255 255 / 0.8);
 }
 .ideas .error {
-  color: #ff8a80;
+  color: var(--danger);
 }
 .ideas .small {
   color: rgb(255 255 255 / 0.6);
@@ -2313,11 +2369,11 @@ a.tile:active {
 }
 .field-label {
   font-weight: 700;
-  font-size: 0.92rem;
+  font-size: var(--fs-sm);
 }
 .field-hint {
   color: var(--ink-soft);
-  font-size: 0.92rem;
+  font-size: var(--fs-sm);
 }
 .field-row {
   display: flex;
@@ -2339,7 +2395,7 @@ textarea {
   color: var(--ink);
   background: var(--bg);
   border: 2px solid transparent;
-  border-radius: 14px;
+  border-radius: var(--r-sm);
   transition:
     border-color 150ms ease,
     background-color 150ms ease;
@@ -2365,7 +2421,7 @@ textarea:focus {
   justify-self: start;
   padding: 0.55rem 0.9rem;
   border: 1.5px dashed var(--ink-soft);
-  border-radius: 12px;
+  border-radius: var(--r-sm);
   color: var(--ink-soft);
   font-weight: 600;
   cursor: pointer;
@@ -2392,7 +2448,7 @@ textarea:focus {
 .photo-preview img {
   width: 72px;
   height: 72px;
-  border-radius: 12px;
+  border-radius: var(--r-sm);
   object-fit: cover;
   outline: 1px solid rgb(0 0 0 / 0.08);
   outline-offset: -1px;
@@ -2435,7 +2491,7 @@ textarea:focus {
   color: var(--tile);
   background: var(--ink);
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   cursor: pointer;
   transition:
     transform 120ms ease,
@@ -2459,7 +2515,7 @@ textarea:focus {
 .button-small {
   min-height: 40px;
   padding: 0.4rem 1rem;
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
 }
 .button-go {
   background: var(--green);
@@ -2467,12 +2523,12 @@ textarea:focus {
 }
 .button-bought {
   background: var(--gold);
-  color: #2b1d00;
+  color: var(--gold-ink);
 }
 .button-buy {
-  background: var(--cream);
-  color: #6b4a00;
-  box-shadow: inset 0 0 0 1.5px var(--gold);
+  background: transparent;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line);
 }
 .button-leave {
   background: transparent;
@@ -2502,7 +2558,7 @@ textarea:focus {
   width: 40px;
   height: 40px;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--r-sm);
   background: none;
   color: var(--ink-soft);
   cursor: pointer;
@@ -2543,7 +2599,7 @@ textarea:focus {
   box-shadow: var(--tile-shadow);
 }
 .onboarding-card img {
-  border-radius: 14px;
+  border-radius: var(--r-sm);
   margin-bottom: 1rem;
 }
 .onboarding-card .lead {
@@ -2593,9 +2649,10 @@ textarea:focus {
 
 /* ---------- Ma liste ---------- */
 .tile-me-hero {
-  color: #2b1d00;
+  color: var(--gold-ink);
   background:
-    radial-gradient(110% 90% at 90% 10%, #ffe08a 0%, transparent 55%), linear-gradient(160deg, var(--gold), #ee9d1c);
+    radial-gradient(110% 90% at 90% 10%, var(--gold-shine) 0%, transparent 55%),
+    linear-gradient(160deg, var(--gold), #ee9d1c);
 }
 .tile-me-hero .hero-days {
   display: flex;
@@ -2628,7 +2685,7 @@ textarea:focus {
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 14px;
+  border-radius: var(--r-sm);
   background: rgb(255 255 255 / 0.5);
   margin-bottom: auto;
 }
@@ -2677,7 +2734,7 @@ textarea:focus {
 .meter-text .num {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.6rem;
+  font-size: var(--fs-xl);
   letter-spacing: -0.04em;
   margin-right: 0.3rem;
 }
@@ -2688,7 +2745,7 @@ textarea:focus {
 }
 .meter-bar span {
   height: 10px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgb(255 255 255 / 0.22);
 }
 .meter-bar span.on {
@@ -2702,7 +2759,7 @@ textarea:focus {
 }
 .tile-form .field {
   padding: 0.8rem 0.9rem;
-  border-radius: 18px;
+  border-radius: var(--r-inner);
   background: var(--bg);
   gap: 0.3rem;
 }
@@ -2711,7 +2768,7 @@ textarea:focus {
   grid-column: 1 / -1;
 }
 .tile-form .field:nth-child(2) {
-  background: #fff1cc;
+  background: var(--cream-strong);
   grid-column: 1 / -1;
 }
 .tile-form .field:nth-child(3) {
@@ -2724,10 +2781,10 @@ textarea:focus {
   background: #e1e7ff;
 }
 .tile-form .field:nth-child(6) {
-  background: #ffe9d6;
+  background: var(--peach);
 }
 .tile-form .field-label {
-  color: #141a2e;
+  color: var(--ink-dark);
 }
 .tile-form .field-hint {
   color: #4d5468;
@@ -2735,7 +2792,7 @@ textarea:focus {
 .tile-form input,
 .tile-form textarea {
   background: rgb(255 255 255 / 0.85);
-  color: #141a2e;
+  color: var(--ink-dark);
 }
 .tile-form input:focus,
 .tile-form textarea:focus {
@@ -2791,7 +2848,7 @@ textarea:focus {
 /* ---------- Transition « entonnoir » (voir zoom.js) ---------- */
 .zoom-layer {
   position: fixed;
-  z-index: 200;
+  z-index: var(--z-top);
   pointer-events: none;
   will-change: left, top, width, height;
 }
@@ -2815,7 +2872,7 @@ textarea:focus {
   white-space: nowrap;
 }
 .code-family {
-  font-size: 0.82rem;
+  font-size: var(--fs-xs);
   opacity: 0.8;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2844,7 +2901,7 @@ textarea:focus {
 }
 .code-done {
   min-height: 1.1em;
-  font-size: 0.82rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 .appbar-start {
@@ -2859,7 +2916,7 @@ textarea:focus {
   align-items: center;
   gap: 0.35rem;
   padding: 0 0.3rem 0 0.65rem;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--tile);
   box-shadow: var(--tile-shadow);
   color: var(--ink);
@@ -2873,7 +2930,7 @@ textarea:focus {
   color: inherit;
   font: inherit;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
   text-overflow: ellipsis;
   cursor: pointer;
 }
@@ -2893,14 +2950,14 @@ textarea:focus {
   display: flex;
   gap: 4px;
   padding: 4px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--bg);
 }
 .segmented button {
   flex: 1;
   min-height: 40px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: transparent;
   color: var(--ink-soft);
   font: inherit;
@@ -2942,7 +2999,7 @@ textarea:focus {
   align-items: center;
   gap: 0.5rem;
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: var(--fs-md);
 }
 .family-code {
   display: flex;
@@ -2950,11 +3007,11 @@ textarea:focus {
   gap: 0.6rem;
   flex-wrap: wrap;
   padding: 0.5rem 0.5rem 0.5rem 0.8rem;
-  border-radius: 12px;
+  border-radius: var(--r-sm);
   background: var(--tile);
 }
 .family-code strong {
-  font-size: 1.15rem;
+  font-size: var(--fs-lg);
   letter-spacing: 0.08em;
 }
 .family-code .button {
@@ -3010,10 +3067,10 @@ textarea:focus {
   gap: 0.6rem;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.3rem;
+  font-size: var(--fs-lg);
 }
 .login-brand img {
-  border-radius: 10px;
+  border-radius: var(--r-sm);
   box-shadow: 0 0 0 2px rgb(255 255 255 / 0.25);
 }
 .login-gift {
@@ -3030,7 +3087,7 @@ textarea:focus {
 }
 .login-tagline {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-raised);
   font-family: var(--font-display);
   font-weight: 800;
   font-size: clamp(1.5rem, 3vw, 2.3rem);
@@ -3081,7 +3138,7 @@ textarea:focus {
 .login-submit {
   width: 100%;
   min-height: 52px;
-  font-size: 1.05rem;
+  font-size: var(--fs-md);
 }
 .login-steps {
   display: flex;
@@ -3101,7 +3158,7 @@ textarea:focus {
   padding-top: 0.6rem;
   border-top: 3px solid var(--line);
   color: var(--ink-soft);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   font-weight: 700;
   counter-increment: step;
 }
@@ -3114,7 +3171,7 @@ textarea:focus {
   border-radius: 50%;
   background: var(--line);
   color: var(--ink-soft);
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
 }
 .login-steps .is-current {
   border-color: var(--red);
@@ -3146,7 +3203,7 @@ textarea:focus {
   align-items: flex-start;
   gap: 0.6rem;
   color: var(--ink-soft);
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
 }
 .login-perks .icon {
   flex-shrink: 0;
@@ -3194,12 +3251,12 @@ textarea:focus {
   display: grid;
   place-items: center;
   aspect-ratio: 4 / 5;
-  border-radius: 14px;
+  border-radius: var(--r-sm);
   background: var(--tile);
   box-shadow: inset 0 0 0 2px var(--line);
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.6rem;
+  font-size: var(--fs-xl);
   font-variant-numeric: tabular-nums;
   transition:
     box-shadow 150ms ease,
@@ -3228,7 +3285,7 @@ textarea:focus {
     --size: 84px;
   }
   .login-tagline {
-    font-size: 1.25rem;
+    font-size: var(--fs-lg);
   }
   .login-panel {
     align-content: start;
@@ -3243,7 +3300,7 @@ textarea:focus {
   display: grid;
   gap: 0.6rem;
   padding: 0.8rem;
-  border-radius: 14px;
+  border-radius: var(--r-sm);
   background: var(--tile);
   animation: form-in 280ms cubic-bezier(0.2, 0.8, 0.3, 1);
 }
@@ -3252,7 +3309,7 @@ textarea:focus {
   align-items: center;
   gap: 0.35rem;
   color: var(--ink-soft);
-  font-size: 0.8rem;
+  font-size: var(--fs-xs);
   font-weight: 600;
 }
 .chat-list {
@@ -3270,16 +3327,16 @@ textarea:focus {
   gap: 0.15rem;
   max-width: 85%;
   padding: 0.5rem 0.75rem;
-  border-radius: 14px 14px 14px 4px;
+  border-radius: var(--r-sm) var(--r-sm) var(--r-sm) 4px;
   background: var(--bg);
 }
 .chat-mine {
   justify-self: end;
-  border-radius: 14px 14px 4px 14px;
+  border-radius: var(--r-sm) var(--r-sm) 4px var(--r-sm);
   background: var(--green-soft);
 }
 .chat-author {
-  font-size: 0.78rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
   color: var(--ink-soft);
 }
@@ -3290,7 +3347,7 @@ textarea:focus {
 .chat-meta {
   display: flex;
   gap: 0.6rem;
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   color: var(--ink-soft);
 }
 .chat-delete {
@@ -3329,7 +3386,7 @@ textarea:focus {
 /* ---------- Installer l'app ---------- */
 .install {
   position: fixed;
-  z-index: 50;
+  z-index: var(--z-nav);
   left: 50%;
   bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px) + 1.25rem);
   display: flex;
@@ -3337,21 +3394,21 @@ textarea:focus {
   gap: 0.7rem;
   width: min(30rem, calc(100% - 2rem));
   padding: 0.7rem 0.6rem 0.7rem 0.8rem;
-  border-radius: 20px;
+  border-radius: var(--r-inner);
   background: var(--tile);
   box-shadow: 0 12px 32px -8px rgb(20 26 46 / 0.35);
   transform: translateX(-50%);
   animation: install-in 500ms cubic-bezier(0.2, 0.8, 0.3, 1) 1.5s both;
 }
 .install img {
-  border-radius: 10px;
+  border-radius: var(--r-sm);
   flex-shrink: 0;
 }
 .install-text {
   flex: 1;
   display: grid;
   gap: 0.1rem;
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
 }
 .install-text span {
   color: var(--ink-soft);
@@ -3410,7 +3467,7 @@ textarea:focus {
   gap: 0.6rem;
   flex-wrap: wrap;
   padding: 0.6rem 0.75rem;
-  border-radius: 12px;
+  border-radius: var(--r-sm);
   background: var(--bg);
 }
 .archive-title {
@@ -3424,10 +3481,10 @@ textarea:focus {
   gap: 0.3rem;
   margin-top: 0.35rem;
   padding: 0.15rem 0.55rem;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgb(255 255 255 / 0.85);
-  color: #141a2e;
-  font-size: 0.78rem;
+  color: var(--ink-dark);
+  font-size: var(--fs-xs);
   font-weight: 700;
   justify-self: start;
   align-self: start;
@@ -3554,7 +3611,7 @@ a.wish-photo:not(.is-framed):active img {
 /* ---------- Confettis (seulement quand on réserve) ---------- */
 .confetti {
   position: fixed;
-  z-index: 100;
+  z-index: var(--z-overlay);
   width: 8px;
   height: 12px;
   margin: -6px 0 0 -4px;
@@ -3622,7 +3679,7 @@ a.wish-photo:not(.is-framed):active img {
   .wish:not(:has(.wish-actions .button)):has(.wish-photo) .wish-actions {
     top: 0.85rem;
     right: 0.85rem;
-    border-radius: 12px;
+    border-radius: var(--r-sm);
     background: rgb(255 255 255 / 0.9);
   }
   .wish:not(:has(.wish-actions .button)) .wish-actions {
@@ -3643,7 +3700,7 @@ a.wish-photo:not(.is-framed):active img {
     width: auto;
     max-width: 8rem;
     min-height: 44px;
-    font-size: 1rem;
+    font-size: var(--fs-md);
   }
   .my-amount .button {
     min-height: 44px;
@@ -3667,7 +3724,6 @@ a.wish-photo:not(.is-framed):active img {
 }
 
 @media (prefers-color-scheme: dark) {
-  .button-buy,
   .badge-bought {
     color: var(--gold);
   }
@@ -3675,7 +3731,7 @@ a.wish-photo:not(.is-framed):active img {
     background: rgb(255 255 255 / 0.1);
   }
   .button-leave {
-    color: #ff8a8c;
+    color: var(--danger);
   }
 }
 
@@ -3713,7 +3769,7 @@ a.wish-photo:not(.is-framed):active img {
   margin: 0;
   padding: 0;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   box-shadow: none;
   background: rgb(128 128 140 / 0.45);
   cursor: pointer;
@@ -3808,5 +3864,25 @@ html {
   .icon-button {
     width: 44px;
     height: 44px;
+  }
+}
+
+/* ---------- Cartes d'envie : une seule hiérarchie d'actions ----------
+   1. principale, pleine (Je réserve, Je participe) ;
+   2. secondaires, au trait (Offrir à plusieurs, Marquer acheté, Discuter) ;
+   3. retour en arrière, en texte (Annuler, Je me retire), toujours en dernier. */
+.wish-actions .button-alt,
+.wish-actions .chat-toggle,
+.wish-actions .more-toggle {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line);
+  border: 0;
+}
+.wish-actions .button-leave {
+  order: 10;
+}
+@media (max-width: 40rem) {
+  .wish-actions .chat-toggle {
+    flex: 1 1 auto;
   }
 }
