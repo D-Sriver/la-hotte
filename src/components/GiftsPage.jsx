@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api.js';
 import Icon from './Icon.jsx';
 import Skeleton from './Skeleton.jsx';
-import CountUp from './CountUp.jsx';
+import PageHead from './PageHead.jsx';
 import { usePageIntro } from '../motion.js';
 
 const euros = (n) => `${n.toLocaleString('fr-FR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })} €`;
@@ -41,26 +41,20 @@ export default function GiftsPage() {
   }, {}));
 
   return (
-    <div className="bento-page bento-me" ref={scope}>
-      <header className="tile tile-me-hero">
-        <p className="hero-hello">À offrir</p>
-        <p className="hero-days"><CountUp value={gifts.length} />{gifts.length === 1 ? 'cadeau' : 'cadeaux'}</p>
-        <p className="hero-sub">
-          {gifts.length ? `${bought} acheté${bought > 1 ? 's' : ''} sur ${gifts.length}.` : 'Rien de réservé pour l’instant.'}
-        </p>
-      </header>
-
-      <div className="tile tile-mini tone-green">
-        <span className="mini-num num">{euros(total)}</span>
-        <span className="mini-label">
-          Mon budget{unpriced ? `, sans ${unpriced} cadeau${unpriced > 1 ? 'x' : ''} sans prix` : ''}
-        </span>
-      </div>
-
-      <div className="tile tile-mini tone-pink">
-        <span className="mini-icon"><Icon name="family" size={22} /></span>
-        <span className="mini-label">Cadeau à plusieurs : seule ma part compte dans le budget (le montant que j’ai indiqué, sinon une part égale).</span>
-      </div>
+    <div className="bento-page gifts-page" ref={scope}>
+      <a href="#/" className="back"><Icon name="back" size={18} />Famille</a>
+      <PageHead
+        title="Ce que j’offre"
+        tone="green"
+        stats={[
+          `${gifts.length} cadeau${gifts.length > 1 ? 'x' : ''}`,
+          `${euros(total)} de budget${unpriced ? ` (+ ${unpriced} sans prix)` : ''}`,
+          `${bought} acheté${bought > 1 ? 's' : ''}`,
+        ]}
+      />
+      {gifts.some((g) => g.group_gift) && (
+        <p className="page-note"><Icon name="family" size={15} />À plusieurs, seule ta part compte dans le budget.</p>
+      )}
 
       {byPerson.length === 0 && (
         <section className="tile section">

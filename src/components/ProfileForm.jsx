@@ -8,12 +8,17 @@ const FIELDS = [
   { key: 'sizes', label: 'Tailles', hint: 'Vêtements, pointure, bague…', rows: 1 },
 ];
 
-export default function ProfileForm({ initial, submitLabel = 'Enregistrer', onSaved }) {
-  const [form, setForm] = useState({
+const fromProfile = (initial) => ({
     name: initial.name || '', likes: initial.likes || '', owns: initial.owns || '',
     dislikes: initial.dislikes || '', sizes: initial.sizes || '', budget_hint: initial.budget_hint || '',
     birthday: initial.birthday || '', notify_email: initial.notify_email !== false,
-  });
+});
+
+export default function ProfileForm({ initial, submitLabel = 'Enregistrer', onSaved }) {
+  const [saved, setSaved] = useState(() => fromProfile(initial));
+  const [form, setForm] = useState(saved);
+  // Modifié mais pas encore enregistré : le bouton reste visible en bas de l'écran.
+  const dirty = JSON.stringify(form) !== JSON.stringify(saved);
   const [status, setStatus] = useState({ saving: false, message: '', error: '' });
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value });
 
@@ -22,7 +27,9 @@ export default function ProfileForm({ initial, submitLabel = 'Enregistrer', onSa
     setStatus({ saving: true, message: '', error: '' });
     try {
       const { me } = await api.saveMe(form);
+      setSaved(form);
       setStatus({ saving: false, message: 'Profil enregistré.', error: '' });
+      setTimeout(() => setStatus((st) => ({ ...st, message: '' })), 2500);
       onSaved(me);
     } catch (err) {
       setStatus({ saving: false, message: '', error: err.message });
@@ -58,8 +65,9 @@ export default function ProfileForm({ initial, submitLabel = 'Enregistrer', onSa
         <input type="checkbox" checked={form.notify_email} onChange={(e) => setForm({ ...form, notify_email: e.target.checked })} />
         Rappels (Noël, anniversaires, cagnottes)
       </label>
-      <div className="form-actions">
+      <div className={`form-actions${dirty ? ' form-actions-sticky' : ''}`}>
         <button className="button" disabled={status.saving}>{status.saving ? 'Enregistrement…' : submitLabel}</button>
+        {dirty && !status.saving && <span className="muted small">Modifications non enregistrées</span>}
         {status.message && <span className="success" role="status">{status.message}</span>}
         {status.error && <span className="error" role="alert">{status.error}</span>}
       </div>

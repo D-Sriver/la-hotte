@@ -18,7 +18,6 @@ import { zoomBackHome } from './zoom.js';
 const TABS = [
   { page: 'home', href: '#/', label: 'Famille', icon: 'family' },
   { page: 'me', href: '#/moi', label: 'Ma liste', icon: 'gift' },
-  { page: 'gifts', href: '#/cadeaux', label: 'À offrir', icon: 'bag' },
   { page: 'profile', href: '#/profil', label: 'Profil', icon: 'user' },
 ];
 
@@ -46,7 +45,8 @@ function FamilySwitcher({ me, onSwitch }) {
 }
 
 function Nav({ current }) {
-  const active = current === 'person' ? 'home' : current;
+  // La page d'une personne et « Ce que j'offre » sont des sous-pages de Famille.
+  const active = current === 'person' || current === 'gifts' ? 'home' : current;
   const nav = useRef(null);
   const pill = useRef(null);
   const placed = useRef(false);
@@ -78,7 +78,7 @@ function Nav({ current }) {
           aria-current={active === t.page ? 'page' : undefined}
           onClick={(e) => {
             // Depuis la page d'une personne, l'onglet Famille joue l'entonnoir inverse.
-            if (t.page === 'home' && current === 'person') {
+            if (t.page === 'home' && current === 'person' && document.querySelector('[data-zoom-target]')) {
               e.preventDefault();
               zoomBackHome();
             }

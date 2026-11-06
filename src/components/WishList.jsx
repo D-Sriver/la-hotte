@@ -100,7 +100,7 @@ function GiftActions({ wish, busy, run }) {
     return (
       <>
         <button className="button button-small button-go" disabled={busy} onClick={act('reserve', true)}>Je réserve</button>
-        <button className="button button-small button-quiet" disabled={busy} onClick={act('group', true)}>
+        <button className="button button-small button-quiet button-alt" disabled={busy} onClick={act('group', true)}>
           <Icon name="family" size={16} />À plusieurs
         </button>
       </>
@@ -208,6 +208,49 @@ function WishChat({ wish, onCount }) {
   );
 }
 
+// Menu « ⋯ » pour les actions rares (modifier, reçu, supprimer) : moins de boutons à l'écran,
+// et pas de suppression ou d'archivage d'un toucher maladroit.
+function MoreMenu({ label, items, disabled }) {
+  const [open, setOpen] = useState(false);
+  const root = useRef(null);
+  const entries = items.filter(Boolean);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const close = (e) => {
+      if (e.type === 'keydown' ? e.key === 'Escape' : !root.current?.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', close);
+    document.addEventListener('keydown', close);
+    return () => {
+      document.removeEventListener('pointerdown', close);
+      document.removeEventListener('keydown', close);
+    };
+  }, [open]);
+
+  return (
+    <div className="more" ref={root}>
+      <button className="icon-button" aria-label={label} aria-haspopup="menu" aria-expanded={open} disabled={disabled} onClick={() => setOpen(!open)}>
+        <Icon name="more" size={20} />
+      </button>
+      {open && (
+        <div className="more-menu" role="menu">
+          {entries.map((item) => (
+            <button
+              key={item.label}
+              role="menuitem"
+              className={`more-item${item.danger ? ' more-item-danger' : ''}`}
+              onClick={() => { setOpen(false); item.onSelect(); }}
+            >
+              <Icon name={item.icon} size={17} />{item.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Petit halo vert sur la carte pour confirmer qu'une action a marché.
 function flash(element) {
   if (!element) return;
@@ -217,17 +260,14 @@ function flash(element) {
 }
 
 // L'envie supprimée glisse et se replie avant de disparaître.
+// Lancé depuis un clic : un simple test de préférence (un gsap.matchMedia créé ici ne serait jamais nettoyé).
 function collapse(element) {
+  if (!element || !window.matchMedia(MOTION_OK).matches) return Promise.resolve();
   return new Promise((resolve) => {
-    const mm = gsap.matchMedia();
-    let animated = false;
-    mm.add(MOTION_OK, () => {
-      animated = true;
-      gsap.timeline({ onComplete: resolve })
-        .to(element, { x: -24, opacity: 0, duration: 0.25, ease: 'power2.in' })
-        .to(element, { height: 0, paddingTop: 0, paddingBottom: 0, marginTop: -8, duration: 0.25, ease: 'power2.inOut' });
-    });
-    if (!animated) resolve();
+    gsap.timeline({ onComplete: resolve })
+      .to(element, { x: -24, opacity: 0, duration: 0.25, ease: 'power2.in' })
+      // La hauteur n'est animée qu'ici, une fois la carte invisible, pour refermer le trou.
+      .to(element, { height: 0, paddingTop: 0, paddingBottom: 0, marginTop: -8, duration: 0.25, ease: 'power2.inOut' });
   });
 }
 
@@ -321,15 +361,6 @@ function WishRow({ wish, onChanged }) {
       )}
       {chatOpen && <WishChat wish={wish} onCount={setMessageCount} />}
       <div className="wish-actions">
-        {wish.mine && (
-          <button
-            className="button button-small button-quiet"
-            disabled={busy}
-            onClick={(e) => { burst(e.currentTarget); run(() => api.setReceived(wish.id, true), null, true); }}
-          >
-            <Icon name="check" size={16} />Reçu, merci !
-          </button>
-        )}
         {!wish.mine && <GiftActions wish={wish} busy={busy} run={run} />}
         {!wish.mine && (
           <button
@@ -342,20 +373,20 @@ function WishRow({ wish, onChanged }) {
             {messageCount > 0 && <span className="chat-count num">{messageCount}</span>}
           </button>
         )}
-        {wish.can_edit && (
-          <button className="icon-button" disabled={busy} aria-label={`Modifier « ${wish.title} »`} onClick={() => setEditing(true)}>
-            <Icon name="pencil" size={18} />
-          </button>
-        )}
-        {canDelete && (
-          <button
-            className="icon-button icon-button-danger"
+        {(wish.can_edit || canDelete || wish.mine) && (
+          <MoreMenu
+            label={`Plus d’actions pour « ${wish.title} »`}
             disabled={busy}
-            aria-label={`Supprimer « ${wish.title} »`}
-            onClick={remove}
-          >
-            <Icon name="trash" size={18} />
-          </button>
+            items={[
+              wish.can_edit && { label: 'Modifier', icon: 'pencil', onSelect: () => setEditing(true) },
+              wish.mine && {
+                label: 'Reçu, merci !',
+                icon: 'check',
+                onSelect: () => run(() => api.setReceived(wish.id, true), () => burst(row.current), true),
+              },
+              canDelete && { label: 'Supprimer', icon: 'trash', danger: true, onSelect: remove },
+            ]}
+          />
         )}
       </div>
     </li>

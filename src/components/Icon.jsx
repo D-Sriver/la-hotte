@@ -22,6 +22,7 @@ const PATHS = {
   cake: <><path d="M4.5 20h15M5.5 20v-6.5a1.5 1.5 0 0 1 1.5-1.5h10a1.5 1.5 0 0 1 1.5 1.5V20" /><path d="M5.5 15.5c1.2 1 2.4 1 3.6 0s2.4-1 3.6 0 2.4 1 3.6 0 1.6-.6 2.2-.6M12 12V8.5M12 6.5c-.8-.7-.8-1.6 0-2.5.8.9.8 1.8 0 2.5Z" /></>,
   download: <path d="M12 4v11M8 11l4 4 4-4M5 19.5h14" />,
   bell: <path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.5 2h-14l1.5-2ZM10 20.5a2 2 0 0 0 4 0" />,
+  more: <><circle cx="6" cy="12" r="1.3" fill="currentColor" /><circle cx="12" cy="12" r="1.3" fill="currentColor" /><circle cx="18" cy="12" r="1.3" fill="currentColor" /></>,
   search: <><circle cx="11" cy="11" r="6" /><path d="M20 20l-4.5-4.5" /></>,
 };
 

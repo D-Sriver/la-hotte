@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "gsap-animation": {
+      "source": "dvy1987/agent-loom",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/gsap-animation/SKILL.md",
+      "computedHash": "1111c7b8edeaa729f07deede6c548406f77390a9b738e9a4334e36da9cfd1b63"
+    }
+  }
+}

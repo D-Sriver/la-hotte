@@ -241,6 +241,87 @@ a.tile:active { transform: scale(0.97); }
   .tile-big { grid-column: 1 / -1; }
 }
 
+/* ---------- Enregistrer le profil : toujours à portée de pouce quand on a modifié ---------- */
+.form-actions-sticky {
+  position: sticky; z-index: 5; bottom: 1rem;
+  padding: 0.6rem 0.7rem; border-radius: 999px; background: var(--tile);
+  box-shadow: 0 10px 30px -8px rgb(20 26 46 / 0.35), 0 0 0 1px var(--line);
+  animation: rise-in 240ms cubic-bezier(.2, .8, .3, 1);
+}
+@keyframes rise-in { from { opacity: 0; transform: translateY(12px); } }
+@media (max-width: 40rem) {
+  .form-actions-sticky { bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px) + 1.25rem); }
+}
+
+/* ---------- Menu « ⋯ » des envies ---------- */
+.tile.section, .tile-form { overflow: visible; } /* sinon le menu est coupé et le bouton flottant ne colle pas */
+.more { position: relative; }
+.more-menu {
+  position: absolute; z-index: 20; top: calc(100% + 4px); right: 0; min-width: 12rem; padding: 0.35rem;
+  border-radius: 16px; background: var(--tile); box-shadow: 0 14px 34px -10px rgb(20 26 46 / 0.4), 0 0 0 1px var(--line);
+  animation: menu-in 160ms cubic-bezier(.2, .8, .3, 1);
+  transform-origin: top right;
+}
+@keyframes menu-in { from { opacity: 0; transform: scale(0.92) translateY(-4px); } }
+.more-item { display: flex; align-items: center; gap: 0.6rem; width: 100%; min-height: 44px; padding: 0 0.8rem; border: 0; border-radius: 10px; background: none; color: var(--ink); font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
+.more-item:hover, .more-item:focus-visible { background: var(--bg); }
+.more-item-danger { color: var(--danger); }
+
+/* ---------- En-tête compact des pages ---------- */
+.page-head { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem 1rem; flex-wrap: wrap; padding: 1.1rem 1.25rem; }
+.page-head-gold { background: linear-gradient(135deg, #ffd56b, var(--gold)); color: #2b1d00; }
+.page-head-green { background: linear-gradient(135deg, #22a676, var(--green)); color: #fff; }
+.page-head-main { display: grid; gap: 0.3rem; min-width: 0; }
+.page-head-title { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: clamp(1.6rem, 6vw, 2.1rem); letter-spacing: -0.04em; line-height: 1.05; }
+.page-head-stats { display: flex; flex-wrap: wrap; gap: 0.15rem 0.5rem; font-size: 0.9rem; font-weight: 600; opacity: 0.85; }
+.page-head-stats span + span::before { content: '·'; margin-right: 0.5rem; }
+.page-head-sub { font-size: 0.88rem; opacity: 0.8; text-wrap: pretty; }
+.page-head-chip { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 40px; padding: 0 0.7rem 0 0.85rem; border-radius: 999px; background: rgb(255 255 255 / 0.6); color: inherit; font-size: 0.88rem; font-weight: 700; text-decoration: none; }
+.page-head-chip:active { transform: scale(0.97); }
+.page-note { display: flex; align-items: center; gap: 0.4rem; padding: 0 0.3rem; color: var(--ink-soft); font-size: 0.88rem; }
+
+/* ---------- Page Famille : l'essentiel visible tout de suite ---------- */
+.home .tile-hero { grid-column: 1 / -1; grid-row: auto; min-height: 14rem; }
+.home .giving { grid-column: 1 / -1; display: flex; flex-direction: column; }
+.home .bento-title { margin-top: 0.75rem; }
+/* Les personnes en grille compacte : 2 colonnes sur téléphone, plus sur grand écran. */
+.people-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: var(--gap); }
+.people-grid .tile-person { min-height: 7.5rem; padding: 1rem 1.1rem; justify-content: flex-end; gap: 0.15rem; }
+.people-grid .person-initial { font-size: 6.5rem; bottom: -0.25em; }
+.people-grid .person-name { font-size: 1.25rem; }
+.people-grid .person-meta { margin-top: 0; font-size: 0.9rem; }
+.people-grid .person-birthday { position: relative; margin-top: 0.35rem; font-size: 0.74rem; }
+/* « Ce que j'offre » */
+.giving .section-head { margin-bottom: 0.5rem; }
+.link-more { display: inline-flex; align-items: center; gap: 0.1rem; min-height: 40px; padding: 0 0.3rem 0 0.7rem; border-radius: 999px; font-weight: 700; font-size: 0.9rem; text-decoration: none; }
+.link-more:hover { background: var(--bg); }
+.giving-stats { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; margin-bottom: 0.6rem; color: var(--ink-soft); font-size: 0.9rem; }
+.giving-stats strong { color: var(--ink); font-size: 1.15rem; }
+.giving-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.giving-list li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0.5rem; padding: 0.55rem 0.7rem; border-radius: 12px; background: var(--bg); }
+.giving-list .icon { color: var(--ink-soft); }
+.giving-list .is-bought .icon { color: var(--green); }
+.giving-list .is-bought .giving-title { text-decoration: line-through; text-decoration-color: var(--ink-soft); }
+.giving-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+/* Le code de la famille sur une seule ligne. */
+.code-bar { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; padding: 0.85rem 0.9rem 0.85rem 1.2rem; }
+.code-bar-text { display: grid; flex: 1; min-width: 0; }
+.code-bar-code { font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; letter-spacing: 0.06em; }
+.code-bar-actions { display: flex; align-items: center; gap: 0.3rem; }
+.code-bar-actions .button { display: inline-flex; align-items: center; gap: 0.35rem; }
+.code-bar .code-done { flex-basis: 100%; min-height: 0; color: var(--green); }
+.code-bar .code-done:empty { display: none; }
+.code-bar-highlight { background: var(--green-soft); box-shadow: inset 0 0 0 2px var(--green); }
+@media (max-width: 40rem) {
+  .home .tile-hero { min-height: 12.5rem; padding: 1.1rem 1.2rem; }
+  .home .hero-days .num { font-size: clamp(3.4rem, 15vw, 5rem); }
+  .home .hero-sub { font-size: 0.92rem; margin-top: 0.4rem; }
+  .home .gift3d { --size: 74px; right: 0.4rem; bottom: 0.6rem; }
+  .home .tile-hero .hero-sub { max-width: calc(100% - 7.5rem); }
+  .home .giving { grid-column: 1 / -1; }
+  .people-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+}
+
 /* ---------- Paquet 3D ---------- */
 .gift3d {
   --size: 112px;
@@ -505,6 +586,10 @@ a.tile:active { transform: scale(0.97); }
   .bento-page > .ideas { grid-column: 2; grid-row: 3 / span 2; position: sticky; top: 1rem; }
   .bento-page > .back + .tile-head { grid-row: 2; }
   .bento-page > .section:not(.ideas) { grid-column: 1; }
+  /* Avec l'en-tête compact (Ma liste), le panneau des lutins démarre juste sous l'en-tête. */
+  .bento-page:has(> .page-head) > .ideas { grid-row: 2 / span 4; }
+  /* Ce que j'offre : une carte par personne, sur les deux colonnes. */
+  .gifts-page > .section:not(.ideas) { grid-column: auto; }
 }
 
 .tile-head { background: var(--ink); color: var(--tile); }
@@ -831,7 +916,7 @@ input:focus, textarea:focus { outline: none; border-color: var(--focus); backgro
 
 /* Chaque rubrique du formulaire est une petite tuile colorée. */
 .tile-form .form { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-.tile-form .field { padding: 1rem; border-radius: 20px; background: var(--bg); }
+.tile-form .field { padding: 0.8rem 0.9rem; border-radius: 18px; background: var(--bg); gap: 0.3rem; }
 .tile-form .field:nth-child(1) { background: #ffe1e1; grid-column: 1 / -1; }
 .tile-form .field:nth-child(2) { background: #fff1cc; grid-column: 1 / -1; }
 .tile-form .field:nth-child(3) { background: #dcf3e8; }
@@ -1041,6 +1126,8 @@ a.wish-photo:active img { transform: scale(0.98); }
   .wish-photo { height: 180px; }
   .wish-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0; }
   .wish-actions .button { flex: 1 1 7.5rem; justify-content: center; min-height: 44px; padding: 0.4rem 0.6rem; white-space: nowrap; }
+  /* « À plusieurs » reste secondaire : il ne prend que sa place. */
+  .wish-actions .button-alt { flex: 0 0 auto; }
   .wish-actions .icon-button { flex: 0 0 44px; }
   .wish-actions .button-quiet { background: var(--tile); }
   /* Seulement crayon / poubelle (sa propre liste) : en haut à droite plutôt qu'une ligne entière. */

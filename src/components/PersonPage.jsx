@@ -53,6 +53,14 @@ export default function PersonPage({ id }) {
       </header>
 
       <section className="tile section">
+        <div className="section-head">
+          <h2 className="section-title">Sa liste<span className="count">{wishes.length}</span></h2>
+        </div>
+        <WishList wishes={wishes} emptyText="Rien pour l’instant. Les lutins peuvent t’aider juste en dessous" onChanged={load} />
+        <AddWishForm ownerId={person.id} forSomeoneElse onAdded={load} />
+      </section>
+
+      <section className="tile section">
         <h2 className="section-title">Son mode d’emploi</h2>
         {filled.length ? (
           <dl className="profile">
@@ -66,14 +74,6 @@ export default function PersonPage({ id }) {
         ) : (
           <p className="muted">{person.name} n’a rien dit sur ses goûts. Mystère total… les idées seront plus vagues.</p>
         )}
-      </section>
-
-      <section className="tile section">
-        <div className="section-head">
-          <h2 className="section-title">Sa liste<span className="count">{wishes.length}</span></h2>
-        </div>
-        <WishList wishes={wishes} emptyText="Rien pour l’instant. Les lutins peuvent t’aider juste en dessous" onChanged={load} />
-        <AddWishForm ownerId={person.id} forSomeoneElse onAdded={load} />
       </section>
 
       <IdeasPanel person={person} onAdded={load} />

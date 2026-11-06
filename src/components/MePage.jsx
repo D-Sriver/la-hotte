@@ -6,7 +6,7 @@ import IdeasPanel from './IdeasPanel.jsx';
 import Icon from './Icon.jsx';
 import Skeleton from './Skeleton.jsx';
 import { profileCompletion } from '../profile.js';
-import CountUp from './CountUp.jsx';
+import PageHead from './PageHead.jsx';
 import { usePageIntro } from '../motion.js';
 
 export default function MePage({ me }) {
@@ -25,23 +25,18 @@ export default function MePage({ me }) {
   const scope = usePageIntro(wishes !== null);
 
   return (
-    <div className="bento-page bento-me" ref={scope}>
-      <header className="tile tile-me-hero" data-zoom-target>
-        <p className="hero-hello">Ma liste</p>
-        <p className="hero-days"><CountUp value={count} />{count === 1 ? 'envie' : 'envies'}</p>
-        <p className="hero-sub">Fais rêver la famille. Tu ne verras jamais ce qu’ils réservent : la surprise reste entière.</p>
-      </header>
-
-      <a href="#/profil" className="tile tile-mini tone-green">
-        <span className="mini-num num">{done}/{total}</span>
-        <span className="mini-label">{done === total ? 'Profil complet' : 'Complète ton profil'}</span>
-        <span className="tile-arrow"><Icon name="chevron" size={18} /></span>
-      </a>
-
-      <div className="tile tile-mini tone-pink">
-        <span className="mini-icon"><Icon name="link" size={22} /></span>
-        <span className="mini-label">Colle le lien du produit : la famille tombera sur le bon modèle.</span>
-      </div>
+    <div className="bento-page" ref={scope}>
+      <PageHead
+        title="Ma liste"
+        stats={[count === undefined ? null : `${count} envie${count > 1 ? 's' : ''}`]}
+        subtitle="La famille réserve en secret : la surprise reste entière."
+      >
+        {done < total && (
+          <a href="#/profil" className="page-head-chip">
+            <span className="num">{done}/{total}</span> Compléter mon profil<Icon name="chevron" size={14} />
+          </a>
+        )}
+      </PageHead>
 
       <section className="tile section">
         <div className="section-head">
