@@ -8,7 +8,10 @@ export const isInstalled = () =>
   window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
 const keyBytes = (base64url) => {
-  const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(base64url.length / 4) * 4, '=');
+  const base64 = base64url
+    .replace(/-/g, '+')
+    .replace(/_/g, '/')
+    .padEnd(Math.ceil(base64url.length / 4) * 4, '=');
   return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
 };
 
@@ -44,7 +47,9 @@ async function subscribe(publicKey) {
 export async function enablePush(publicKey) {
   const permission = await Notification.requestPermission();
   if (permission !== 'granted') {
-    throw new Error('Notifications refusées. Autorise-les pour La Hotte dans les réglages de l’appareil ou du navigateur.');
+    throw new Error(
+      'Notifications refusées. Autorise-les pour La Hotte dans les réglages de l’appareil ou du navigateur.',
+    );
   }
   await subscribe(publicKey);
 }

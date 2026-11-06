@@ -22,7 +22,10 @@ export const clearSessionCookie = () => `${SESSION_COOKIE}=; Path=/; Max-Age=0; 
 
 export async function emailFromSession(request, env) {
   const cookie = request.headers.get('cookie') || '';
-  const token = cookie.split(/;\s*/).find((c) => c.startsWith(`${SESSION_COOKIE}=`))?.slice(SESSION_COOKIE.length + 1);
+  const token = cookie
+    .split(/;\s*/)
+    .find((c) => c.startsWith(`${SESSION_COOKIE}=`))
+    ?.slice(SESSION_COOKIE.length + 1);
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, keyOf(env), { algorithms: ['HS256'] });

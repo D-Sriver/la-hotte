@@ -27,7 +27,16 @@ export async function saveIdea(db, { personId, viewerId, familyId }, idea) {
       `INSERT INTO ai_ideas (person_id, asked_by, family_id, title, why, price, shop, search_url)
        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) RETURNING ${COLUMNS}`,
     )
-    .bind(personId, viewerId, personId === viewerId ? null : familyId, idea.title, idea.why, idea.price, idea.shop, idea.search_url)
+    .bind(
+      personId,
+      viewerId,
+      personId === viewerId ? null : familyId,
+      idea.title,
+      idea.why,
+      idea.price,
+      idea.shop,
+      idea.search_url,
+    )
     .first();
   return shape(row);
 }
@@ -38,7 +47,9 @@ export async function visibleIdea(db, ideaId, viewerId, familyId) {
   if (!idea) return null;
   if (idea.person_id === viewerId) return idea.asked_by === viewerId && idea.family_id === null ? idea : null;
   if (idea.family_id !== familyId || idea.asked_by === idea.person_id) return null;
-  const member = await db.prepare('SELECT 1 FROM memberships WHERE family_id = ?1 AND user_id = ?2')
-    .bind(familyId, idea.person_id).first();
+  const member = await db
+    .prepare('SELECT 1 FROM memberships WHERE family_id = ?1 AND user_id = ?2')
+    .bind(familyId, idea.person_id)
+    .first();
   return member ? idea : null;
 }

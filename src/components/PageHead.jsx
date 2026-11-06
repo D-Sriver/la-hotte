@@ -7,7 +7,9 @@ export default function PageHead({ title, stats = [], subtitle, children, tone =
         <h1 className="page-head-title">{title}</h1>
         {stats.length > 0 && (
           <p className="page-head-stats">
-            {stats.filter(Boolean).map((stat) => <span key={stat}>{stat}</span>)}
+            {stats.filter(Boolean).map((stat) => (
+              <span key={stat}>{stat}</span>
+            ))}
           </p>
         )}
         {subtitle && <p className="page-head-sub">{subtitle}</p>}

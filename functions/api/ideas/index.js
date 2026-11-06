@@ -30,10 +30,13 @@ export async function onRequestPost({ request, env, data }) {
     .bind(data.me.id, data.family.id)
     .first();
   if (used >= limit) return fail(429, `Limite de ${limit} recherches par jour atteinte. Reviens demain.`);
-  if (familyUsed >= familyLimit) return fail(429, `Ta famille a fait ses ${familyLimit} recherches du jour. Reviens demain.`);
+  if (familyUsed >= familyLimit)
+    return fail(429, `Ta famille a fait ses ${familyLimit} recherches du jour. Reviens demain.`);
   if (!env.AI) return fail(500, 'Workers AI n’est pas branché sur le projet (binding AI).');
 
-  await env.DB.prepare('INSERT INTO idea_requests (user_id, family_id) VALUES (?1, ?2)').bind(data.me.id, data.family.id).run();
+  await env.DB.prepare('INSERT INTO idea_requests (user_id, family_id) VALUES (?1, ?2)')
+    .bind(data.me.id, data.family.id)
+    .run();
 
   const owner = { personId: person.id, viewerId: data.me.id, familyId: data.family.id };
   const wishes = await visibleWishes(env.DB, person.id, data.me.id, data.family.id);
@@ -64,9 +67,11 @@ export async function onRequestPost({ request, env, data }) {
   (async () => {
     try {
       const count = await findIdeas(env, input, async (idea) => send({ idea: await saveIdea(env.DB, owner, idea) }));
-      await send(count
-        ? { done: true, remaining: Math.min(limit - used, familyLimit - familyUsed) - 1 }
-        : { error: 'Aucune idée exploitable cette fois. Relance la recherche.' });
+      await send(
+        count
+          ? { done: true, remaining: Math.min(limit - used, familyLimit - familyUsed) - 1 }
+          : { error: 'Aucune idée exploitable cette fois. Relance la recherche.' },
+      );
     } catch (err) {
       console.error(err);
       await send({ error: 'La recherche a échoué. Réessaie dans une minute.' }).catch(() => {});

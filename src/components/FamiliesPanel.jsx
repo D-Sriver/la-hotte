@@ -29,37 +29,66 @@ function FamilyRow({ family, current, onChanged }) {
   return (
     <li className={`family${current ? ' family-current' : ''}`}>
       {renaming ? (
-        <form className="family-rename" onSubmit={(e) => { e.preventDefault(); act(() => api.renameFamily(family.id, name)).then(() => setRenaming(false)); }}>
-          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} required autoFocus aria-label="Nom de la famille" />
+        <form
+          className="family-rename"
+          onSubmit={(e) => {
+            e.preventDefault();
+            act(() => api.renameFamily(family.id, name)).then(() => setRenaming(false));
+          }}
+        >
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            maxLength={60}
+            required
+            autoFocus
+            aria-label="Nom de la famille"
+          />
           <button className="button button-small">OK</button>
-          <button type="button" className="button button-small button-quiet" onClick={() => setRenaming(false)}>Annuler</button>
+          <button type="button" className="button button-small button-quiet" onClick={() => setRenaming(false)}>
+            Annuler
+          </button>
         </form>
       ) : (
         <div className="family-head">
-          <p className="family-name">{family.name}{current && <span className="badge badge-group">Affichée</span>}</p>
-          <p className="muted small">{family.member_count} membre{family.member_count > 1 ? 's' : ''}</p>
+          <p className="family-name">
+            {family.name}
+            {current && <span className="badge badge-group">Affichée</span>}
+          </p>
+          <p className="muted small">
+            {family.member_count} membre{family.member_count > 1 ? 's' : ''}
+          </p>
         </div>
       )}
       <div className="family-code">
         <span className="muted small">Code</span>
         <strong className="num">{family.code}</strong>
         <button type="button" className="button button-small button-go" onClick={share}>
-          <Icon name={copied ? 'check' : 'link'} size={16} />{copied ? 'Copié' : 'Partager'}
+          <Icon name={copied ? 'check' : 'link'} size={16} />
+          {copied ? 'Copié' : 'Partager'}
         </button>
       </div>
       <div className="family-actions">
         <button type="button" className="button button-small button-quiet" onClick={() => setRenaming(true)}>
-          <Icon name="pencil" size={16} />Renommer
+          <Icon name="pencil" size={16} />
+          Renommer
         </button>
         <button
           type="button"
           className="button button-small button-leave"
-          onClick={() => window.confirm(`Quitter « ${family.name} » ? Tu ne verras plus ses membres.`) && act(() => api.leaveFamily(family.id))}
+          onClick={() =>
+            window.confirm(`Quitter « ${family.name} » ? Tu ne verras plus ses membres.`) &&
+            act(() => api.leaveFamily(family.id))
+          }
         >
           Quitter
         </button>
       </div>
-      {error && <p className="error small" role="alert">{error}</p>}
+      {error && (
+        <p className="error small" role="alert">
+          {error}
+        </p>
+      )}
     </li>
   );
 }
@@ -71,15 +100,23 @@ export default function FamiliesPanel({ me, onChanged }) {
     <section className="tile section">
       <h2 className="section-title">Mes familles</h2>
       <ul className="families">
-        {me.families.map((f) => <FamilyRow key={f.id} family={f} current={f.id === me.family?.id} onChanged={onChanged} />)}
+        {me.families.map((f) => (
+          <FamilyRow key={f.id} family={f} current={f.id === me.family?.id} onChanged={onChanged} />
+        ))}
       </ul>
-      {adding
-        ? <JoinForm onJoined={(family) => { setAdding(false); onChanged(family); }} />
-        : (
-          <button className="add-button" onClick={() => setAdding(true)}>
-            <Icon name="plus" size={20} />Rejoindre ou créer une famille
-          </button>
-        )}
+      {adding ? (
+        <JoinForm
+          onJoined={(family) => {
+            setAdding(false);
+            onChanged(family);
+          }}
+        />
+      ) : (
+        <button className="add-button" onClick={() => setAdding(true)}>
+          <Icon name="plus" size={20} />
+          Rejoindre ou créer une famille
+        </button>
+      )}
     </section>
   );
 }

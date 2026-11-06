@@ -11,31 +11,55 @@ function keepCodeFromUrl() {
   const url = new URL(window.location.href);
   const code = url.searchParams.get(PARAM);
   if (!code) return;
-  try { localStorage.setItem(KEY, code); } catch { /* stockage indisponible */ }
+  try {
+    localStorage.setItem(KEY, code);
+  } catch {
+    /* stockage indisponible */
+  }
   url.searchParams.delete(PARAM);
   window.history.replaceState(null, '', url);
 }
 keepCodeFromUrl();
 
 export function pendingInvite() {
-  try { return localStorage.getItem(KEY); } catch { return null; }
+  try {
+    return localStorage.getItem(KEY);
+  } catch {
+    return null;
+  }
 }
 
 // Invitation refusée (souvent par erreur) : on la garde pour pouvoir changer d'avis sans redemander le code.
 const DECLINED = 'la-hotte-declined';
 
 export function rememberDeclined(code, familyName) {
-  try { localStorage.setItem(DECLINED, JSON.stringify({ code, name: familyName })); } catch { /* stockage indisponible */ }
+  try {
+    localStorage.setItem(DECLINED, JSON.stringify({ code, name: familyName }));
+  } catch {
+    /* stockage indisponible */
+  }
 }
 
 export function declinedInvite() {
-  try { return JSON.parse(localStorage.getItem(DECLINED)); } catch { return null; }
+  try {
+    return JSON.parse(localStorage.getItem(DECLINED));
+  } catch {
+    return null;
+  }
 }
 
 export function forgetDeclined() {
-  try { localStorage.removeItem(DECLINED); } catch { /* stockage indisponible */ }
+  try {
+    localStorage.removeItem(DECLINED);
+  } catch {
+    /* stockage indisponible */
+  }
 }
 
 export function clearInvite() {
-  try { localStorage.removeItem(KEY); } catch { /* stockage indisponible */ }
+  try {
+    localStorage.removeItem(KEY);
+  } catch {
+    /* stockage indisponible */
+  }
 }

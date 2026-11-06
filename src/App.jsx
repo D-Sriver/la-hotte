@@ -51,7 +51,11 @@ function FamilySwitcher({ me, onSwitch }) {
       <span className="sr-only">Famille affichée</span>
       <Icon name="family" size={16} />
       <select value={me.family.id} onChange={(e) => onSwitch(Number(e.target.value))}>
-        {me.families.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+        {me.families.map((f) => (
+          <option key={f.id} value={f.id}>
+            {f.name}
+          </option>
+        ))}
       </select>
     </label>
   );
@@ -65,20 +69,23 @@ function Nav({ current }) {
   const placed = useRef(false);
 
   // La pastille glisse jusqu'à l'onglet actif (placée sans animation au premier affichage).
-  useGSAP(() => {
-    const move = () => {
-      const tab = nav.current.querySelector('[aria-current="page"]');
-      if (!tab) return;
-      const target = { x: tab.offsetLeft, y: tab.offsetTop, width: tab.offsetWidth, height: tab.offsetHeight };
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (!placed.current || reduce) gsap.set(pill.current, target);
-      else gsap.to(pill.current, { ...target, duration: 0.45, ease: 'back.out(1.4)' });
-      placed.current = true;
-    };
-    move();
-    window.addEventListener('resize', move);
-    return () => window.removeEventListener('resize', move);
-  }, { dependencies: [active], scope: nav });
+  useGSAP(
+    () => {
+      const move = () => {
+        const tab = nav.current.querySelector('[aria-current="page"]');
+        if (!tab) return;
+        const target = { x: tab.offsetLeft, y: tab.offsetTop, width: tab.offsetWidth, height: tab.offsetHeight };
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!placed.current || reduce) gsap.set(pill.current, target);
+        else gsap.to(pill.current, { ...target, duration: 0.45, ease: 'back.out(1.4)' });
+        placed.current = true;
+      };
+      move();
+      window.addEventListener('resize', move);
+      return () => window.removeEventListener('resize', move);
+    },
+    { dependencies: [active], scope: nav },
+  );
 
   return (
     <nav className="tabs" aria-label="Navigation principale" ref={nav}>
@@ -130,7 +137,11 @@ function DeclinedInvite({ onJoined }) {
       <button className="button button-go" disabled={status.sending} onClick={join}>
         {status.sending ? 'Un instant…' : `Rejoindre « ${declined.name} »`}
       </button>
-      {status.error && <p className="error small" role="alert">{status.error}</p>}
+      {status.error && (
+        <p className="error small" role="alert">
+          {status.error}
+        </p>
+      )}
     </div>
   );
 }
@@ -144,7 +155,10 @@ export default function App() {
 
   const loadMe = useCallback(() => {
     setError('');
-    api.me().then((data) => setMe(data.me)).catch((err) => setError(err.needsLogin ? 'login' : err.message));
+    api
+      .me()
+      .then((data) => setMe(data.me))
+      .catch((err) => setError(err.needsLogin ? 'login' : err.message));
   }, []);
   useEffect(loadMe, [loadMe]);
 
@@ -154,16 +168,20 @@ export default function App() {
   }, []);
 
   // Après avoir créé, rejoint ou choisi une famille : on l'affiche.
-  const showFamily = useCallback((family) => {
-    if (family?.id) setFamily(family.id);
-    loadMe();
-  }, [loadMe]);
+  const showFamily = useCallback(
+    (family) => {
+      if (family?.id) setFamily(family.id);
+      loadMe();
+    },
+    [loadMe],
+  );
 
   // Une fois connecté : déjà membre, on bascule sur la famille ; sinon on pose la question.
   useEffect(() => {
     if (!me || invite !== 'checking') return;
     const code = pendingInvite();
-    api.invitation(code)
+    api
+      .invitation(code)
       .then(({ family, member }) => {
         if (!member) return setInvite({ code, family });
         clearInvite();
@@ -178,29 +196,53 @@ export default function App() {
 
   // Changer de famille. La page d'une personne ne vaut que dans sa famille : on revient à l'accueil,
   // ou on ouvre la page demandée (hash) une fois dans la bonne famille.
-  const switchFamily = useCallback((id, hash) => {
-    setFamily(id);
-    if (hash) window.location.hash = hash;
-    else if (route.page === 'person') window.location.hash = '#/';
-    showFamily({ id });
-  }, [route.page, showFamily]);
+  const switchFamily = useCallback(
+    (id, hash) => {
+      setFamily(id);
+      if (hash) window.location.hash = hash;
+      else if (route.page === 'person') window.location.hash = '#/';
+      showFamily({ id });
+    },
+    [route.page, showFamily],
+  );
 
-  const closeInvite = useCallback((family) => {
-    clearInvite();
-    setInvite(null);
-    if (family) showFamily(family);
-  }, [showFamily]);
+  const closeInvite = useCallback(
+    (family) => {
+      clearInvite();
+      setInvite(null);
+      if (family) showFamily(family);
+    },
+    [showFamily],
+  );
 
   if (error === 'login') return <LoginScreen onLoggedIn={loadMe} />;
-  if (error) return <main className="page page-center"><p className="error" role="alert">{error}</p></main>;
-  if (!me || invite === 'checking') return <main className="page page-center"><div className="spinner" role="status" aria-label="Chargement" /></main>;
+  if (error)
+    return (
+      <main className="page page-center">
+        <p className="error" role="alert">
+          {error}
+        </p>
+      </main>
+    );
+  if (!me || invite === 'checking')
+    return (
+      <main className="page page-center">
+        <div className="spinner" role="status" aria-label="Chargement" />
+      </main>
+    );
   if (invite) {
     return (
       <InviteScreen
         me={me}
         invite={invite}
-        onJoined={(family) => { forgetDeclined(); closeInvite(family); }}
-        onDeclined={() => { rememberDeclined(invite.code, invite.family.name); closeInvite(); }}
+        onJoined={(family) => {
+          forgetDeclined();
+          closeInvite(family);
+        }}
+        onDeclined={() => {
+          rememberDeclined(invite.code, invite.family.name);
+          closeInvite();
+        }}
       />
     );
   }
@@ -211,9 +253,17 @@ export default function App() {
         <div className="onboarding-card">
           <img src="/icon.svg" alt="" width="56" height="56" />
           <h1 className="title">Bienvenue dans La Hotte</h1>
-          <p className="lead">Les listes de cadeaux de ta famille, sans gâcher les surprises. Rejoins ta famille avec le lien ou le code reçu, ou crée-la et invite les autres.</p>
+          <p className="lead">
+            Les listes de cadeaux de ta famille, sans gâcher les surprises. Rejoins ta famille avec le lien ou le code
+            reçu, ou crée-la et invite les autres.
+          </p>
           <DeclinedInvite onJoined={showFamily} />
-          <JoinForm onJoined={(family) => { forgetDeclined(); showFamily(family); }} />
+          <JoinForm
+            onJoined={(family) => {
+              forgetDeclined();
+              showFamily(family);
+            }}
+          />
           <LogoutButton email={me.email} emailLogin={me.email_login} quiet />
         </div>
       </main>
@@ -223,7 +273,7 @@ export default function App() {
   if (!me.name) {
     return (
       <main className="onboarding">
-          <div className="onboarding-card">
+        <div className="onboarding-card">
           <img src="/icon.svg" alt="" width="56" height="56" />
           <h1 className="title">Bienvenue dans La Hotte</h1>
           <p className="lead">
@@ -233,7 +283,10 @@ export default function App() {
             initial={me}
             quick
             submitLabel="C’est parti"
-            onSaved={(saved) => { setMe(saved); window.scrollTo(0, 0); }}
+            onSaved={(saved) => {
+              setMe(saved);
+              window.scrollTo(0, 0);
+            }}
           />
           <LogoutButton email={me.email} emailLogin={me.email_login} quiet />
         </div>
@@ -254,11 +307,11 @@ export default function App() {
       <InstallPrompt />
       <main className="page" key={me.family.id}>
         <Suspense fallback={<Skeleton rows={4} />}>
-        {route.page === 'home' && <Home me={me} />}
-        {route.page === 'me' && <MePage me={me} />}
-        {route.page === 'gifts' && <GiftsPage familyId={me.family.id} onSwitchFamily={switchFamily} />}
-        {route.page === 'profile' && <ProfilePage me={me} onSaved={setMe} onFamiliesChanged={showFamily} />}
-        {route.page === 'person' && <PersonPage key={route.id} id={route.id} />}
+          {route.page === 'home' && <Home me={me} />}
+          {route.page === 'me' && <MePage me={me} />}
+          {route.page === 'gifts' && <GiftsPage familyId={me.family.id} onSwitchFamily={switchFamily} />}
+          {route.page === 'profile' && <ProfilePage me={me} onSaved={setMe} onFamiliesChanged={showFamily} />}
+          {route.page === 'person' && <PersonPage key={route.id} id={route.id} />}
         </Suspense>
       </main>
     </div>

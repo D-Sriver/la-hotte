@@ -14,17 +14,22 @@ export async function recipients(db, { userIds, familyId, ownerId, senderId, kin
   if (!column) throw new Error(`Type de notification inconnu : ${kind}`);
   const ids = [...new Set(userIds)].filter((id) => id && id !== ownerId && id !== senderId);
   if (!ids.length) return [];
-  const { results } = await db.prepare(
-    `SELECT u.id FROM users u JOIN memberships m ON m.user_id = u.id AND m.family_id = ?1
+  const { results } = await db
+    .prepare(
+      `SELECT u.id FROM users u JOIN memberships m ON m.user_id = u.id AND m.family_id = ?1
      WHERE u.${column} = 1 AND u.id IN (SELECT value FROM json_each(?2))`,
-  ).bind(familyId, JSON.stringify(ids)).all();
+    )
+    .bind(familyId, JSON.stringify(ids))
+    .all();
   return results.map((r) => r.id);
 }
 
 export function notifyLater(context, userIds, message) {
   const { env } = context;
   if (!userIds.length || !pushConfigured(env)) return;
-  const work = Promise.all(userIds.map((id) => notifyUser(env, id, message).catch((err) => console.warn('notification', err.message))));
+  const work = Promise.all(
+    userIds.map((id) => notifyUser(env, id, message).catch((err) => console.warn('notification', err.message))),
+  );
   if (context.waitUntil) context.waitUntil(work);
 }
 
@@ -36,10 +41,13 @@ export async function familyMembers(db, familyId) {
 
 // Ceux qui offrent ce cadeau, et ceux qui ont déjà écrit dans sa discussion (dans cette famille).
 export async function giftCircle(db, wish, familyId) {
-  const { results } = await db.prepare(
-    `SELECT user_id FROM contributions WHERE wish_id = ?1
+  const { results } = await db
+    .prepare(
+      `SELECT user_id FROM contributions WHERE wish_id = ?1
      UNION SELECT user_id FROM wish_messages WHERE wish_id = ?1 AND family_id = ?2`,
-  ).bind(wish.id, familyId).all();
+    )
+    .bind(wish.id, familyId)
+    .all();
   return [wish.reserved_by, ...results.map((r) => r.user_id)];
 }
 

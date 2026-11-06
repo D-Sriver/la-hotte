@@ -2,16 +2,30 @@ import { useState } from 'react';
 import { api } from '../api.js';
 
 const FIELDS = [
-  { key: 'likes', label: 'Ce que tu aimes', hint: 'Passions, séries, couleurs, marques… plus c’est précis, mieux c’est.', rows: 4 },
-  { key: 'owns', label: 'Ce que tu as déjà', hint: 'Pour éviter les doublons : collections, matériel, tomes possédés…', rows: 3 },
+  {
+    key: 'likes',
+    label: 'Ce que tu aimes',
+    hint: 'Passions, séries, couleurs, marques… plus c’est précis, mieux c’est.',
+    rows: 4,
+  },
+  {
+    key: 'owns',
+    label: 'Ce que tu as déjà',
+    hint: 'Pour éviter les doublons : collections, matériel, tomes possédés…',
+    rows: 3,
+  },
   { key: 'dislikes', label: 'À éviter', hint: 'Ce qui ne te ferait pas plaisir.', rows: 2 },
   { key: 'sizes', label: 'Tailles', hint: 'Vêtements, pointure, bague…', rows: 1 },
 ];
 
 const fromProfile = (initial) => ({
-    name: initial.name || '', likes: initial.likes || '', owns: initial.owns || '',
-    dislikes: initial.dislikes || '', sizes: initial.sizes || '', budget_hint: initial.budget_hint || '',
-    birthday: initial.birthday || '',
+  name: initial.name || '',
+  likes: initial.likes || '',
+  owns: initial.owns || '',
+  dislikes: initial.dislikes || '',
+  sizes: initial.sizes || '',
+  budget_hint: initial.budget_hint || '',
+  birthday: initial.birthday || '',
 });
 
 // quick : premier passage, juste le prénom et les goûts ; le reste se complète plus tard dans Profil.
@@ -47,30 +61,49 @@ export default function ProfileForm({ initial, submitLabel = 'Enregistrer', quic
         <label className="field" key={f.key}>
           <span className="field-label">{f.label}</span>
           <span className="field-hint">{f.hint}</span>
-          {f.rows > 1
-            ? <textarea rows={f.rows} value={form[f.key]} onChange={set(f.key)} />
-            : <input value={form[f.key]} onChange={set(f.key)} />}
+          {f.rows > 1 ? (
+            <textarea rows={f.rows} value={form[f.key]} onChange={set(f.key)} />
+          ) : (
+            <input value={form[f.key]} onChange={set(f.key)} />
+          )}
         </label>
       ))}
       {quick ? (
         <p className="field-hint">Tailles, budget, anniversaire… tu pourras compléter quand tu veux dans « Profil ».</p>
-      ) : (<>
-      <label className="field">
-        <span className="field-label">Budget idéal</span>
-        <span className="field-hint">Une indication pour la famille, ex. « 20 à 50 € ».</span>
-        <input value={form.budget_hint} onChange={set('budget_hint')} maxLength={60} />
-      </label>
-      <label className="field">
-        <span className="field-label">Anniversaire</span>
-        <span className="field-hint">Pour que la famille y pense. Seuls le jour et le mois sont montrés.</span>
-        <input type="date" value={form.birthday} onChange={set('birthday')} max={new Date().toISOString().slice(0, 10)} />
-      </label>
-      </>)}
+      ) : (
+        <>
+          <label className="field">
+            <span className="field-label">Budget idéal</span>
+            <span className="field-hint">Une indication pour la famille, ex. « 20 à 50 € ».</span>
+            <input value={form.budget_hint} onChange={set('budget_hint')} maxLength={60} />
+          </label>
+          <label className="field">
+            <span className="field-label">Anniversaire</span>
+            <span className="field-hint">Pour que la famille y pense. Seuls le jour et le mois sont montrés.</span>
+            <input
+              type="date"
+              value={form.birthday}
+              onChange={set('birthday')}
+              max={new Date().toISOString().slice(0, 10)}
+            />
+          </label>
+        </>
+      )}
       <div className={`form-actions${dirty ? ' form-actions-sticky' : ''}`}>
-        <button className="button" disabled={status.saving}>{status.saving ? 'Enregistrement…' : submitLabel}</button>
+        <button className="button" disabled={status.saving}>
+          {status.saving ? 'Enregistrement…' : submitLabel}
+        </button>
         {dirty && !status.saving && !quick && <span className="muted small">Modifications non enregistrées</span>}
-        {status.message && <span className="success" role="status">{status.message}</span>}
-        {status.error && <span className="error" role="alert">{status.error}</span>}
+        {status.message && (
+          <span className="success" role="status">
+            {status.message}
+          </span>
+        )}
+        {status.error && (
+          <span className="error" role="alert">
+            {status.error}
+          </span>
+        )}
       </div>
     </form>
   );

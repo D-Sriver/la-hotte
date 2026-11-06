@@ -7,7 +7,11 @@ import { disablePush, enablePush, isInstalled, isIos, pushSupported, syncPush } 
 const KINDS = [
   { key: 'reminders', label: 'Rappels du matin', hint: 'Noël, anniversaires, listes vides, cagnottes pas bouclées.' },
   { key: 'messages', label: 'Messages', hint: 'Quand quelqu’un écrit dans une discussion secrète où tu offres.' },
-  { key: 'groups', label: 'Cagnottes', hint: 'Une nouvelle cagnotte dans la famille, ou quelqu’un qui rejoint la tienne.' },
+  {
+    key: 'groups',
+    label: 'Cagnottes',
+    hint: 'Une nouvelle cagnotte dans la famille, ou quelqu’un qui rejoint la tienne.',
+  },
 ];
 
 function Switch({ checked, label, hint, disabled, onChange }) {
@@ -17,8 +21,15 @@ function Switch({ checked, label, hint, disabled, onChange }) {
         <span className="switch-label">{label}</span>
         <span className="field-hint">{hint}</span>
       </span>
-      <input type="checkbox" role="switch" className="switch" checked={checked} disabled={disabled}
-        aria-checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <input
+        type="checkbox"
+        role="switch"
+        className="switch"
+        checked={checked}
+        disabled={disabled}
+        aria-checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+      />
     </label>
   );
 }
@@ -52,10 +63,14 @@ export default function NotificationsPanel({ me, onChanged }) {
 
   // On remet l'abonnement de cet appareil d'accord avec le serveur à chaque visite.
   useEffect(() => {
-    api.pushStatus()
+    api
+      .pushStatus()
       .then((s) => {
         setStatus(s);
-        if (s.configured) syncPush(s.public_key).then(setSubscribed).catch(() => setSubscribed(false));
+        if (s.configured)
+          syncPush(s.public_key)
+            .then(setSubscribed)
+            .catch(() => setSubscribed(false));
       })
       .catch(() => setStatus({ configured: false }));
   }, []);
@@ -89,29 +104,51 @@ export default function NotificationsPanel({ me, onChanged }) {
   else if (isIos() && !isInstalled()) {
     content = (
       <p className="muted small">
-        Sur iPhone, installe d’abord La Hotte : touche <Icon name="share" size={14} /> en bas de Safari,
-        puis « Sur l’écran d’accueil ». Ouvre-la depuis l’écran d’accueil et reviens ici.
+        Sur iPhone, installe d’abord La Hotte : touche <Icon name="share" size={14} /> en bas de Safari, puis « Sur
+        l’écran d’accueil ». Ouvre-la depuis l’écran d’accueil et reviens ici.
       </p>
     );
-  } else if (!pushSupported()) content = <p className="muted small">Ce navigateur ne sait pas recevoir de notifications.</p>;
+  } else if (!pushSupported())
+    content = <p className="muted small">Ce navigateur ne sait pas recevoir de notifications.</p>;
   else {
     content = (
       <div className="notif-actions">
         {subscribed ? (
           <>
-            <button className="button button-small button-go" disabled={busy}
-              onClick={() => act(test, 'Notification envoyée : elle arrive dans quelques secondes.')}>
-              <Icon name="bell" size={16} />M’envoyer un test
+            <button
+              className="button button-small button-go"
+              disabled={busy}
+              onClick={() => act(test, 'Notification envoyée : elle arrive dans quelques secondes.')}
+            >
+              <Icon name="bell" size={16} />
+              M’envoyer un test
             </button>
-            <button className="button button-small button-leave" disabled={busy}
-              onClick={() => act(async () => { await disablePush(); setSubscribed(false); }, 'Notifications coupées sur cet appareil.')}>
+            <button
+              className="button button-small button-leave"
+              disabled={busy}
+              onClick={() =>
+                act(async () => {
+                  await disablePush();
+                  setSubscribed(false);
+                }, 'Notifications coupées sur cet appareil.')
+              }
+            >
               Couper sur cet appareil
             </button>
           </>
         ) : (
-          <button className="button button-accent" disabled={busy}
-            onClick={() => act(async () => { await enablePush(status.public_key); setSubscribed(true); }, 'C’est activé ! Tu peux m’envoyer un test.')}>
-            <Icon name="bell" size={18} />Activer les notifications
+          <button
+            className="button button-accent"
+            disabled={busy}
+            onClick={() =>
+              act(async () => {
+                await enablePush(status.public_key);
+                setSubscribed(true);
+              }, 'C’est activé ! Tu peux m’envoyer un test.')
+            }
+          >
+            <Icon name="bell" size={18} />
+            Activer les notifications
           </button>
         )}
       </div>
@@ -121,17 +158,29 @@ export default function NotificationsPanel({ me, onChanged }) {
   return (
     <section className="tile section">
       <h2 className="section-title">Notifications</h2>
-      <p className="muted small">Sur ce téléphone ou cet ordinateur : rappels avant Noël et les anniversaires, cagnottes et messages entre ceux qui offrent. Jamais de pub.</p>
+      <p className="muted small">
+        Sur ce téléphone ou cet ordinateur : rappels avant Noël et les anniversaires, cagnottes et messages entre ceux
+        qui offrent. Jamais de pub.
+      </p>
       {content}
       {status?.configured && (
         <div className="switch-list">
           {KINDS.map((kind) => (
-            <Switch key={kind.key} {...kind} checked={!!choices[kind.key]} disabled={saving === kind.key}
-              onChange={(value) => toggle(kind.key, value)} />
+            <Switch
+              key={kind.key}
+              {...kind}
+              checked={!!choices[kind.key]}
+              disabled={saving === kind.key}
+              onChange={(value) => toggle(kind.key, value)}
+            />
           ))}
         </div>
       )}
-      {message.text && <p className={message.error ? 'error small' : 'success small'} role={message.error ? 'alert' : 'status'}>{message.text}</p>}
+      {message.text && (
+        <p className={message.error ? 'error small' : 'success small'} role={message.error ? 'alert' : 'status'}>
+          {message.text}
+        </p>
+      )}
     </section>
   );
 }

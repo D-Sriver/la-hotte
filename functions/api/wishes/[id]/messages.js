@@ -36,7 +36,10 @@ export async function onRequestPost(context) {
 
   const to = await recipients(env.DB, {
     userIds: await giftCircle(env.DB, wish, data.family.id),
-    familyId: data.family.id, ownerId: wish.owner_id, senderId: data.me.id, kind: 'messages',
+    familyId: data.family.id,
+    ownerId: wish.owner_id,
+    senderId: data.me.id,
+    kind: 'messages',
   });
   notifyLater(context, to, {
     title: `💬 ${wish.title} (pour ${await ownerName(env.DB, wish)})`,

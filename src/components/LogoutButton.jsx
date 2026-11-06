@@ -13,9 +13,14 @@ export default function LogoutButton({ email, emailLogin, quiet }) {
   };
   return (
     <div className={`logout${quiet ? ' logout-quiet' : ''}`}>
-      {email && <p className="muted small">Connecté avec <strong>{email}</strong></p>}
+      {email && (
+        <p className="muted small">
+          Connecté avec <strong>{email}</strong>
+        </p>
+      )}
       <a className="button button-quiet" href={ACCESS_LOGOUT_URL} onClick={logout}>
-        <Icon name="logout" size={18} />Se déconnecter ou changer de compte
+        <Icon name="logout" size={18} />
+        Se déconnecter ou changer de compte
       </a>
     </div>
   );

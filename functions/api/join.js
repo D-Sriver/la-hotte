@@ -3,8 +3,8 @@ import { isMember, normalizeCode } from '../../server/family.js';
 
 const MAX_FAILURES = 8;
 
-const isBlocked = (me) => me.join_failures >= MAX_FAILURES
-  && me.join_failed_at && Date.parse(`${me.join_failed_at}Z`) > Date.now() - 3600_000;
+const isBlocked = (me) =>
+  me.join_failures >= MAX_FAILURES && me.join_failed_at && Date.parse(`${me.join_failed_at}Z`) > Date.now() - 3600_000;
 
 // Retrouve la famille d'un code. Les mauvais codes sont comptés pour empêcher de les deviner.
 async function findFamily(env, me, code) {
@@ -33,8 +33,13 @@ export async function onRequestGet({ request, env, data }) {
   const { results } = await env.DB.prepare(
     `SELECT u.name FROM memberships m JOIN users u ON u.id = m.user_id
      WHERE m.family_id = ?1 AND u.name IS NOT NULL ORDER BY m.joined_at LIMIT 6`,
-  ).bind(family.id).all();
-  return json({ family: { ...family, members: results.map((r) => r.name) }, member: await isMember(env.DB, family.id, me.id) });
+  )
+    .bind(family.id)
+    .all();
+  return json({
+    family: { ...family, members: results.map((r) => r.name) },
+    member: await isMember(env.DB, family.id, me.id),
+  });
 }
 
 // Rejoindre une famille avec son code.

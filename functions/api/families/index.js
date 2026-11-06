@@ -21,7 +21,9 @@ export async function onRequestPost({ request, env, data }) {
       .bind(name, code, data.me.id)
       .first();
     if (!family) continue;
-    await env.DB.prepare('INSERT INTO memberships (family_id, user_id) VALUES (?1, ?2)').bind(family.id, data.me.id).run();
+    await env.DB.prepare('INSERT INTO memberships (family_id, user_id) VALUES (?1, ?2)')
+      .bind(family.id, data.me.id)
+      .run();
     return json({ family }, 201);
   }
   return fail(500, 'Impossible de créer la famille, réessaie.');

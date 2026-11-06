@@ -6,7 +6,8 @@ import { searchPrice } from './pricesearch.js';
 const PAGE_LIMIT = 1_500_000;
 const IMAGE_LIMIT = 4_000_000;
 const HEADERS = {
-  'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36',
+  'user-agent':
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36',
   'accept-language': 'fr-FR,fr;q=0.9,en;q=0.6',
 };
 
@@ -31,11 +32,16 @@ async function readLimited(response, limit) {
   return { bytes, truncated: size >= limit };
 }
 
-const decodeEntities = (text) => text
-  .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
-  .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
-  .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-  .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
+const decodeEntities = (text) =>
+  text
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&');
 
 function metaContent(html, names) {
   for (const name of names) {
@@ -54,7 +60,8 @@ function metaContent(html, names) {
 
 // Les fiches produit décrivent souvent le produit en JSON-LD (schema.org/Product).
 // On fouille tout l'arbre : @graph, listes, ProductGroup et ses variantes, offres imbriquées.
-const isProduct = (node) => [].concat(node['@type'] || []).some((t) => /^(Product|ProductGroup|IndividualProduct)$/.test(t));
+const isProduct = (node) =>
+  [].concat(node['@type'] || []).some((t) => /^(Product|ProductGroup|IndividualProduct)$/.test(t));
 
 function findPrice(offers) {
   for (const offer of [].concat(offers || [])) {
@@ -63,7 +70,8 @@ function findPrice(offers) {
     if (direct != null && direct !== '') return { amount: String(direct), currency: offer.priceCurrency || '' };
     for (const spec of [].concat(offer.priceSpecification || [])) {
       if (/Strikethrough|ListPrice|MSRP/i.test(spec?.priceType || '')) continue; // ancien prix barré
-      if (spec?.price != null) return { amount: String(spec.price), currency: spec.priceCurrency || offer.priceCurrency || '' };
+      if (spec?.price != null)
+        return { amount: String(spec.price), currency: spec.priceCurrency || offer.priceCurrency || '' };
     }
     const nested = findPrice(offer.offers);
     if (nested) return nested;
@@ -80,11 +88,18 @@ function productFromJsonLd(html) {
   const products = [];
   for (const [, raw] of html.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)) {
     let parsed;
-    try { parsed = JSON.parse(raw.trim()); } catch { continue; }
+    try {
+      parsed = JSON.parse(raw.trim());
+    } catch {
+      continue;
+    }
     const queue = [parsed];
     while (queue.length) {
       const node = queue.shift();
-      if (Array.isArray(node)) { queue.push(...node); continue; }
+      if (Array.isArray(node)) {
+        queue.push(...node);
+        continue;
+      }
       if (!node || typeof node !== 'object') continue;
       if (isProduct(node)) products.push(node);
       for (const key of ['@graph', 'mainEntity', 'itemListElement', 'item', 'hasVariant']) {
@@ -94,7 +109,8 @@ function productFromJsonLd(html) {
   }
   // Une page catégorie liste plein de produits : on garde celui qui a un prix, en premier.
   for (const node of products) {
-    const price = findPrice(node.offers) || (node.hasVariant ? findPrice([].concat(node.hasVariant).map((v) => v.offers)) : null);
+    const price =
+      findPrice(node.offers) || (node.hasVariant ? findPrice([].concat(node.hasVariant).map((v) => v.offers)) : null);
     if (products.length > 3 && !price) continue;
     return {
       title: typeof node.name === 'string' ? node.name : '',
@@ -116,16 +132,20 @@ function priceFromMicrodata(html) {
 // Texte visible de la page, pour l'IA en dernier recours.
 function visibleText(html) {
   return decodeEntities(
-    html
-      .replace(/<(script|style|noscript|svg|template)[\s\S]*?<\/\1>/gi, ' ')
-      .replace(/<[^>]+>/g, ' '),
-  ).replace(/\s+/g, ' ').trim();
+    html.replace(/<(script|style|noscript|svg|template)[\s\S]*?<\/\1>/gi, ' ').replace(/<[^>]+>/g, ' '),
+  )
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 // Les boutiques qui bloquent les robots laissent au moins le lien : son « slug » donne souvent le nom.
 export function titleFromUrl(pageUrl) {
   let url;
-  try { url = new URL(pageUrl); } catch { return ''; }
+  try {
+    url = new URL(pageUrl);
+  } catch {
+    return '';
+  }
   const words = url.pathname
     .split('/')
     .map((part) => decodeURIComponent(part).replace(/\.(html?|php|aspx?)$/i, ''))
@@ -156,7 +176,11 @@ function toBase64(bytes) {
 
 async function fetchImage(src, pageUrl) {
   let url;
-  try { url = new URL(src, pageUrl); } catch { return null; }
+  try {
+    url = new URL(src, pageUrl);
+  } catch {
+    return null;
+  }
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
   const response = await fetch(url, { headers: { ...HEADERS, referer: pageUrl }, signal: AbortSignal.timeout(6000) });
   const type = response.headers.get('content-type') || '';
@@ -172,8 +196,9 @@ async function priceWithAi(env, title, text) {
     messages: [
       {
         role: 'system',
-        content: 'On te donne le texte d’une page produit. Réponds UNIQUEMENT avec le prix de vente actuel du produit principal, '
-          + 'au format « 24,99 € », ou « ? » si tu ne le trouves pas avec certitude. Ignore les prix barrés, de livraison et des autres produits.',
+        content:
+          'On te donne le texte d’une page produit. Réponds UNIQUEMENT avec le prix de vente actuel du produit principal, ' +
+          'au format « 24,99 € », ou « ? » si tu ne le trouves pas avec certitude. Ignore les prix barrés, de livraison et des autres produits.',
       },
       { role: 'user', content: `Produit : ${title}\n\nPage :\n${text.slice(0, 6000)}` },
     ],
@@ -200,11 +225,14 @@ async function readPage(pageUrl, env) {
 
   const product = productFromJsonLd(html);
   const titleTag = html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1];
-  const title = product.title
-    || metaContent(html, ['og:title', 'twitter:title'])
-    || (titleTag ? decodeEntities(titleTag).trim() : '');
+  const title =
+    product.title ||
+    metaContent(html, ['og:title', 'twitter:title']) ||
+    (titleTag ? decodeEntities(titleTag).trim() : '');
   let price = formatPrice(
-    product.price || metaContent(html, ['product:price:amount', 'og:price:amount', 'price']) || priceFromMicrodata(html),
+    product.price ||
+      metaContent(html, ['product:price:amount', 'og:price:amount', 'price']) ||
+      priceFromMicrodata(html),
     product.currency || metaContent(html, ['product:price:currency', 'og:price:currency', 'priceCurrency']),
   );
   const imageSrc = product.image || metaContent(html, ['og:image', 'og:image:url', 'twitter:image']);

@@ -12,19 +12,22 @@ export default function ProfilePage({ me, onSaved, onFamiliesChanged }) {
   const scope = usePageIntro();
   const bar = useRef(null);
   // La jauge se remplit segment par segment.
-  useGSAP(() => {
-    const mm = gsap.matchMedia();
-    mm.add(MOTION_OK, () => {
-      gsap.from(bar.current.querySelectorAll('.on'), {
-        scaleX: 0,
-        transformOrigin: 'left center',
-        duration: 0.5,
-        ease: 'power3.out',
-        stagger: 0.12,
-        delay: 0.35,
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add(MOTION_OK, () => {
+        gsap.from(bar.current.querySelectorAll('.on'), {
+          scaleX: 0,
+          transformOrigin: 'left center',
+          duration: 0.5,
+          ease: 'power3.out',
+          stagger: 0.12,
+          delay: 0.35,
+        });
       });
-    });
-  }, { scope: bar, dependencies: [done] });
+    },
+    { scope: bar, dependencies: [done] },
+  );
   return (
     <div className="bento-page profile-page" ref={scope}>
       <header className="tile tile-profile-hero">
@@ -36,9 +39,16 @@ export default function ProfilePage({ me, onSaved, onFamiliesChanged }) {
           </div>
         </div>
         <div className="meter" aria-label={`Profil rempli à ${done} sur ${total}`}>
-          <p className="meter-text"><span className="num">{done}/{total}</span> {done === total ? 'profil complet, bravo' : 'rubriques remplies'}</p>
+          <p className="meter-text">
+            <span className="num">
+              {done}/{total}
+            </span>{' '}
+            {done === total ? 'profil complet, bravo' : 'rubriques remplies'}
+          </p>
           <div className="meter-bar" ref={bar}>
-            {Array.from({ length: total }, (_, i) => <span key={i} className={i < done ? 'on' : ''} />)}
+            {Array.from({ length: total }, (_, i) => (
+              <span key={i} className={i < done ? 'on' : ''} />
+            ))}
           </div>
         </div>
       </header>

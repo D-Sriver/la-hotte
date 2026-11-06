@@ -85,7 +85,9 @@ export default function Gift3D({ decorative = false }) {
           </div>
         </div>
       </div>
-      {Array.from({ length: SPARKLES }, (_, i) => <span key={i} className="gift3d-sparkle" aria-hidden="true" />)}
+      {Array.from({ length: SPARKLES }, (_, i) => (
+        <span key={i} className="gift3d-sparkle" aria-hidden="true" />
+      ))}
       <div className="gift3d-shadow" />
     </Tag>
   );

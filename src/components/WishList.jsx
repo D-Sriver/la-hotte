@@ -7,12 +7,17 @@ import PhotoCarousel from './PhotoCarousel.jsx';
 import { gsap, MOTION_OK, useStagger } from '../motion.js';
 
 const hostOf = (url) => {
-  try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; }
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
 };
 
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
-const euros = (n) => `${n.toLocaleString('fr-FR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })} €`;
+const euros = (n) =>
+  `${n.toLocaleString('fr-FR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })} €`;
 
 // Où en est la cagnotte d'un cadeau à plusieurs : qui met combien, et la barre vers le prix.
 function GroupProgress({ wish, children }) {
@@ -22,8 +27,14 @@ function GroupProgress({ wish, children }) {
     <div className={`group-progress${wish.target && wish.collected >= wish.target ? ' group-done' : ''}`}>
       {wish.target ? (
         <>
-          <div className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={wish.target} aria-valuenow={wish.collected}
-            aria-label={`${euros(wish.collected)} réunis sur ${euros(wish.target)}`}>
+          <div
+            className="progress"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={wish.target}
+            aria-valuenow={wish.collected}
+            aria-label={`${euros(wish.collected)} réunis sur ${euros(wish.target)}`}
+          >
             <span style={{ transform: `scaleX(${ratio})` }} />
           </div>
           <p className="progress-text num">
@@ -32,7 +43,9 @@ function GroupProgress({ wish, children }) {
           </p>
         </>
       ) : (
-        <p className="progress-text num"><strong>{euros(wish.collected)}</strong> réunis (pas de prix indiqué)</p>
+        <p className="progress-text num">
+          <strong>{euros(wish.collected)}</strong> réunis (pas de prix indiqué)
+        </p>
       )}
       <p className="group-organizer">
         <Icon name="bag" size={14} />
@@ -43,7 +56,9 @@ function GroupProgress({ wish, children }) {
       <ul className="chips" aria-label="Participants">
         {wish.participants.map((p) => (
           <li key={p.id} className="chip">
-            <span className={`chip-dot tone-${toneOf(p.id)}`} aria-hidden="true">{p.name.charAt(0).toUpperCase()}</span>
+            <span className={`chip-dot tone-${toneOf(p.id)}`} aria-hidden="true">
+              {p.name.charAt(0).toUpperCase()}
+            </span>
             {p.name}
             <strong className="num">{p.amount ? euros(p.amount) : '?'}</strong>
           </li>
@@ -60,9 +75,10 @@ function MyAmount({ wish, busy, run }) {
   const [value, setValue] = useState(initial);
   // Suggestion : une part égale entre les participants, sans dépasser ce qui manque. Seul, on ne suggère rien.
   const others = wish.collected - (wish.my_amount || 0);
-  const suggested = wish.target && wish.participants.length > 1
-    ? Math.min(Math.max(0, wish.target - others), wish.target / wish.participants.length)
-    : null;
+  const suggested =
+    wish.target && wish.participants.length > 1
+      ? Math.min(Math.max(0, wish.target - others), wish.target / wish.participants.length)
+      : null;
   const changed = value !== initial;
   return (
     <form
@@ -73,7 +89,10 @@ function MyAmount({ wish, busy, run }) {
         const form = e.currentTarget;
         // La cagnotte est bouclée grâce à moi : confettis !
         const completes = wish.target && wish.collected - (wish.my_amount || 0) + (amount || 0) >= wish.target;
-        run(() => api.gift(wish.id, 'amount', amount), () => completes && burst(form));
+        run(
+          () => api.gift(wish.id, 'amount', amount),
+          () => completes && burst(form),
+        );
       }}
     >
       <label htmlFor={`amount-${wish.id}`}>Ma part</label>
@@ -87,7 +106,11 @@ function MyAmount({ wish, busy, run }) {
         onChange={(e) => setValue(e.target.value)}
       />
       <span aria-hidden="true">€</span>
-      {changed && <button className="button button-small button-go" disabled={busy}>OK</button>}
+      {changed && (
+        <button className="button button-small button-go" disabled={busy}>
+          OK
+        </button>
+      )}
     </form>
   );
 }
@@ -107,7 +130,8 @@ function GiftActions({ wish, busy, run }) {
       aria-pressed={wish.bought}
       onClick={act('bought', !wish.bought)}
     >
-      <Icon name={wish.bought ? 'check' : 'bag'} size={16} />{wish.bought ? 'Acheté' : 'Marquer acheté'}
+      <Icon name={wish.bought ? 'check' : 'bag'} size={16} />
+      {wish.bought ? 'Acheté' : 'Marquer acheté'}
     </button>
   );
 
@@ -115,28 +139,47 @@ function GiftActions({ wish, busy, run }) {
     return (
       <div className="confirm-group" role="group" aria-label="Lancer une cagnotte">
         <p>
-          <strong>Offrir à plusieurs ?</strong> C’est toi qui achètes le cadeau, les autres te donnent leur part.
-          La famille sera prévenue.
+          <strong>Offrir à plusieurs ?</strong> C’est toi qui achètes le cadeau, les autres te donnent leur part. La
+          famille sera prévenue.
         </p>
-        <button className="button button-small button-go" disabled={busy} onClick={act('group', true)}>Oui, lancer la cagnotte</button>
-        <button className="button button-small button-quiet" disabled={busy} onClick={() => setConfirmingGroup(false)}>Non, retour</button>
+        <button className="button button-small button-go" disabled={busy} onClick={act('group', true)}>
+          Oui, lancer la cagnotte
+        </button>
+        <button className="button button-small button-quiet" disabled={busy} onClick={() => setConfirmingGroup(false)}>
+          Non, retour
+        </button>
       </div>
     );
   }
   if (!wish.reserved) {
     return (
       <>
-        <button className="button button-small button-go" disabled={busy} onClick={act('reserve', true)}>Je réserve</button>
-        <button className="button button-small button-quiet button-alt" disabled={busy} onClick={() => setConfirmingGroup(true)}>
-          <Icon name="family" size={16} />Offrir à plusieurs
+        <button className="button button-small button-go" disabled={busy} onClick={act('reserve', true)}>
+          Je réserve
+        </button>
+        <button
+          className="button button-small button-quiet button-alt"
+          disabled={busy}
+          onClick={() => setConfirmingGroup(true)}
+        >
+          <Icon name="family" size={16} />
+          Offrir à plusieurs
         </button>
       </>
     );
   }
   // Une fois acheté : « Offert » le fait passer dans les archives.
   const givenButton = wish.bought && (
-    <button className="button button-small button-go" disabled={busy} onClick={(e) => { burst(e.currentTarget); run(() => api.gift(wish.id, 'given'), null, true); }}>
-      <Icon name="gift" size={16} />Offert
+    <button
+      className="button button-small button-go"
+      disabled={busy}
+      onClick={(e) => {
+        burst(e.currentTarget);
+        run(() => api.gift(wish.id, 'given'), null, true);
+      }}
+    >
+      <Icon name="gift" size={16} />
+      Offert
     </button>
   );
 
@@ -147,11 +190,14 @@ function GiftActions({ wish, busy, run }) {
       <>
         {wish.reserved_by_me && givenButton}
         {wish.reserved_by_me && boughtButton}
-        <button className="button button-small button-leave" disabled={busy} onClick={act('leave')}>Je me retire</button>
+        <button className="button button-small button-leave" disabled={busy} onClick={act('leave')}>
+          Je me retire
+        </button>
       </>
     ) : (
       <button className="button button-small button-go" disabled={busy} onClick={act('join', true)}>
-        <Icon name="plus" size={16} />Je participe
+        <Icon name="plus" size={16} />
+        Je participe
       </button>
     );
   }
@@ -160,14 +206,22 @@ function GiftActions({ wish, busy, run }) {
       <>
         {givenButton}
         {boughtButton}
-        <button className="button button-small button-leave" disabled={busy} onClick={act('reserve')}>Annuler</button>
+        <button className="button button-small button-leave" disabled={busy} onClick={act('reserve')}>
+          Annuler
+        </button>
       </>
     );
   }
   return null;
 }
 
-const timeOf = (iso) => new Date(`${iso.replace(' ', 'T')}Z`).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const timeOf = (iso) =>
+  new Date(`${iso.replace(' ', 'T')}Z`).toLocaleString('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
 // Discussion secrète entre ceux qui offrent ce cadeau (jamais vue par la personne gâtée).
 function WishChat({ wish, onCount }) {
@@ -177,14 +231,18 @@ function WishChat({ wish, onCount }) {
   const [sending, setSending] = useState(false);
   const bottom = useRef(null);
 
-  const load = () => api.messages(wish.id)
-    .then((d) => {
-      setMessages(d.messages);
-      onCount(d.messages.length);
-      requestAnimationFrame(() => bottom.current?.scrollIntoView({ block: 'nearest' }));
-    })
-    .catch((e) => setError(e.message));
-  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const load = () =>
+    api
+      .messages(wish.id)
+      .then((d) => {
+        setMessages(d.messages);
+        onCount(d.messages.length);
+        requestAnimationFrame(() => bottom.current?.scrollIntoView({ block: 'nearest' }));
+      })
+      .catch((e) => setError(e.message));
+  useEffect(() => {
+    load();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function send(e) {
     e.preventDefault();
@@ -204,9 +262,14 @@ function WishChat({ wish, onCount }) {
 
   return (
     <div className="chat">
-      <p className="chat-note"><Icon name="lock" size={13} />Entre vous : la personne gâtée ne voit jamais cette discussion.</p>
+      <p className="chat-note">
+        <Icon name="lock" size={13} />
+        Entre vous : la personne gâtée ne voit jamais cette discussion.
+      </p>
       {messages === null && !error && <p className="muted small">Chargement…</p>}
-      {messages?.length === 0 && <p className="muted small">Pas encore de message. Qui s’en occupe ? Quelle taille ? Lancez-vous.</p>}
+      {messages?.length === 0 && (
+        <p className="muted small">Pas encore de message. Qui s’en occupe ? Quelle taille ? Lancez-vous.</p>
+      )}
       {messages?.length > 0 && (
         <ul className="chat-list">
           {messages.map((m) => (
@@ -216,7 +279,12 @@ function WishChat({ wish, onCount }) {
               <span className="chat-meta">
                 {timeOf(m.created_at)}
                 {m.mine && (
-                  <button type="button" className="chat-delete" onClick={() => api.deleteMessage(wish.id, m.id).then(load)} aria-label="Effacer ce message">
+                  <button
+                    type="button"
+                    className="chat-delete"
+                    onClick={() => api.deleteMessage(wish.id, m.id).then(load)}
+                    aria-label="Effacer ce message"
+                  >
                     Effacer
                   </button>
                 )}
@@ -227,10 +295,22 @@ function WishChat({ wish, onCount }) {
         </ul>
       )}
       <form className="chat-form" onSubmit={send}>
-        <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Écrire aux autres…" maxLength={1000} aria-label="Message" />
-        <button className="button button-small button-go" disabled={sending || !text.trim()}>Envoyer</button>
+        <input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Écrire aux autres…"
+          maxLength={1000}
+          aria-label="Message"
+        />
+        <button className="button button-small button-go" disabled={sending || !text.trim()}>
+          Envoyer
+        </button>
       </form>
-      {error && <p className="error small" role="alert">{error}</p>}
+      {error && (
+        <p className="error small" role="alert">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -257,8 +337,16 @@ function MoreMenu({ label, items, disabled }) {
 
   return (
     <div className="more" ref={root}>
-      <button className="button button-small button-quiet more-toggle" aria-label={label} aria-haspopup="menu" aria-expanded={open} disabled={disabled} onClick={() => setOpen(!open)}>
-        <Icon name="more" size={18} />Gérer
+      <button
+        className="button button-small button-quiet more-toggle"
+        aria-label={label}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        disabled={disabled}
+        onClick={() => setOpen(!open)}
+      >
+        <Icon name="more" size={18} />
+        Gérer
       </button>
       {open && (
         <div className="more-menu" role="menu">
@@ -267,9 +355,13 @@ function MoreMenu({ label, items, disabled }) {
               key={item.label}
               role="menuitem"
               className={`more-item${item.danger ? ' more-item-danger' : ''}`}
-              onClick={() => { setOpen(false); item.onSelect(); }}
+              onClick={() => {
+                setOpen(false);
+                item.onSelect();
+              }}
             >
-              <Icon name={item.icon} size={17} />{item.label}
+              <Icon name={item.icon} size={17} />
+              {item.label}
             </button>
           ))}
         </div>
@@ -291,7 +383,8 @@ function flash(element) {
 function collapse(element) {
   if (!element || !window.matchMedia(MOTION_OK).matches) return Promise.resolve();
   return new Promise((resolve) => {
-    gsap.timeline({ onComplete: resolve })
+    gsap
+      .timeline({ onComplete: resolve })
       .to(element, { x: -24, opacity: 0, duration: 0.25, ease: 'power2.in' })
       // La hauteur n'est animée qu'ici, une fois la carte invisible, pour refermer le trou.
       .to(element, { height: 0, paddingTop: 0, paddingBottom: 0, marginTop: -8, duration: 0.25, ease: 'power2.inOut' });
@@ -343,7 +436,10 @@ function WishRow({ wish, onChanged }) {
         <WishForm
           wish={wish}
           forSomeoneElse={!wish.mine}
-          onDone={() => { setEditing(false); onChanged(); }}
+          onDone={() => {
+            setEditing(false);
+            onChanged();
+          }}
           onCancel={() => setEditing(false)}
         />
       </li>
@@ -353,14 +449,20 @@ function WishRow({ wish, onChanged }) {
   const canDelete = wish.mine || wish.can_delete;
   const host = wish.url && hostOf(wish.url);
   // Grisé seulement quand il n'y a plus rien à faire pour moi dessus.
-  const taken = wish.reserved && !wish.reserved_by_me && !(wish.group_gift);
+  const taken = wish.reserved && !wish.reserved_by_me && !wish.group_gift;
 
   return (
     <li ref={row} className={`wish${taken ? ' wish-taken' : ''}${wish.favorite ? ' wish-favorite' : ''}`}>
       {wish.photos?.length > 0 && <PhotoCarousel wishId={wish.id} photos={wish.photos} title={wish.title} />}
       <div className="wish-main">
         <p className="wish-title">
-          {wish.url ? <a href={wish.url} target="_blank" rel="noopener noreferrer">{wish.title}</a> : wish.title}
+          {wish.url ? (
+            <a href={wish.url} target="_blank" rel="noopener noreferrer">
+              {wish.title}
+            </a>
+          ) : (
+            wish.title
+          )}
         </p>
         <p className="wish-meta">
           {wish.price && <span className="price">{wish.price}</span>}
@@ -368,17 +470,53 @@ function WishRow({ wish, onChanged }) {
         </p>
         {(wish.favorite || wish.secret || wish.reserved || wish.bought || wish.removed) && (
           <p className="badges">
-            {wish.favorite && <span className="badge badge-favorite"><Icon name="star" size={13} />Coup de cœur</span>}
-            {wish.secret && <span className="badge badge-secret"><Icon name="lock" size={13} />Idée secrète de {wish.added_by_name}</span>}
-            {wish.group_gift && <span className="badge badge-group"><Icon name="family" size={13} />Cagnotte</span>}
-            {taken && <span className="badge badge-taken"><Icon name="check" size={13} />Réservé par {wish.reserved_by_name}</span>}
-            {wish.reserved_by_me && !wish.group_gift && <span className="badge badge-taken"><Icon name="check" size={13} />C’est toi qui l’offres</span>}
+            {wish.favorite && (
+              <span className="badge badge-favorite">
+                <Icon name="star" size={13} />
+                Coup de cœur
+              </span>
+            )}
+            {wish.secret && (
+              <span className="badge badge-secret">
+                <Icon name="lock" size={13} />
+                Idée secrète de {wish.added_by_name}
+              </span>
+            )}
+            {wish.group_gift && (
+              <span className="badge badge-group">
+                <Icon name="family" size={13} />
+                Cagnotte
+              </span>
+            )}
+            {taken && (
+              <span className="badge badge-taken">
+                <Icon name="check" size={13} />
+                Réservé par {wish.reserved_by_name}
+              </span>
+            )}
+            {wish.reserved_by_me && !wish.group_gift && (
+              <span className="badge badge-taken">
+                <Icon name="check" size={13} />
+                C’est toi qui l’offres
+              </span>
+            )}
             {wish.removed && <span className="badge badge-warn">Retirée de sa liste : à toi de voir</span>}
-            {!wish.removed && wish.edited_after_reservation && <span className="badge badge-warn">Modifiée depuis la réservation</span>}
-            {wish.bought && <span className="badge badge-bought"><Icon name="bag" size={13} />Acheté</span>}
+            {!wish.removed && wish.edited_after_reservation && (
+              <span className="badge badge-warn">Modifiée depuis la réservation</span>
+            )}
+            {wish.bought && (
+              <span className="badge badge-bought">
+                <Icon name="bag" size={13} />
+                Acheté
+              </span>
+            )}
           </p>
         )}
-        {error && <p className="error small" role="alert">{error}</p>}
+        {error && (
+          <p className="error small" role="alert">
+            {error}
+          </p>
+        )}
       </div>
       {wish.group_gift && (
         <GroupProgress wish={wish}>
@@ -397,7 +535,11 @@ function WishRow({ wish, onChanged }) {
             onClick={() => setChatOpen(!chatOpen)}
           >
             <Icon name="chat" size={16} />
-            {chatOpen ? 'Fermer' : messageCount > 0 ? `${messageCount} message${messageCount > 1 ? 's' : ''}` : 'Discuter en secret'}
+            {chatOpen
+              ? 'Fermer'
+              : messageCount > 0
+                ? `${messageCount} message${messageCount > 1 ? 's' : ''}`
+                : 'Discuter en secret'}
             {!chatOpen && <Icon name="lock" size={13} />}
           </button>
         )}
@@ -410,7 +552,12 @@ function WishRow({ wish, onChanged }) {
               wish.mine && {
                 label: 'Reçu, merci !',
                 icon: 'check',
-                onSelect: () => run(() => api.setReceived(wish.id, true), () => burst(row.current), true),
+                onSelect: () =>
+                  run(
+                    () => api.setReceived(wish.id, true),
+                    () => burst(row.current),
+                    true,
+                  ),
               },
               canDelete && { label: 'Supprimer', icon: 'trash', danger: true, onSelect: remove },
             ]}
@@ -427,7 +574,9 @@ export default function WishList({ wishes, emptyText, onChanged }) {
   if (!wishes.length) return <p className="empty-inline">{emptyText}</p>;
   return (
     <ul className="wish-list" ref={list}>
-      {wishes.map((w) => <WishRow key={w.id} wish={w} onChanged={onChanged} />)}
+      {wishes.map((w) => (
+        <WishRow key={w.id} wish={w} onChanged={onChanged} />
+      ))}
     </ul>
   );
 }

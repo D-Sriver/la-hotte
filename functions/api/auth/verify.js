@@ -8,13 +8,17 @@ const MAX_ATTEMPTS = 5;
 export async function onRequestPost({ request, env }) {
   if (!usesEmailLogin(env)) return fail(404, 'Connexion par email désactivée.');
   const body = await readJson(request);
-  const email = String(body?.email || '').trim().toLowerCase();
+  const email = String(body?.email || '')
+    .trim()
+    .toLowerCase();
   const code = String(body?.code || '').replace(/\D/g, '');
 
   const pending = await env.DB.prepare(
     `SELECT id, code_hash, attempts FROM login_codes
      WHERE email = ?1 AND expires_at > datetime('now') ORDER BY created_at DESC LIMIT 1`,
-  ).bind(email).first();
+  )
+    .bind(email)
+    .first();
   if (!pending || pending.attempts >= MAX_ATTEMPTS) return fail(400, 'Code expiré. Demandes-en un nouveau.');
 
   if (code.length !== 6 || (await hashCode(env, email, code)) !== pending.code_hash) {

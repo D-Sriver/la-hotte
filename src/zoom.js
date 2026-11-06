@@ -48,12 +48,13 @@ export function zoomInto(element, href, { color, target: selector = '[data-zoom-
       return;
     }
     const to = target.getBoundingClientRect();
-    gsap.timeline({
-      onComplete: () => {
-        layer.remove();
-        delete html.dataset.zooming;
-      },
-    })
+    gsap
+      .timeline({
+        onComplete: () => {
+          layer.remove();
+          delete html.dataset.zooming;
+        },
+      })
       .to(layer, {
         left: to.left,
         top: to.top,
@@ -66,17 +67,22 @@ export function zoomInto(element, href, { color, target: selector = '[data-zoom-
       .to(layer, { opacity: 0, duration: 0.25, ease: 'power1.out' });
   };
 
-  gsap.timeline()
+  gsap
+    .timeline()
     .to(element, { scale: 1.08, duration: 0.18, ease: 'power2.out' })
-    .to(layer, {
-      left: 0,
-      top: 0,
-      width: window.innerWidth,
-      height: window.innerHeight,
-      borderRadius: 0,
-      duration: 0.55,
-      ease: 'power4.inOut',
-    }, '<0.05')
+    .to(
+      layer,
+      {
+        left: 0,
+        top: 0,
+        width: window.innerWidth,
+        height: window.innerHeight,
+        borderRadius: 0,
+        duration: 0.55,
+        ease: 'power4.inOut',
+      },
+      '<0.05',
+    )
     .add(land);
 }
 

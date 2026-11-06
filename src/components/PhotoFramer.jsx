@@ -26,7 +26,9 @@ export default function PhotoFramer({ src, frame, onChange, onRemove, children }
       y: clamp(d.base.y - ((e.clientY - d.y) / d.rect.height) * speed, 0, 100),
     });
   };
-  const end = () => { drag.current = null; };
+  const end = () => {
+    drag.current = null;
+  };
 
   return (
     <div className="framer">
@@ -40,7 +42,12 @@ export default function PhotoFramer({ src, frame, onChange, onRemove, children }
         aria-label="Aperçu de la photo, glisser pour recadrer"
       >
         <img src={src} alt="" draggable="false" style={frameStyle(frame)} />
-        {!frame && <span className="framer-hint"><Icon name="move" size={15} />Glisse pour recadrer</span>}
+        {!frame && (
+          <span className="framer-hint">
+            <Icon name="move" size={15} />
+            Glisse pour recadrer
+          </span>
+        )}
       </div>
       <div className="framer-tools">
         <label className="framer-zoom">
@@ -55,9 +62,15 @@ export default function PhotoFramer({ src, frame, onChange, onRemove, children }
             onChange={(e) => onChange({ ...(frame || { x: 50, y: 50 }), zoom: Number(e.target.value) })}
           />
         </label>
-        {frame && <button type="button" className="button button-small button-quiet" onClick={() => onChange(null)}>Image entière</button>}
+        {frame && (
+          <button type="button" className="button button-small button-quiet" onClick={() => onChange(null)}>
+            Image entière
+          </button>
+        )}
         {children}
-        <button type="button" className="button button-small button-quiet" onClick={onRemove}>Retirer</button>
+        <button type="button" className="button button-small button-quiet" onClick={onRemove}>
+          Retirer
+        </button>
       </div>
     </div>
   );

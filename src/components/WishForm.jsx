@@ -24,12 +24,21 @@ let nextKey = 0;
  */
 export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCancel }) {
   const editing = !!wish;
-  const [form, setForm] = useState(() => (editing
-    ? { title: wish.title, url: wish.url || '', price: wish.price || '', note: wish.note || '', favorite: wish.favorite }
-    : EMPTY));
+  const [form, setForm] = useState(() =>
+    editing
+      ? {
+          title: wish.title,
+          url: wish.url || '',
+          price: wish.price || '',
+          note: wish.note || '',
+          favorite: wish.favorite,
+        }
+      : EMPTY,
+  );
   // Chaque photo : { key, id } si déjà enregistrée, ou { key, data } si nouvelle ; plus son recadrage.
-  const [photos, setPhotos] = useState(() => (editing ? wish.photos || [] : [])
-    .map((p) => ({ key: `saved-${p.id}`, id: p.id, frame: parseFrame(p.frame) })));
+  const [photos, setPhotos] = useState(() =>
+    (editing ? wish.photos || [] : []).map((p) => ({ key: `saved-${p.id}`, id: p.id, frame: parseFrame(p.frame) })),
+  );
   const [selected, setSelected] = useState(0);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -55,7 +64,8 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
     e.target.value = '';
     if (!files.length) return;
     setError('');
-    if (files.length > MAX_PHOTOS - photos.length) setError(`${MAX_PHOTOS} photos au maximum : les premières ont été gardées.`);
+    if (files.length > MAX_PHOTOS - photos.length)
+      setError(`${MAX_PHOTOS} photos au maximum : les premières ont été gardées.`);
     try {
       await addPhotos(files);
     } catch (err) {
@@ -87,11 +97,15 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
       if (found.image && photos.length === 0) await addPhotos([found.image]).catch(() => {});
       const missing = [!found.price && 'le prix', !found.image && 'la photo'].filter(Boolean);
       if (found.price_source) {
-        setHint(found.price_exact
-          ? `Prix trouvé chez ${found.price_source} par une recherche : vérifie-le avant d’acheter.`
-          : `Prix estimé d’après d’autres boutiques (dont ${found.price_source}) : vérifie-le avant d’acheter.`);
+        setHint(
+          found.price_exact
+            ? `Prix trouvé chez ${found.price_source} par une recherche : vérifie-le avant d’acheter.`
+            : `Prix estimé d’après d’autres boutiques (dont ${found.price_source}) : vérifie-le avant d’acheter.`,
+        );
       } else if (found.blocked) {
-        setHint(`Ce site bloque la lecture automatique : le nom vient du lien, ajoute ${missing.join(' et ')} à la main.`);
+        setHint(
+          `Ce site bloque la lecture automatique : le nom vient du lien, ajoute ${missing.join(' et ')} à la main.`,
+        );
       } else if (!found.title && !found.price && !found.image) {
         setHint('Rien trouvé sur cette page, remplis à la main.');
       } else if (missing.length) {
@@ -115,7 +129,9 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
       ...form,
       url: link || '',
       note: leftover ? [form.note.trim(), `(${leftover})`].filter(Boolean).join(' ') : form.note,
-      photos: photos.map((p) => (p.id ? { id: p.id, frame: formatFrame(p.frame) } : { data: p.data, frame: formatFrame(p.frame) })),
+      photos: photos.map((p) =>
+        p.id ? { id: p.id, frame: formatFrame(p.frame) } : { data: p.data, frame: formatFrame(p.frame) },
+      ),
     };
     try {
       if (editing) await api.updateWish(wish.id, payload);
@@ -133,13 +149,27 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
 
   return (
     <form className="form card card-pad" onSubmit={submit}>
-      {forSomeoneElse && !editing && <p className="notice"><Icon name="lock" size={15} />Chut. Cette idée reste secrète : la personne ne la verra pas.</p>}
+      {forSomeoneElse && !editing && (
+        <p className="notice">
+          <Icon name="lock" size={15} />
+          Chut. Cette idée reste secrète : la personne ne la verra pas.
+        </p>
+      )}
       <label className="field">
         <span className="field-label">Quoi</span>
-        <input value={form.title} placeholder={forSomeoneElse ? 'ex. un pull bien chaud' : 'ex. un sécateur'} onChange={set('title')} required maxLength={200} autoFocus />
+        <input
+          value={form.title}
+          placeholder={forSomeoneElse ? 'ex. un pull bien chaud' : 'ex. un sécateur'}
+          onChange={set('title')}
+          required
+          maxLength={200}
+          autoFocus
+        />
       </label>
       <label className="field">
-        <span className="field-label">Lien <span className="muted small">(facultatif)</span></span>
+        <span className="field-label">
+          Lien <span className="muted small">(facultatif)</span>
+        </span>
         <div className="input-with-button">
           <input
             type="text"
@@ -155,12 +185,20 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
               if (asLink(pasted) && !reading) setTimeout(() => fillFromLink(asLink(pasted)), 0);
             }}
           />
-          <button type="button" className="button button-quiet button-small" disabled={!canRead || reading} onClick={() => fillFromLink()}>
-            <Icon name="sparkle" size={16} />{reading ? 'Lecture…' : 'Remplir'}
+          <button
+            type="button"
+            className="button button-quiet button-small"
+            disabled={!canRead || reading}
+            onClick={() => fillFromLink()}
+          >
+            <Icon name="sparkle" size={16} />
+            {reading ? 'Lecture…' : 'Remplir'}
           </button>
         </div>
         <span className="field-hint" role="status">
-          {reading ? 'Lecture de la page…' : hint || 'Tu as trouvé l’objet sur un site ? Colle le lien : le prix et la photo arrivent tout seuls.'}
+          {reading
+            ? 'Lecture de la page…'
+            : hint || 'Tu as trouvé l’objet sur un site ? Colle le lien : le prix et la photo arrivent tout seuls.'}
         </span>
       </label>
       <div className="field-row">
@@ -174,12 +212,21 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
         </label>
       </div>
       <div className="field">
-        <span className="field-label">Photos{photos.length > 1 && <span className="muted small"> · la première sert de couverture</span>}</span>
+        <span className="field-label">
+          Photos{photos.length > 1 && <span className="muted small"> · la première sert de couverture</span>}
+        </span>
         {current && (
-          <PhotoFramer key={current.key} src={srcOf(current)} frame={current.frame} onChange={setFrame} onRemove={() => removePhoto(selected)}>
+          <PhotoFramer
+            key={current.key}
+            src={srcOf(current)}
+            frame={current.frame}
+            onChange={setFrame}
+            onRemove={() => removePhoto(selected)}
+          >
             {selected > 0 && (
               <button type="button" className="button button-small button-quiet" onClick={() => makeCover(selected)}>
-                <Icon name="star" size={15} />En couverture
+                <Icon name="star" size={15} />
+                En couverture
               </button>
             )}
           </PhotoFramer>
@@ -195,12 +242,17 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
               aria-pressed={i === selected}
             >
               <img src={srcOf(p)} alt="" />
-              {i === 0 && photos.length > 1 && <span className="photo-thumb-cover"><Icon name="star" size={11} /></span>}
+              {i === 0 && photos.length > 1 && (
+                <span className="photo-thumb-cover">
+                  <Icon name="star" size={11} />
+                </span>
+              )}
             </button>
           ))}
           {photos.length < MAX_PHOTOS && (
             <label className={`photo-pick${photos.length ? ' photo-pick-small' : ''}`}>
-              <Icon name="camera" size={18} />{photos.length ? <span className="sr-only">Ajouter des photos</span> : 'Ajouter des photos'}
+              <Icon name="camera" size={18} />
+              {photos.length ? <span className="sr-only">Ajouter des photos</span> : 'Ajouter des photos'}
               <input type="file" accept="image/*" multiple onChange={pickPhotos} />
             </label>
           )}
@@ -208,16 +260,27 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
       </div>
       {!forSomeoneElse && (
         <label className="check">
-          <input type="checkbox" checked={form.favorite} onChange={(e) => setForm({ ...form, favorite: e.target.checked })} />
-          <Icon name="star" size={18} />Coup de cœur : ce dont je rêve le plus
+          <input
+            type="checkbox"
+            checked={form.favorite}
+            onChange={(e) => setForm({ ...form, favorite: e.target.checked })}
+          />
+          <Icon name="star" size={18} />
+          Coup de cœur : ce dont je rêve le plus
         </label>
       )}
       <div className="form-actions">
         <button className="button" disabled={saving || reading}>
           {saving ? 'Enregistrement…' : editing ? 'Enregistrer' : 'Ajouter'}
         </button>
-        <button type="button" className="button button-quiet" onClick={onCancel}>Annuler</button>
-        {error && <span className="error" role="alert">{error}</span>}
+        <button type="button" className="button button-quiet" onClick={onCancel}>
+          Annuler
+        </button>
+        {error && (
+          <span className="error" role="alert">
+            {error}
+          </span>
+        )}
       </div>
     </form>
   );

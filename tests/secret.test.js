@@ -29,7 +29,16 @@ test('pour soi : ses envies seulement, sans idée secrète ni réservation', asy
   const wishes = await visibleWishes(db, alice, alice, f1);
   assert.deepEqual(titles(wishes), ['Appareil photo', 'Vélo']);
   for (const wish of wishes) {
-    for (const key of ['reserved', 'reserved_by_name', 'participants', 'bought', 'collected', 'secret', 'added_by_name', 'message_count']) {
+    for (const key of [
+      'reserved',
+      'reserved_by_name',
+      'participants',
+      'bought',
+      'collected',
+      'secret',
+      'added_by_name',
+      'message_count',
+    ]) {
       assert.equal(key in wish, false, `${key} ne doit pas être envoyé à la personne gâtée`);
     }
   }
@@ -54,13 +63,22 @@ test('une réservation se voit partout, mais le nom seulement dans la même fami
   assert.notEqual(daveView.reserved_by_name, 'Bob');
 
   const daveAndPot = (await visibleWishes(db, alice, dave, f2)).find((w) => w.id === pot);
-  assert.deepEqual(daveAndPot.participants.map((p) => p.name), ['Autre famille']);
+  assert.deepEqual(
+    daveAndPot.participants.map((p) => p.name),
+    ['Autre famille'],
+  );
   assert.equal(daveAndPot.collected, 100);
 });
 
 test('un cadeau reçu quitte les listes et ne reste que dans les archives de son propriétaire', async () => {
-  assert.equal((await visibleWishes(db, alice, carol, f1)).some((w) => w.id === received), false);
-  assert.equal((await visibleWishes(db, alice, alice, f1)).some((w) => w.id === received), false);
+  assert.equal(
+    (await visibleWishes(db, alice, carol, f1)).some((w) => w.id === received),
+    false,
+  );
+  assert.equal(
+    (await visibleWishes(db, alice, alice, f1)).some((w) => w.id === received),
+    false,
+  );
   assert.deepEqual(titles(await visibleWishes(db, alice, alice, f1, { archived: true })), ['Écharpe']);
 });
 
@@ -121,13 +139,28 @@ test('supprimer une envie déjà réservée : elle quitte sa liste, mais celui q
 
   assert.equal((await call(remove, { db, me: alice, family: f1, params: { id: String(own) } })).status, 200);
   assert.equal((await call(remove, { db, me: alice, family: f1, params: { id: String(free) } })).status, 200);
-  assert.equal(db.sqlite.prepare('SELECT 1 FROM wishes WHERE id = ?').get(free), undefined, 'libre : vraiment supprimée');
+  assert.equal(
+    db.sqlite.prepare('SELECT 1 FROM wishes WHERE id = ?').get(free),
+    undefined,
+    'libre : vraiment supprimée',
+  );
 
-  assert.equal((await visibleWishes(db, alice, alice, f1)).some((w) => w.id === own), false, 'Alice ne la voit plus');
+  assert.equal(
+    (await visibleWishes(db, alice, alice, f1)).some((w) => w.id === own),
+    false,
+    'Alice ne la voit plus',
+  );
   const bobView = (await visibleWishes(db, alice, bob, f1)).find((w) => w.id === own);
   assert.equal(bobView.removed, true, 'Bob la garde, avec l’avertissement');
-  assert.equal((await visibleWishes(db, alice, carol, f1)).some((w) => w.id === own), false, 'les autres ne la voient plus');
-  assert.equal((await call(change, { db, me: alice, family: f1, params: { id: String(own) }, body: { title: 'x' } })).status, 404);
+  assert.equal(
+    (await visibleWishes(db, alice, carol, f1)).some((w) => w.id === own),
+    false,
+    'les autres ne la voient plus',
+  );
+  assert.equal(
+    (await call(change, { db, me: alice, family: f1, params: { id: String(own) }, body: { title: 'x' } })).status,
+    404,
+  );
 
   // Bob annule : plus personne n'en a besoin, elle disparaît pour de bon.
   await call(gift, { db, me: bob, family: f1, params: { id: String(own) }, body: { action: 'reserve' } });
@@ -138,16 +171,34 @@ test('modifier une envie après sa réservation prévient celui qui l’offre', 
   const { onRequestPut: change } = await import('../functions/api/wishes/[id].js');
   db.sqlite.prepare("UPDATE wishes SET reserved_at = datetime('now', '-1 hour') WHERE id = ?").run(own);
   assert.equal((await visibleWishes(db, alice, bob, f1)).find((w) => w.id === own).edited_after_reservation, false);
-  await call(change, { db, me: alice, family: f1, params: { id: String(own) }, body: { title: 'Vélo électrique', price: '300 €' } });
+  await call(change, {
+    db,
+    me: alice,
+    family: f1,
+    params: { id: String(own) },
+    body: { title: 'Vélo électrique', price: '300 €' },
+  });
   assert.equal((await visibleWishes(db, alice, bob, f1)).find((w) => w.id === own).edited_after_reservation, true);
 });
 
 test('notifications : jamais la personne gâtée, seulement la famille affichée, et pas ceux qui ont dit non', async () => {
   const { recipients } = await import('../server/notify.js');
   db.sqlite.prepare('UPDATE users SET notify_messages = 0 WHERE id = ?').run(carol);
-  const to = await recipients(db, { userIds: [alice, bob, carol, dave, bob], familyId: f1, ownerId: alice, senderId: null, kind: 'messages' });
+  const to = await recipients(db, {
+    userIds: [alice, bob, carol, dave, bob],
+    familyId: f1,
+    ownerId: alice,
+    senderId: null,
+    kind: 'messages',
+  });
   assert.deepEqual(to, [bob]);
-  const groups = await recipients(db, { userIds: [alice, bob, carol, dave], familyId: f1, ownerId: alice, senderId: null, kind: 'groups' });
+  const groups = await recipients(db, {
+    userIds: [alice, bob, carol, dave],
+    familyId: f1,
+    ownerId: alice,
+    senderId: null,
+    kind: 'groups',
+  });
   assert.deepEqual(groups.sort(), [bob, carol].sort(), 'Carol a coupé les messages, pas les cagnottes');
 });
 
@@ -155,6 +206,10 @@ test('préférences de notification : chaque interrupteur ne change que le sien'
   const { onRequestPut: prefs } = await import('../functions/api/me/notifications.js');
   const put = (body) => call(prefs, { db, me: bob, family: f1, body });
   assert.deepEqual((await put({ messages: false })).body, { reminders: true, messages: false, groups: true });
-  assert.deepEqual((await put({ reminders: false, groups: false })).body, { reminders: false, messages: false, groups: false });
+  assert.deepEqual((await put({ reminders: false, groups: false })).body, {
+    reminders: false,
+    messages: false,
+    groups: false,
+  });
   assert.equal((await put({ messages: 'oui' })).status, 400);
 });

@@ -18,7 +18,10 @@ export default function AddWishForm({ ownerId, forSomeoneElse, onAdded }) {
     <WishForm
       ownerId={ownerId}
       forSomeoneElse={forSomeoneElse}
-      onDone={() => { setOpen(false); onAdded(); }}
+      onDone={() => {
+        setOpen(false);
+        onAdded();
+      }}
       onCancel={() => setOpen(false)}
     />
   );

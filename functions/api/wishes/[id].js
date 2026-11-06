@@ -8,7 +8,8 @@ export async function onRequestPut({ request, env, data, params }) {
   const wish = await env.DB.prepare('SELECT id, owner_id, added_by, removed_at FROM wishes WHERE id = ?1')
     .bind(Number(params.id))
     .first();
-  if (!wish || wish.added_by !== data.me.id || wish.removed_at) return fail(404, 'Tu ne peux modifier que ce que tu as ajouté.');
+  if (!wish || wish.added_by !== data.me.id || wish.removed_at)
+    return fail(404, 'Tu ne peux modifier que ce que tu as ajouté.');
 
   const title = clean(body.title, 200);
   if (!title) return fail(400, 'Donne un nom à l’idée.');
@@ -40,9 +41,12 @@ export async function onRequestDelete({ env, data, params }) {
   const wish = await env.DB.prepare('SELECT id, owner_id, added_by, reserved_by, removed_at FROM wishes WHERE id = ?1')
     .bind(Number(params.id))
     .first();
-  if (!wish || wish.added_by !== data.me.id || wish.removed_at) return fail(404, 'Tu ne peux supprimer que ce que tu as ajouté.');
+  if (!wish || wish.added_by !== data.me.id || wish.removed_at)
+    return fail(404, 'Tu ne peux supprimer que ce que tu as ajouté.');
   if (wish.owner_id === data.me.id && wish.reserved_by !== null) {
-    await env.DB.prepare("UPDATE wishes SET removed_at = datetime('now'), favorite = 0 WHERE id = ?1").bind(wish.id).run();
+    await env.DB.prepare("UPDATE wishes SET removed_at = datetime('now'), favorite = 0 WHERE id = ?1")
+      .bind(wish.id)
+      .run();
   } else {
     await env.DB.prepare('DELETE FROM wishes WHERE id = ?1').bind(wish.id).run();
   }

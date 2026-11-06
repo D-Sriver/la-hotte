@@ -26,35 +26,49 @@ const list = (names) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} et
 export async function remindersFor(db, user, now) {
   const lines = [];
   const keys = [];
-  const sent = new Set((await db.prepare('SELECT key FROM reminders_sent WHERE user_id = ?1').bind(user.id).all()).results.map((r) => r.key));
+  const sent = new Set(
+    (await db.prepare('SELECT key FROM reminders_sent WHERE user_id = ?1').bind(user.id).all()).results.map(
+      (r) => r.key,
+    ),
+  );
 
   // Les membres de ses familles (sans doublon s'ils sont dans plusieurs).
-  const { results: people } = await db.prepare(
-    `SELECT DISTINCT u.id, u.name, u.birthday FROM users u
+  const { results: people } = await db
+    .prepare(
+      `SELECT DISTINCT u.id, u.name, u.birthday FROM users u
      JOIN memberships m ON m.user_id = u.id
      WHERE m.family_id IN (SELECT family_id FROM memberships WHERE user_id = ?1) AND u.id != ?1 AND u.name IS NOT NULL`,
-  ).bind(user.id).all();
+    )
+    .bind(user.id)
+    .all();
 
   const xmas = daysUntil(12, 25, now);
   if (XMAS_DAYS.includes(xmas.days)) {
     const key = `xmas-${xmas.year}-${xmas.days}`;
     if (!sent.has(key)) {
       // Ma propre liste est vide : la famille n'a rien pour se guider.
-      const own = await db.prepare(
-        'SELECT COUNT(*) AS n FROM wishes WHERE owner_id = ?1 AND added_by = ?1 AND received_at IS NULL AND removed_at IS NULL',
-      ).bind(user.id).first();
-      if (!own.n) lines.push(`Noël dans ${xmas.days} jours et ta liste est vide : ajoute quelques envies pour aider ta famille.`);
+      const own = await db
+        .prepare(
+          'SELECT COUNT(*) AS n FROM wishes WHERE owner_id = ?1 AND added_by = ?1 AND received_at IS NULL AND removed_at IS NULL',
+        )
+        .bind(user.id)
+        .first();
+      if (!own.n)
+        lines.push(`Noël dans ${xmas.days} jours et ta liste est vide : ajoute quelques envies pour aider ta famille.`);
 
       // Pour chaque proche : ce que j’ai prévu, ce que les autres ont prévu (toutes familles, sans dire qui), et ses envies.
-      const { results: status } = await db.prepare(
-        `SELECT u.id,
+      const { results: status } = await db
+        .prepare(
+          `SELECT u.id,
            EXISTS (SELECT 1 FROM wishes w WHERE w.owner_id = u.id AND w.received_at IS NULL
              AND (w.reserved_by = ?1 OR EXISTS (SELECT 1 FROM contributions c WHERE c.wish_id = w.id AND c.user_id = ?1))) AS by_me,
            EXISTS (SELECT 1 FROM wishes w WHERE w.owner_id = u.id AND w.received_at IS NULL
              AND (w.reserved_by IS NOT NULL OR EXISTS (SELECT 1 FROM contributions c WHERE c.wish_id = w.id))) AS by_anyone,
            (SELECT COUNT(*) FROM wishes w WHERE w.owner_id = u.id AND w.added_by = u.id AND w.received_at IS NULL AND w.removed_at IS NULL) AS own_wishes
          FROM users u WHERE u.id IN (SELECT value FROM json_each(?2))`,
-      ).bind(user.id, JSON.stringify(people.map((p) => p.id))).all();
+        )
+        .bind(user.id, JSON.stringify(people.map((p) => p.id)))
+        .all();
       const byId = new Map(status.map((s) => [s.id, s]));
       const nobody = [];
       const notMe = [];
@@ -65,26 +79,34 @@ export async function remindersFor(db, user, now) {
         (s.by_anyone ? notMe : nobody).push(person.name);
         if (!s.own_wishes) emptyList.push(person.name);
       }
-      if (nobody.length) lines.push(`Noël dans ${xmas.days} jours : personne n’a encore rien prévu pour ${list(nobody)}.`);
+      if (nobody.length)
+        lines.push(`Noël dans ${xmas.days} jours : personne n’a encore rien prévu pour ${list(nobody)}.`);
       if (notMe.length) lines.push(`Noël dans ${xmas.days} jours : tu n’as encore rien prévu pour ${list(notMe)}.`);
       if (emptyList.length) {
-        lines.push(emptyList.length > 1
-          ? `Les listes de ${list(emptyList)} sont vides : une idée secrète ou l’IA peuvent t’aider.`
-          : `La liste de ${emptyList[0]} est vide : une idée secrète ou l’IA peuvent t’aider.`);
+        lines.push(
+          emptyList.length > 1
+            ? `Les listes de ${list(emptyList)} sont vides : une idée secrète ou l’IA peuvent t’aider.`
+            : `La liste de ${emptyList[0]} est vide : une idée secrète ou l’IA peuvent t’aider.`,
+        );
       }
 
       // Cagnottes auxquelles je participe et qui ne sont pas bouclées.
-      const { results: pots } = await db.prepare(
-        `SELECT w.title, w.price, o.name AS owner_name,
+      const { results: pots } = await db
+        .prepare(
+          `SELECT w.title, w.price, o.name AS owner_name,
                 (SELECT COALESCE(SUM(amount), 0) FROM contributions c WHERE c.wish_id = w.id) AS collected
          FROM wishes w JOIN users o ON o.id = w.owner_id
          WHERE w.group_gift = 1 AND w.received_at IS NULL
            AND EXISTS (SELECT 1 FROM contributions c WHERE c.wish_id = w.id AND c.user_id = ?1)`,
-      ).bind(user.id).all();
+        )
+        .bind(user.id)
+        .all();
       for (const pot of pots) {
         const target = priceValue(pot.price);
         if (target && pot.collected < target) {
-          lines.push(`Cagnotte « ${pot.title} » pour ${pot.owner_name} : ${euros(pot.collected)} sur ${euros(target)}.`);
+          lines.push(
+            `Cagnotte « ${pot.title} » pour ${pot.owner_name} : ${euros(pot.collected)} sur ${euros(target)}.`,
+          );
         }
       }
       if (lines.length) keys.push(key);
@@ -97,9 +119,11 @@ export async function remindersFor(db, user, now) {
     const birthday = daysUntil(month, day, now);
     const key = `bday-${person.id}-${birthday.year}-${birthday.days}`;
     if (!BIRTHDAY_DAYS.includes(birthday.days) || sent.has(key)) continue;
-    lines.push(birthday.days === 1
-      ? `C’est l’anniversaire de ${person.name} demain !`
-      : `Anniversaire de ${person.name} dans ${birthday.days} jours.`);
+    lines.push(
+      birthday.days === 1
+        ? `C’est l’anniversaire de ${person.name} demain !`
+        : `Anniversaire de ${person.name} dans ${birthday.days} jours.`,
+    );
     keys.push(key);
   }
 
@@ -115,13 +139,15 @@ export default {
     const db = env.DB;
     const canEmail = !!(env.RESEND_API_KEY && env.EMAIL_FROM);
     // Les personnes qui veulent des rappels et qu'on peut joindre : notifications, ou email si configuré.
-    const { results: users } = await db.prepare(
-      `SELECT u.id, u.email, u.name,
+    const { results: users } = await db
+      .prepare(
+        `SELECT u.id, u.email, u.name,
               EXISTS (SELECT 1 FROM push_subscriptions p WHERE p.user_id = u.id) AS has_push
        FROM users u
        WHERE u.notify_email = 1 AND u.name IS NOT NULL
          AND EXISTS (SELECT 1 FROM memberships m WHERE m.user_id = u.id)`,
-    ).all();
+      )
+      .all();
 
     let sentCount = 0;
     for (const user of users) {
@@ -135,11 +161,20 @@ export default {
           // Une notification par rappel (elles s'empilent sur le téléphone), au plus 3.
           let delivered = 0;
           for (const [i, line] of lines.slice(0, 3).entries()) {
-            delivered += await notifyUser(env, user.id, { title: 'La Hotte 🎁', body: line, url: '/#/', tag: `rappel-${i}` });
+            delivered += await notifyUser(env, user.id, {
+              title: 'La Hotte 🎁',
+              body: line,
+              url: '/#/',
+              tag: `rappel-${i}`,
+            });
           }
           if (!delivered && !canEmail) continue; // plus aucun appareil joignable : on réessaiera demain
           if (delivered) {
-            await db.batch(keys.map((key) => db.prepare('INSERT OR IGNORE INTO reminders_sent (user_id, key) VALUES (?1, ?2)').bind(user.id, key)));
+            await db.batch(
+              keys.map((key) =>
+                db.prepare('INSERT OR IGNORE INTO reminders_sent (user_id, key) VALUES (?1, ?2)').bind(user.id, key),
+              ),
+            );
             sentCount++;
             continue;
           }
@@ -154,7 +189,11 @@ export default {
             button: { label: 'Ouvrir La Hotte', url: env.APP_URL },
           }),
         });
-        await db.batch(keys.map((key) => db.prepare('INSERT OR IGNORE INTO reminders_sent (user_id, key) VALUES (?1, ?2)').bind(user.id, key)));
+        await db.batch(
+          keys.map((key) =>
+            db.prepare('INSERT OR IGNORE INTO reminders_sent (user_id, key) VALUES (?1, ?2)').bind(user.id, key),
+          ),
+        );
         sentCount++;
       } catch (err) {
         console.error('rappel', user.id, err.message);

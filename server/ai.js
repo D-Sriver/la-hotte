@@ -27,8 +27,11 @@ Réponds UNIQUEMENT avec un tableau JSON de 5 idées, sans texte avant ni après
 
 const OCCASIONS = { christmas: 'pour Noël', birthday: 'pour son anniversaire' };
 
-const wishLine = (w) => [w.title, w.price && `(${w.price})`, w.favorite && '— coup de cœur', w.note && `— ${w.note}`]
-  .filter(Boolean).join(' ').slice(0, 200);
+const wishLine = (w) =>
+  [w.title, w.price && `(${w.price})`, w.favorite && '— coup de cœur', w.note && `— ${w.note}`]
+    .filter(Boolean)
+    .join(' ')
+    .slice(0, 200);
 
 function buildPrompt({ person, wishes, received, history = [], budget, note, occasion, forSelf = false }) {
   const lines = [
@@ -42,13 +45,20 @@ function buildPrompt({ person, wishes, received, history = [], budget, note, occ
     `Tailles : ${person.sizes || 'non précisé'}`,
     `Budget : ${budget || person.budget_hint || 'libre, raisonnable'}`,
   ];
-  if (wishes.length) lines.push(`Sa liste d'envies (ne pas reproposer, mais s'en inspirer) :\n${wishes.map((w) => `- ${wishLine(w)}`).join('\n')}`);
+  if (wishes.length)
+    lines.push(
+      `Sa liste d'envies (ne pas reproposer, mais s'en inspirer) :\n${wishes.map((w) => `- ${wishLine(w)}`).join('\n')}`,
+    );
   if (received.length) lines.push(`Cadeaux déjà reçus (ne pas reproposer) : ${received.join(' ; ')}`);
   // Les idées déjà proposées, avec l'avis de la famille : on s'en inspire sans les répéter.
   const liked = history.filter((i) => i.rating === 1 || i.kept).map((i) => i.title);
   const disliked = history.filter((i) => i.rating === -1 && !i.kept).map((i) => i.title);
-  const others = history.filter((i) => !i.rating && !i.kept).map((i) => i.title).slice(0, 20);
-  if (liked.length) lines.push(`Idées déjà proposées qui ont plu (même esprit, mais ne pas les répéter) : ${liked.join(' ; ')}`);
+  const others = history
+    .filter((i) => !i.rating && !i.kept)
+    .map((i) => i.title)
+    .slice(0, 20);
+  if (liked.length)
+    lines.push(`Idées déjà proposées qui ont plu (même esprit, mais ne pas les répéter) : ${liked.join(' ; ')}`);
   if (disliked.length) lines.push(`Idées déjà proposées jugées à côté (éviter ce genre) : ${disliked.join(' ; ')}`);
   if (others.length) lines.push(`Idées déjà proposées (ne pas reproposer) : ${others.join(' ; ')}`);
   if (note) lines.push(`Précision de la personne qui offre : ${note}`);
@@ -67,7 +77,10 @@ function extractText(result) {
 }
 
 function parseIdeas(text) {
-  const raw = text.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/```json|```/g, '').trim();
+  const raw = text
+    .replace(/<think>[\s\S]*?<\/think>/g, '')
+    .replace(/```json|```/g, '')
+    .trim();
   const start = raw.indexOf('[');
   const end = raw.lastIndexOf(']');
   if (start === -1 || end === -1) return [];
@@ -142,7 +155,9 @@ export function ideaReader() {
             try {
               const idea = take(JSON.parse(text.slice(objectStart, pos + 1)));
               if (idea) found.push(idea);
-            } catch { /* objet mal formé : on l'ignore */ }
+            } catch {
+              /* objet mal formé : on l'ignore */
+            }
             objectStart = -1;
           }
         }
@@ -190,7 +205,9 @@ async function* streamText(stream) {
       if (!data || data === '[DONE]') continue;
       try {
         yield chunkText(JSON.parse(data));
-      } catch { /* ligne incomplète ou autre événement */ }
+      } catch {
+        /* ligne incomplète ou autre événement */
+      }
     }
   }
 }

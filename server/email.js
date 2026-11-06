@@ -1,10 +1,13 @@
 // Envoi d'emails via Resend (connexion par code, rappels). Sans RESEND_API_KEY, rien ne part.
 
-const escapeHtml = (text) => String(text).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const escapeHtml = (text) =>
+  String(text).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 // Un email simple aux couleurs de La Hotte : un titre, des paragraphes, un bouton.
 export function emailLayout({ title, paragraphs, button }) {
-  const body = paragraphs.map((p) => `<p style="margin:0 0 14px;font-size:16px;line-height:1.5;color:#141a2e">${escapeHtml(p)}</p>`).join('');
+  const body = paragraphs
+    .map((p) => `<p style="margin:0 0 14px;font-size:16px;line-height:1.5;color:#141a2e">${escapeHtml(p)}</p>`)
+    .join('');
   const cta = button
     ? `<p style="margin:24px 0 0"><a href="${escapeHtml(button.url)}" style="display:inline-block;padding:12px 22px;border-radius:999px;background:#d93236;color:#fff;font-weight:700;text-decoration:none">${escapeHtml(button.label)}</a></p>`
     : '';
@@ -16,7 +19,8 @@ export function emailLayout({ title, paragraphs, button }) {
 }
 
 export async function sendEmail(env, { to, subject, html, text }) {
-  if (!env.RESEND_API_KEY || !env.EMAIL_FROM) throw new Error('Envoi d’emails non configuré (RESEND_API_KEY, EMAIL_FROM).');
+  if (!env.RESEND_API_KEY || !env.EMAIL_FROM)
+    throw new Error('Envoi d’emails non configuré (RESEND_API_KEY, EMAIL_FROM).');
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, 'content-type': 'application/json' },

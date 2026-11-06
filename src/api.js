@@ -4,11 +4,19 @@ const devAs = new URLSearchParams(window.location.search).get('as');
 // La famille affichée, retenue sur cet appareil (le serveur retombe sur la première sinon).
 const FAMILY_KEY = 'la-hotte-family';
 let familyId = null;
-try { familyId = Number(localStorage.getItem(FAMILY_KEY)) || null; } catch { /* stockage indisponible */ }
+try {
+  familyId = Number(localStorage.getItem(FAMILY_KEY)) || null;
+} catch {
+  /* stockage indisponible */
+}
 
 export function setFamily(id) {
   familyId = id;
-  try { localStorage.setItem(FAMILY_KEY, String(id)); } catch { /* stockage indisponible */ }
+  try {
+    localStorage.setItem(FAMILY_KEY, String(id));
+  } catch {
+    /* stockage indisponible */
+  }
 }
 
 function send(path, { method = 'GET', body } = {}) {
@@ -83,7 +91,8 @@ export const api = {
   // { reminders, messages, groups } : seuls les choix envoyés changent.
   setNotify: (choices) => request('/me/notifications', { method: 'PUT', body: choices }),
   preview: (url) => request('/preview', { method: 'POST', body: { url } }),
-  photoUrl: (wishId, photoId) => `/api/wishes/${wishId}/photo?p=${photoId}${devAs ? `&as=${encodeURIComponent(devAs)}` : ''}`,
+  photoUrl: (wishId, photoId) =>
+    `/api/wishes/${wishId}/photo?p=${photoId}${devAs ? `&as=${encodeURIComponent(devAs)}` : ''}`,
   // onEvent reçoit { idea }, puis { done, remaining } ou { error }.
   findIdeas: (query, onEvent) => stream('/ideas', { method: 'POST', body: query }, onEvent),
   ideaHistory: (personId) => request(`/ideas?person_id=${personId}`),

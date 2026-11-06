@@ -34,11 +34,19 @@ export async function savePhotos(db, wishId, items) {
     const frame = cleanFrame(item?.frame);
     if (item?.id && existing.has(Number(item.id))) {
       kept.add(Number(item.id));
-      statements.push(db.prepare('UPDATE wish_photos SET position = ?1, frame = ?2 WHERE id = ?3').bind(position, frame, Number(item.id)));
+      statements.push(
+        db
+          .prepare('UPDATE wish_photos SET position = ?1, frame = ?2 WHERE id = ?3')
+          .bind(position, frame, Number(item.id)),
+      );
     } else {
       const photo = cleanPhoto(item?.data);
       if (!photo) return 'Photo trop lourde ou illisible.';
-      statements.push(db.prepare('INSERT INTO wish_photos (wish_id, photo, frame, position) VALUES (?1, ?2, ?3, ?4)').bind(wishId, photo, frame, position));
+      statements.push(
+        db
+          .prepare('INSERT INTO wish_photos (wish_id, photo, frame, position) VALUES (?1, ?2, ?3, ?4)')
+          .bind(wishId, photo, frame, position),
+      );
     }
   }
   for (const id of existing) {

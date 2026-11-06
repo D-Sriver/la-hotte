@@ -28,9 +28,8 @@ export async function onRequest(context) {
   // Access laisse entrer n'importe quelle adresse : tant qu'on n'a ni créé ni rejoint de famille,
   // seules ces routes répondent.
   const path = new URL(request.url).pathname;
-  const allowedWithoutFamily = (path === '/api/me')
-    || path === '/api/join'
-    || (path === '/api/families' && request.method === 'POST');
+  const allowedWithoutFamily =
+    path === '/api/me' || path === '/api/join' || (path === '/api/families' && request.method === 'POST');
   if (!data.family && !allowedWithoutFamily) return fail(403, 'Crée ou rejoins une famille pour continuer.');
 
   try {

@@ -32,8 +32,8 @@ export default function InviteScreen({ me, invite, onJoined, onDeclined }) {
         <img src="/icon.svg" alt="" width="56" height="56" />
         <h1 className="title">Rejoindre «&nbsp;{family.name}&nbsp;»&nbsp;?</h1>
         <p className="lead">
-          Les listes de cadeaux de la famille, sans gâcher les surprises. {membersLabel(family)} :
-          tu verras leurs listes et ils verront la tienne.
+          Les listes de cadeaux de la famille, sans gâcher les surprises. {membersLabel(family)} : tu verras leurs
+          listes et ils verront la tienne.
         </p>
         <div className="form-actions invite-choice">
           <button className="button button-go" disabled={status.sending} onClick={join}>
@@ -42,7 +42,11 @@ export default function InviteScreen({ me, invite, onJoined, onDeclined }) {
           <button className="button button-quiet" disabled={status.sending} onClick={onDeclined}>
             Non merci
           </button>
-          {status.error && <span className="error" role="alert">{status.error}</span>}
+          {status.error && (
+            <span className="error" role="alert">
+              {status.error}
+            </span>
+          )}
         </div>
         <LogoutButton email={me.email} emailLogin={me.email_login} quiet />
       </div>

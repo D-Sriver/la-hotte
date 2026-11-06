@@ -16,8 +16,12 @@ export async function onRequestPut({ request, env, data, params }) {
 export async function onRequestDelete({ env, data, params }) {
   const family = mine(data, params.id);
   if (!family) return fail(404, 'Famille introuvable.');
-  await env.DB.prepare('DELETE FROM memberships WHERE family_id = ?1 AND user_id = ?2').bind(family.id, data.me.id).run();
-  const left = await env.DB.prepare('SELECT COUNT(*) AS n FROM memberships WHERE family_id = ?1').bind(family.id).first();
+  await env.DB.prepare('DELETE FROM memberships WHERE family_id = ?1 AND user_id = ?2')
+    .bind(family.id, data.me.id)
+    .run();
+  const left = await env.DB.prepare('SELECT COUNT(*) AS n FROM memberships WHERE family_id = ?1')
+    .bind(family.id)
+    .first();
   if (!left.n) await env.DB.prepare('DELETE FROM families WHERE id = ?1').bind(family.id).run();
   return json({ ok: true });
 }

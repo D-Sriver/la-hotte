@@ -9,7 +9,12 @@ const WORDING = {
   christmas: {
     button: 'Demander aux lutins',
     busy: 'Les lutins cherchent…',
-    lines: ['Les lutins fouillent les rayons…', 'Un lutin compare les prix…', 'On secoue le Père Noël pour avoir des idées…', 'Les rennes votent…'],
+    lines: [
+      'Les lutins fouillent les rayons…',
+      'Un lutin compare les prix…',
+      'On secoue le Père Noël pour avoir des idées…',
+      'Les rennes votent…',
+    ],
   },
   birthday: {
     button: 'Trouver des idées',
@@ -34,8 +39,13 @@ export default function IdeasPanel({ person, onAdded }) {
   useEffect(() => {
     let alive = true;
     setState(IDLE);
-    api.ideaHistory(person.id).then((data) => alive && setHistory(data.ideas)).catch(() => {});
-    return () => { alive = false; };
+    api
+      .ideaHistory(person.id)
+      .then((data) => alive && setHistory(data.ideas))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
   }, [person.id]);
 
   // Une idée a changé (avis, gardée) : on la met à jour partout où elle s'affiche.
@@ -109,11 +119,21 @@ export default function IdeasPanel({ person, onAdded }) {
         <div className="field-row">
           <label className="field">
             <span className="field-label">Budget</span>
-            <input value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="ex. 30 à 60 €" maxLength={60} />
+            <input
+              value={budget}
+              onChange={(e) => setBudget(e.target.value)}
+              placeholder="ex. 30 à 60 €"
+              maxLength={60}
+            />
           </label>
           <label className="field field-grow">
             <span className="field-label">Une précision ?</span>
-            <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="ex. plutôt un objet déco" maxLength={300} />
+            <input
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="ex. plutôt un objet déco"
+              maxLength={300}
+            />
           </label>
         </div>
         <div className="form-actions">
@@ -124,9 +144,22 @@ export default function IdeasPanel({ person, onAdded }) {
         </div>
       </form>
 
-      {state.ideas.length > 0 && <ol className="idea-list" ref={listRef}>{state.ideas.map(card)}</ol>}
-      {state.loading && <p className="loading-line" role="status"><span className="spinner spinner-small" />{pick(words.lines)}</p>}
-      {state.error && <p className="error" role="alert">{state.error}</p>}
+      {state.ideas.length > 0 && (
+        <ol className="idea-list" ref={listRef}>
+          {state.ideas.map(card)}
+        </ol>
+      )}
+      {state.loading && (
+        <p className="loading-line" role="status">
+          <span className="spinner spinner-small" />
+          {pick(words.lines)}
+        </p>
+      )}
+      {state.error && (
+        <p className="error" role="alert">
+          {state.error}
+        </p>
+      )}
       {state.remaining !== null && <p className="muted small">Recherches restantes aujourd’hui : {state.remaining}</p>}
       {state.ideas.length > 0 && !state.loading && (
         <p className="muted small">👍 et 👎 aident l’IA à mieux viser la prochaine fois.</p>
@@ -134,7 +167,9 @@ export default function IdeasPanel({ person, onAdded }) {
 
       {older.length > 0 && (
         <details className="idea-history">
-          <summary>Idées déjà proposées <span className="count">{older.length}</span></summary>
+          <summary>
+            Idées déjà proposées <span className="count">{older.length}</span>
+          </summary>
           <ol className="idea-list">{older.map(card)}</ol>
         </details>
       )}
@@ -150,7 +185,9 @@ function IdeaCard({ idea, forMe, saving, onKeep, onRate }) {
         <p className="wish-meta">{[idea.price, idea.shop].filter(Boolean).join(', ')}</p>
         {idea.why && <p className="idea-why">{idea.why}</p>}
         <div className="idea-actions">
-          <a className="text-link" href={idea.search_url} target="_blank" rel="noopener noreferrer">Chercher en ligne</a>
+          <a className="text-link" href={idea.search_url} target="_blank" rel="noopener noreferrer">
+            Chercher en ligne
+          </a>
           <span className="idea-buttons">
             <button
               className={`idea-rate${idea.rating === 1 ? ' is-on' : ''}`}
@@ -175,7 +212,16 @@ function IdeaCard({ idea, forMe, saving, onKeep, onRate }) {
               disabled={idea.kept || saving}
               onClick={() => onKeep(idea)}
             >
-              {idea.kept ? <><Icon name="check" size={16} />Ajouté</> : forMe ? 'Ajouter à ma liste' : 'Je garde !'}
+              {idea.kept ? (
+                <>
+                  <Icon name="check" size={16} />
+                  Ajouté
+                </>
+              ) : forMe ? (
+                'Ajouter à ma liste'
+              ) : (
+                'Je garde !'
+              )}
             </button>
           </span>
         </div>

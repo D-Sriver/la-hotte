@@ -20,7 +20,13 @@ export async function visibleWishes(db, ownerId, viewerId, familyId, { archived 
       )
       .bind(ownerId)
       .all();
-    return results.map((w) => ({ ...w, photos: parsePhotos(w.photos), favorite: !!w.favorite, mine: true, can_edit: true }));
+    return results.map((w) => ({
+      ...w,
+      photos: parsePhotos(w.photos),
+      favorite: !!w.favorite,
+      mine: true,
+      can_edit: true,
+    }));
   }
 
   const { results } = await db
@@ -51,8 +57,7 @@ export async function visibleWishes(db, ownerId, viewerId, familyId, { archived 
     .all();
 
   return results.map((w) => {
-    const participants = JSON.parse(w.participants || '[]')
-      .map((p) => ({ ...p, name: p.name || 'Autre famille' }));
+    const participants = JSON.parse(w.participants || '[]').map((p) => ({ ...p, name: p.name || 'Autre famille' }));
     const mine = participants.find((p) => p.id === viewerId);
     return {
       id: w.id,
@@ -87,27 +92,31 @@ export async function visibleWishes(db, ownerId, viewerId, familyId, { archived 
 
 // Lit un prix saisi à la main (« ≈ 30 € », « 24,90 », « 20-40 € ») : on garde le premier nombre.
 export function priceValue(text) {
-  const match = String(text || '').replace(/\s/g, '').match(/\d+(?:[.,]\d+)?/);
+  const match = String(text || '')
+    .replace(/\s/g, '')
+    .match(/\d+(?:[.,]\d+)?/);
   return match ? Number(match[0].replace(',', '.')) : null;
 }
 
 // La personne fait-elle partie de la famille affichée ? (sinon on ne montre ni elle ni sa liste)
 export async function personInFamily(db, personId, familyId) {
-  return db.prepare(
-    `SELECT u.id, u.name, u.likes, u.dislikes, u.owns, u.sizes, u.budget_hint, substr(u.birthday, 6) AS birthday
+  return db
+    .prepare(
+      `SELECT u.id, u.name, u.likes, u.dislikes, u.owns, u.sizes, u.budget_hint, substr(u.birthday, 6) AS birthday
      FROM users u JOIN memberships m ON m.user_id = u.id
      WHERE u.id = ?1 AND m.family_id = ?2 AND u.name IS NOT NULL`,
-  )
+    )
     .bind(personId, familyId)
     .first();
 }
 
 // Peut-on agir sur ce vœu depuis la famille affichée ? Il faut voir la personne, et l'idée doit être de cette famille.
 export async function wishInFamily(db, wishId, familyId) {
-  return db.prepare(
-    `SELECT w.* FROM wishes w JOIN memberships m ON m.user_id = w.owner_id AND m.family_id = ?2
+  return db
+    .prepare(
+      `SELECT w.* FROM wishes w JOIN memberships m ON m.user_id = w.owner_id AND m.family_id = ?2
      WHERE w.id = ?1 AND (w.family_id IS NULL OR w.family_id = ?2)`,
-  )
+    )
     .bind(wishId, familyId)
     .first();
 }

@@ -43,14 +43,28 @@ export default function PhotoCarousel({ wishId, photos, title }) {
       </div>
       {many && (
         <>
-          <button type="button" className="carousel-arrow carousel-prev" aria-label="Photo précédente" disabled={index === 0} onClick={() => go(index - 1)}>
+          <button
+            type="button"
+            className="carousel-arrow carousel-prev"
+            aria-label="Photo précédente"
+            disabled={index === 0}
+            onClick={() => go(index - 1)}
+          >
             <Icon name="back" size={18} />
           </button>
-          <button type="button" className="carousel-arrow carousel-next" aria-label="Photo suivante" disabled={index === photos.length - 1} onClick={() => go(index + 1)}>
+          <button
+            type="button"
+            className="carousel-arrow carousel-next"
+            aria-label="Photo suivante"
+            disabled={index === photos.length - 1}
+            onClick={() => go(index + 1)}
+          >
             <Icon name="chevron" size={18} />
           </button>
           <div className="carousel-dots" aria-hidden="true">
-            {photos.map((p, i) => <span key={p.id} className={i === index ? 'is-active' : ''} />)}
+            {photos.map((p, i) => (
+              <span key={p.id} className={i === index ? 'is-active' : ''} />
+            ))}
           </div>
         </>
       )}

@@ -33,7 +33,11 @@ export default function MePage({ me }) {
       >
         {done < total && (
           <a href="#/profil" className="page-head-chip">
-            <span className="num">{done}/{total}</span> Compléter mon profil<Icon name="chevron" size={14} />
+            <span className="num">
+              {done}/{total}
+            </span>{' '}
+            Compléter mon profil
+            <Icon name="chevron" size={14} />
           </a>
         )}
       </PageHead>
@@ -42,9 +46,15 @@ export default function MePage({ me }) {
         <div className="section-head">
           <h2 className="section-title">Mes envies{wishes ? <span className="count">{wishes.length}</span> : null}</h2>
         </div>
-        {wishes
-          ? <WishList wishes={wishes} emptyText="Liste vide. Ajoute une envie, sinon ce sera la surprise totale !" onChanged={load} />
-          : <Skeleton rows={2} />}
+        {wishes ? (
+          <WishList
+            wishes={wishes}
+            emptyText="Liste vide. Ajoute une envie, sinon ce sera la surprise totale !"
+            onChanged={load}
+          />
+        ) : (
+          <Skeleton rows={2} />
+        )}
         <AddWishForm ownerId={me.id} onAdded={load} />
       </section>
 
@@ -58,7 +68,10 @@ export default function MePage({ me }) {
             {archived.map((w) => (
               <li key={w.id} className="archive-item">
                 <span className="archive-title">{w.title}</span>
-                <button className="button button-small button-quiet" onClick={() => api.setReceived(w.id, false).then(load)}>
+                <button
+                  className="button button-small button-quiet"
+                  onClick={() => api.setReceived(w.id, false).then(load)}
+                >
                   Remettre dans ma liste
                 </button>
               </li>

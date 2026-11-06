@@ -14,8 +14,7 @@ export async function readJson(request) {
   }
 }
 
-export const clean = (value, max = 2000) =>
-  typeof value === 'string' ? value.trim().slice(0, max) : '';
+export const clean = (value, max = 2000) => (typeof value === 'string' ? value.trim().slice(0, max) : '');
 
 // Un lien, même tapé à la main : « amazon.fr/truc » devient https://amazon.fr/truc. Le reste est ignoré.
 export function cleanUrl(value) {
@@ -40,7 +39,9 @@ export function cleanPhoto(value) {
 
 // Recadrage d'une photo : "x,y,zoom", x et y en % (0 à 100), zoom de 1 à 3. Sinon null (image entière).
 export function cleanFrame(value) {
-  const parts = String(value ?? '').split(',').map(Number);
+  const parts = String(value ?? '')
+    .split(',')
+    .map(Number);
   if (parts.length !== 3 || parts.some((n) => !Number.isFinite(n))) return null;
   const [x, y, zoom] = parts;
   const clamp = (n, min, max) => Math.round(Math.min(max, Math.max(min, n)) * 10) / 10;

@@ -24,7 +24,10 @@ test('budget : prévu, déjà offert cette année, et rien des années passées'
 
   const { body } = await call(reservations, { db, me: bob, family: f1 });
   assert.deepEqual(body.gifts.map((g) => g.title).sort(), ['Appareil photo', 'Vélo']);
-  assert.deepEqual(body.given.map((g) => g.title), ['Écharpe']);
+  assert.deepEqual(
+    body.given.map((g) => g.title),
+    ['Écharpe'],
+  );
   assert.equal(body.total, 500);
   assert.equal(body.year_total, 525);
 });

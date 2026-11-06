@@ -3,11 +3,17 @@
 
 const enc = new TextEncoder();
 
-export const b64url = (bytes) => btoa(String.fromCharCode(...new Uint8Array(bytes)))
-  .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+export const b64url = (bytes) =>
+  btoa(String.fromCharCode(...new Uint8Array(bytes)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
 
 export function fromB64url(text) {
-  const base64 = text.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(text.length / 4) * 4, '=');
+  const base64 = text
+    .replace(/-/g, '+')
+    .replace(/_/g, '/')
+    .padEnd(Math.ceil(text.length / 4) * 4, '=');
   return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
 }
 
@@ -34,12 +40,20 @@ async function vapidHeader(env, endpoint) {
   const jwk = JSON.parse(env.VAPID_PRIVATE_KEY);
   const key = await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
   const header = b64url(enc.encode(JSON.stringify({ typ: 'JWT', alg: 'ES256' })));
-  const claims = b64url(enc.encode(JSON.stringify({
-    aud: new URL(endpoint).origin,
-    exp: Math.floor(Date.now() / 1000) + 12 * 3600,
-    sub: env.VAPID_SUBJECT || 'https://la-hotte.pages.dev',
-  })));
-  const signature = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, key, enc.encode(`${header}.${claims}`));
+  const claims = b64url(
+    enc.encode(
+      JSON.stringify({
+        aud: new URL(endpoint).origin,
+        exp: Math.floor(Date.now() / 1000) + 12 * 3600,
+        sub: env.VAPID_SUBJECT || 'https://la-hotte.pages.dev',
+      }),
+    ),
+  );
+  const signature = await crypto.subtle.sign(
+    { name: 'ECDSA', hash: 'SHA-256' },
+    key,
+    enc.encode(`${header}.${claims}`),
+  );
   return `vapid t=${header}.${claims}.${b64url(signature)}, k=${env.VAPID_PUBLIC_KEY}`;
 }
 
@@ -51,7 +65,9 @@ export async function encryptPayload(subscription, payload) {
   const local = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
   const asPublic = new Uint8Array(await crypto.subtle.exportKey('raw', local.publicKey));
   const uaKey = await crypto.subtle.importKey('raw', uaPublic, { name: 'ECDH', namedCurve: 'P-256' }, false, []);
-  const ecdhSecret = new Uint8Array(await crypto.subtle.deriveBits({ name: 'ECDH', public: uaKey }, local.privateKey, 256));
+  const ecdhSecret = new Uint8Array(
+    await crypto.subtle.deriveBits({ name: 'ECDH', public: uaKey }, local.privateKey, 256),
+  );
 
   const ikm = await hkdf(authSecret, ecdhSecret, concat(enc.encode('WebPush: info\0'), uaPublic, asPublic), 32);
   const salt = crypto.getRandomValues(new Uint8Array(16));
@@ -93,8 +109,11 @@ export async function sendPush(env, subscription, message) {
 
 // Envoie à tous les appareils d'une personne ; nettoie les abonnements expirés. Renvoie le nombre d'envois réussis.
 export async function notifyUser(env, userId, message) {
-  const { results } = await env.DB.prepare('SELECT id, endpoint, p256dh, auth FROM push_subscriptions WHERE user_id = ?1')
-    .bind(userId).all();
+  const { results } = await env.DB.prepare(
+    'SELECT id, endpoint, p256dh, auth FROM push_subscriptions WHERE user_id = ?1',
+  )
+    .bind(userId)
+    .all();
   let sent = 0;
   for (const sub of results) {
     const outcome = await sendPush(env, sub, message).catch((err) => {

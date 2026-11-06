@@ -8,8 +8,15 @@ const root = new URL('../', import.meta.url);
 export function testDb() {
   const sqlite = new DatabaseSync(':memory:');
   sqlite.exec(readFileSync(new URL('schema.sql', root), 'utf8'));
-  const applied = new Set(sqlite.prepare('SELECT name FROM d1_migrations').all().map((r) => r.name));
-  for (const name of readdirSync(new URL('migrations/', root)).filter((n) => n.endsWith('.sql')).sort()) {
+  const applied = new Set(
+    sqlite
+      .prepare('SELECT name FROM d1_migrations')
+      .all()
+      .map((r) => r.name),
+  );
+  for (const name of readdirSync(new URL('migrations/', root))
+    .filter((n) => n.endsWith('.sql'))
+    .sort()) {
     if (!applied.has(name)) sqlite.exec(readFileSync(new URL(`migrations/${name}`, root), 'utf8'));
   }
 
@@ -20,7 +27,12 @@ export function testDb() {
       const row = sqlite.prepare(sql).get(...params);
       return row ? { ...row } : null;
     },
-    all: async () => ({ results: sqlite.prepare(sql).all(...params).map((row) => ({ ...row })) }),
+    all: async () => ({
+      results: sqlite
+        .prepare(sql)
+        .all(...params)
+        .map((row) => ({ ...row })),
+    }),
     run: async () => {
       const result = sqlite.prepare(sql).run(...params);
       return { meta: { changes: result.changes, last_row_id: Number(result.lastInsertRowid) } };
@@ -50,22 +62,37 @@ export function testDb() {
 export function seed(db) {
   const run = (sql, ...params) => db.sqlite.prepare(sql).run(...params);
   return {
-    user: (name, extra = {}) => Number(run(
-      'INSERT INTO users (email, name, birthday) VALUES (?, ?, ?)',
-      `${name.toLowerCase()}@test.fr`, name, extra.birthday ?? null,
-    ).lastInsertRowid),
+    user: (name, extra = {}) =>
+      Number(
+        run(
+          'INSERT INTO users (email, name, birthday) VALUES (?, ?, ?)',
+          `${name.toLowerCase()}@test.fr`,
+          name,
+          extra.birthday ?? null,
+        ).lastInsertRowid,
+      ),
     family: (name, ...members) => {
       const id = Number(run('INSERT INTO families (name, code) VALUES (?, ?)', name, `CODE-${name}`).lastInsertRowid);
       for (const member of members) run('INSERT INTO memberships (family_id, user_id) VALUES (?, ?)', id, member);
       return id;
     },
-    wish: (owner, title, extra = {}) => Number(run(
-      `INSERT INTO wishes (owner_id, added_by, family_id, title, price, reserved_by, group_gift, received_at)
+    wish: (owner, title, extra = {}) =>
+      Number(
+        run(
+          `INSERT INTO wishes (owner_id, added_by, family_id, title, price, reserved_by, group_gift, received_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      owner, extra.addedBy ?? owner, extra.family ?? null, title, extra.price ?? null,
-      extra.reservedBy ?? null, extra.group ? 1 : 0, extra.receivedAt ?? null,
-    ).lastInsertRowid),
-    contribute: (wish, user, amount = null) => run('INSERT INTO contributions (wish_id, user_id, amount) VALUES (?, ?, ?)', wish, user, amount),
+          owner,
+          extra.addedBy ?? owner,
+          extra.family ?? null,
+          title,
+          extra.price ?? null,
+          extra.reservedBy ?? null,
+          extra.group ? 1 : 0,
+          extra.receivedAt ?? null,
+        ).lastInsertRowid,
+      ),
+    contribute: (wish, user, amount = null) =>
+      run('INSERT INTO contributions (wish_id, user_id, amount) VALUES (?, ?, ?)', wish, user, amount),
   };
 }
 
@@ -78,5 +105,8 @@ export async function call(handler, { db, me, family, params = {}, url = 'https:
     params,
     data: { me: typeof me === 'object' ? me : { id: me }, family: family ? { id: family } : null },
   });
-  return { status: response.status, body: response.headers.get('content-type')?.includes('ndjson') ? await response.text() : await response.json() };
+  return {
+    status: response.status,
+    body: response.headers.get('content-type')?.includes('ndjson') ? await response.text() : await response.json(),
+  };
 }
