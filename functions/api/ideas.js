@@ -23,10 +23,18 @@ export async function onRequestPost({ request, env, data }) {
   await env.DB.prepare('INSERT INTO idea_requests (user_id, family_id) VALUES (?1, ?2)').bind(data.me.id, data.family.id).run();
 
   const wishes = await visibleWishes(env.DB, person.id, data.me.id, data.family.id);
+  // Ses cadeaux déjà reçus : envoyés seulement au modèle, pour ne pas les reproposer.
+  const { results: received } = await env.DB.prepare(
+    `SELECT title FROM wishes WHERE owner_id = ?1 AND received_at > datetime('now', '-2 years')
+     ORDER BY received_at DESC LIMIT 20`,
+  )
+    .bind(person.id)
+    .all();
   try {
     const ideas = await findIdeas(env, {
       person,
       wishes,
+      received: received.map((r) => r.title),
       budget: clean(body.budget, 60),
       occasion: body.occasion === 'birthday' ? 'birthday' : 'christmas',
       note: clean(body.note, 300),

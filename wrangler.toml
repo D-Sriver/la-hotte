@@ -11,7 +11,7 @@ database_id = "874fe530-e678-4ab7-be0d-fa3d2d6c77d7"   # donné par `wrangler d1
 binding = "AI"
 
 [vars]
-AI_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+AI_MODEL = "@cf/openai/gpt-oss-120b"
 IDEAS_PER_DAY = "10"
 PRICE_SEARCHES_PER_MONTH = "200" # palier gratuit SerpApi : 250
 FAMILY_IDEAS_PER_DAY = "40"
