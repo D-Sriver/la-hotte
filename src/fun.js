@@ -1,6 +1,6 @@
 const CONFETTI_COLORS = ['#e5383b', '#f6b93b', '#17845d', '#f49ac1', '#172040'];
 
-// Petite explosion de confettis autour d'un élément (bouton « Je réserve »…).
+// Petite explosion de confettis autour d'un élément (bouton « Je réserve »…).
 export function burst(element) {
   if (!element || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const rect = element.getBoundingClientRect();
@@ -47,7 +47,7 @@ export const GREETINGS = ['Salut', 'Coucou', 'Hey'];
 
 // ---------- Occasions : Noël ou anniversaire, selon ce qui approche ----------
 
-// Dans combien de jours tombe un anniversaire (« MM-JJ », ou date complète « AAAA-MM-JJ »).
+// Dans combien de jours tombe un anniversaire (« MM-JJ », ou date complète « AAAA-MM-JJ »).
 export function daysUntilBirthday(date, now = new Date()) {
   if (!date) return null;
   const [month, day] = date.slice(-5).split('-').map(Number);
@@ -80,7 +80,7 @@ export function occasionFor(person, now = new Date()) {
     : christmas;
 }
 
-// « de Bruno », « d’Alice », « d’Hugo » : l'élision devant une voyelle ou un h.
+// « de Bruno », « d’Alice », « d’Hugo » : l'élision devant une voyelle ou un h.
 export const deName = (name) => (/^[aeiouyhàâäéèêëîïôöùûü]/i.test(name) ? `d’${name}` : `de ${name}`);
 
 export function birthdayLine(days, isMe) {

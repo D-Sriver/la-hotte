@@ -15,7 +15,7 @@ export function usePageIntro(ready = true) {
       if (!ready) return;
       const mm = gsap.matchMedia();
       mm.add(MOTION_OK, () => {
-        // Pendant une transition « entonnoir », l'en-tête est déjà couvert par le calque :
+        // Pendant une transition « entonnoir », l'en-tête est déjà couvert par le calque :
         // on ne l'anime pas, et les autres tuiles attendent que le calque se soit posé.
         const zooming = document.documentElement.dataset.zooming;
         const tiles = [...scope.current.children].filter((el) => !(zooming && el.matches(zooming)));

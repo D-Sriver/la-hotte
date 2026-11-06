@@ -61,7 +61,7 @@ export default function ProfilePage({ me, onSaved, onFamiliesChanged }) {
 
       <FamiliesPanel me={me} onChanged={onFamiliesChanged} />
 
-      {/* Sur grand écran, à droite de « Mes familles » plutôt qu'en dessous. */}
+      {/* Sur grand écran, à droite de « Mes familles » plutôt qu'en dessous. */}
       <div className="profile-side">
         <NotificationsPanel me={me} onChanged={(notify) => onSaved({ ...me, notify })} />
 

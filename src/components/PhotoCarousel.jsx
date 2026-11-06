@@ -21,7 +21,7 @@ export default function PhotoCarousel({ wishId, photos, title }) {
   };
 
   return (
-    <div className="carousel" aria-roledescription="carrousel" aria-label={`Photos de « ${title} »`}>
+    <div className="carousel" aria-roledescription="carrousel" aria-label={`Photos de « ${title} »`}>
       <div className="carousel-track" ref={track} onScroll={many ? onScroll : undefined}>
         {photos.map((p, i) => {
           const frame = parseFrame(p.frame);

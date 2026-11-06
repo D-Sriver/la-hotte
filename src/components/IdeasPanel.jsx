@@ -112,8 +112,8 @@ export default function IdeasPanel({ person, onAdded }) {
       </h2>
       <p className="muted small">
         {forMe
-          ? 'L’IA propose des idées à partir de ton profil, pour t’inspirer ta liste. Prix approximatifs : vérifie avec « Chercher en ligne ».'
-          : `L’IA propose des idées à partir du profil de ${person.name} et évite ce qui est déjà sur sa liste. Prix approximatifs : vérifie avec « Chercher en ligne ».`}
+          ? 'L’IA propose des idées à partir de ton profil, pour t’inspirer ta liste. Prix approximatifs : vérifie avec « Chercher en ligne ».'
+          : `L’IA propose des idées à partir du profil de ${person.name} et évite ce qui est déjà sur sa liste. Prix approximatifs : vérifie avec « Chercher en ligne ».`}
       </p>
       <form className="form" onSubmit={search}>
         <div className="field-row">

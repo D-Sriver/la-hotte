@@ -8,6 +8,15 @@ export default [
   { ignores: ['dist/', '.wrangler/', 'node_modules/'] },
   js.configs.recommended,
   {
+    // Espaces insécables voulus dans les textes (typographie française : « … », ?, !).
+    rules: {
+      'no-irregular-whitespace': [
+        'error',
+        { skipStrings: true, skipTemplates: true, skipJSXText: true, skipComments: true },
+      ],
+    },
+  },
+  {
     files: ['src/**/*.{js,jsx}'],
     languageOptions: {
       ecmaVersion: 'latest',

@@ -104,8 +104,8 @@ export default function NotificationsPanel({ me, onChanged }) {
   else if (isIos() && !isInstalled()) {
     content = (
       <p className="muted small">
-        Sur iPhone, installe d’abord La Hotte : touche <Icon name="share" size={14} /> en bas de Safari, puis « Sur
-        l’écran d’accueil ». Ouvre-la depuis l’écran d’accueil et reviens ici.
+        Sur iPhone, installe d’abord La Hotte : touche <Icon name="share" size={14} /> en bas de Safari, puis « Sur
+        l’écran d’accueil ». Ouvre-la depuis l’écran d’accueil et reviens ici.
       </p>
     );
   } else if (!pushSupported())

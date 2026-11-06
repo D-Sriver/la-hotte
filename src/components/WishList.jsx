@@ -69,7 +69,7 @@ function GroupProgress({ wish, children }) {
   );
 }
 
-// « Ma part : [ 50 ] € » pour un participant.
+// « Ma part : [ 50 ] € » pour un participant.
 function MyAmount({ wish, busy, run }) {
   const initial = wish.my_amount == null ? '' : String(wish.my_amount).replace('.', ',');
   const [value, setValue] = useState(initial);
@@ -168,7 +168,7 @@ function GiftActions({ wish, busy, run }) {
       </>
     );
   }
-  // Une fois acheté : « Offert » le fait passer dans les archives.
+  // Une fois acheté : « Offert » le fait passer dans les archives.
   const givenButton = wish.bought && (
     <button
       className="button button-small button-go"
@@ -184,7 +184,7 @@ function GiftActions({ wish, busy, run }) {
   );
 
   if (wish.group_gift) {
-    // Seul l'organisateur achète : lui seul coche « acheté » puis « offert ».
+    // Seul l'organisateur achète : lui seul coche « acheté » puis « offert ».
     if (wish.removed && !wish.participating) return null;
     return wish.participating ? (
       <>
@@ -315,7 +315,7 @@ function WishChat({ wish, onCount }) {
   );
 }
 
-// Menu « ⋯ » pour les actions rares (modifier, reçu, supprimer) : moins de boutons à l'écran,
+// Menu « ⋯ » pour les actions rares (modifier, reçu, supprimer) : moins de boutons à l'écran,
 // et pas de suppression ou d'archivage d'un toucher maladroit.
 function MoreMenu({ label, items, disabled }) {
   const [open, setOpen] = useState(false);
@@ -418,7 +418,7 @@ function WishRow({ wish, onChanged }) {
   }
 
   async function remove() {
-    if (!window.confirm(`Supprimer « ${wish.title} » ?`)) return;
+    if (!window.confirm(`Supprimer « ${wish.title} » ?`)) return;
     setBusy(true);
     try {
       await api.deleteWish(wish.id);
@@ -545,7 +545,7 @@ function WishRow({ wish, onChanged }) {
         )}
         {(wish.can_edit || canDelete || wish.mine) && (
           <MoreMenu
-            label={`Plus d’actions pour « ${wish.title} »`}
+            label={`Plus d’actions pour « ${wish.title} »`}
             disabled={busy}
             items={[
               wish.can_edit && { label: 'Modifier', icon: 'pencil', onSelect: () => setEditing(true) },

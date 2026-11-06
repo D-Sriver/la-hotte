@@ -15,7 +15,7 @@ function waitForTarget(selector, timeout = 1500) {
   });
 }
 
-// Transition « entonnoir » : un calque part de l'élément cliqué, remplit l'écran,
+// Transition « entonnoir » : un calque part de l'élément cliqué, remplit l'écran,
 // on change de page derrière, puis le calque se pose sur l'en-tête de la nouvelle page.
 export function zoomInto(element, href, { color, target: selector = '[data-zoom-target]' } = {}) {
   if (!window.matchMedia(MOTION_OK).matches) {

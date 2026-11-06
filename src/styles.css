@@ -32,6 +32,9 @@
   --fs-md: 1rem; /* texte courant */
   --fs-lg: 1.2rem; /* titres de carte */
   --fs-xl: 1.5rem; /* titres de section */
+  --fs-h2: clamp(1.6rem, 6vw, 2.2rem); /* titres de page compacts */
+  --fs-h1: clamp(1.8rem, 6vw, 2.6rem); /* grands titres */
+  --fs-hero: clamp(4.5rem, 16vw, 6.5rem); /* le compte à rebours */
 
   /* Arrondis : 4 rayons. */
   --r-sm: 12px;
@@ -63,6 +66,9 @@
   --cream-strong: #fff1cc;
   --peach: #ffe9d6;
   --pine: #0f5c40;
+  --tint-red: #ffe1e1; /* fonds pastel des rubriques du profil (mode clair) */
+  --tint-pink: #fde0ec;
+  --tint-blue: #e1e7ff;
   color-scheme: light;
 }
 
@@ -308,7 +314,7 @@ a.tile:active {
 }
 .hero-days .num {
   display: block;
-  font-size: clamp(4.5rem, 16vw, 6.5rem);
+  font-size: var(--fs-hero);
   letter-spacing: -0.06em;
   line-height: 0.9;
 }
@@ -356,7 +362,7 @@ a.tile:active {
   margin: 1.25rem 0.25rem 0.25rem;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(1.6rem, 6vw, 2.2rem);
+  font-size: var(--fs-h2);
   letter-spacing: -0.04em;
 }
 .tile-wide {
@@ -801,7 +807,7 @@ a.tile:active {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(1.6rem, 6vw, 2.1rem);
+  font-size: var(--fs-h2);
   letter-spacing: -0.04em;
   line-height: 1.05;
 }
@@ -972,6 +978,7 @@ a.tile:active {
 }
 /* Carte « Inviter » au bout de la grille des personnes. */
 .invite-card {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -993,13 +1000,24 @@ a.tile:active {
 .invite-code {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: var(--fs-lg);
+  font-size: min(var(--fs-lg), 11cqi);
   letter-spacing: 0.05em;
   color: var(--ink);
   white-space: nowrap;
 }
+.invite-actions .icon-button {
+  flex-shrink: 0;
+}
+/* Carte étroite : « Partager » passe sous le bouton de copie plutôt que de déborder. */
+@container (max-width: 11rem) {
+  .invite-actions .button {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+}
 .invite-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem;
   margin-top: 0.1rem;
@@ -1663,7 +1681,11 @@ a.tile:active {
   }
   /* Ce que j'offre : une carte par personne, sur les deux colonnes. */
   .gifts-page > .section:not(.ideas) {
-    grid-column: auto;
+    grid-column: 1 / -1;
+  }
+  .gifts-page .wish-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
   }
   /* Page d'une personne : sa liste à gauche ; ses goûts puis les idées à droite, sous les yeux. */
   .bento-page.person-page > .section.person-list {
@@ -1748,7 +1770,7 @@ a.tile:active {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(1.8rem, 6vw, 2.6rem);
+  font-size: var(--fs-h1);
   letter-spacing: -0.04em;
   line-height: 1.05;
   text-wrap: balance;
@@ -2764,7 +2786,7 @@ textarea:focus {
   gap: 0.3rem;
 }
 .tile-form .field:nth-child(1) {
-  background: #ffe1e1;
+  background: var(--tint-red);
   grid-column: 1 / -1;
 }
 .tile-form .field:nth-child(2) {
@@ -2772,13 +2794,13 @@ textarea:focus {
   grid-column: 1 / -1;
 }
 .tile-form .field:nth-child(3) {
-  background: #dcf3e8;
+  background: var(--green-soft);
 }
 .tile-form .field:nth-child(4) {
-  background: #fde0ec;
+  background: var(--tint-pink);
 }
 .tile-form .field:nth-child(5) {
-  background: #e1e7ff;
+  background: var(--tint-blue);
 }
 .tile-form .field:nth-child(6) {
   background: var(--peach);
@@ -3059,7 +3081,8 @@ textarea:focus {
   grid-template-rows: auto 1fr auto;
   padding: 2.5rem;
   color: #fff;
-  background: radial-gradient(circle at 70% 20%, #ff6b5e, transparent 55%), linear-gradient(160deg, #e5383b, #a4161a);
+  background:
+    radial-gradient(circle at 70% 20%, #ff6b5e, transparent 55%), linear-gradient(160deg, var(--red), #a4161a);
 }
 .login-brand {
   display: flex;
@@ -3090,7 +3113,7 @@ textarea:focus {
   z-index: var(--z-raised);
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(1.5rem, 3vw, 2.3rem);
+  font-size: var(--fs-h2);
   line-height: 1.15;
   letter-spacing: -0.02em;
   text-wrap: balance;
@@ -3133,7 +3156,7 @@ textarea:focus {
   animation: form-in 400ms cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 .login-form .title {
-  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-size: var(--fs-h1);
 }
 .login-submit {
   width: 100%;
@@ -3689,7 +3712,7 @@ a.wish-photo:not(.is-framed):active img {
     grid-column: auto;
   }
   .mini-num {
-    font-size: clamp(1.6rem, 8vw, 2.4rem);
+    font-size: var(--fs-h2);
     white-space: nowrap;
   }
   .wish-actions .button-leave {

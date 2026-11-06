@@ -69,12 +69,12 @@ export default function ProfileForm({ initial, submitLabel = 'Enregistrer', quic
         </label>
       ))}
       {quick ? (
-        <p className="field-hint">Tailles, budget, anniversaire… tu pourras compléter quand tu veux dans « Profil ».</p>
+        <p className="field-hint">Tailles, budget, anniversaire… tu pourras compléter quand tu veux dans « Profil ».</p>
       ) : (
         <>
           <label className="field">
             <span className="field-label">Budget idéal</span>
-            <span className="field-hint">Une indication pour la famille, ex. « 20 à 50 € ».</span>
+            <span className="field-hint">Une indication pour la famille, ex. « 20 à 50 € ».</span>
             <input value={form.budget_hint} onChange={set('budget_hint')} maxLength={60} />
           </label>
           <label className="field">

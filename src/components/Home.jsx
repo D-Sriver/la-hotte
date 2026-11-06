@@ -40,7 +40,7 @@ function InviteCard({ family, alone }) {
         <Icon name="plus" size={18} />
         {alone ? 'Invite ta famille' : 'Inviter'}
       </p>
-      <p className="invite-code num" aria-label={`Code de « ${family.name} » : ${family.code}`}>
+      <p className="invite-code num" aria-label={`Code de « ${family.name} » : ${family.code}`}>
         {family.code}
       </p>
       {alone && (
@@ -76,7 +76,7 @@ function InviteCard({ family, alone }) {
   );
 }
 
-// « Ce que j'offre » en résumé : combien, quel budget, et les prochains à acheter.
+// « Ce que j'offre » en résumé : combien, quel budget, et les prochains à acheter.
 function GivingSummary({ gifts, suggestion }) {
   const list = useStagger(gifts?.length || 0);
   if (!gifts) return <section className="tile giving skeleton-tile" />;
@@ -100,7 +100,7 @@ function GivingSummary({ gifts, suggestion }) {
       {gifts.length === 0 ? (
         <div className="giving-empty">
           <p className="muted small">
-            Rien de réservé pour l’instant. Ouvre la liste de quelqu’un et touche « Je réserve ».
+            Rien de réservé pour l’instant. Ouvre la liste de quelqu’un et touche « Je réserve ».
           </p>
           {/* L'occasion la plus proche : on propose d'aller voir sa liste tout de suite. */}
           {suggestion && (

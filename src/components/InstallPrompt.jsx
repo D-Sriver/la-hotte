@@ -61,7 +61,7 @@ export default function InstallPrompt() {
         <strong>Installe La Hotte</strong>
         {ios ? (
           <span>
-            Touche <Icon name="share" size={14} /> en bas de Safari, puis « Sur l’écran d’accueil ».
+            Touche <Icon name="share" size={14} /> en bas de Safari, puis « Sur l’écran d’accueil ».
           </span>
         ) : (
           <span>Elle s’ouvrira comme une vraie app, depuis ton écran d’accueil.</span>

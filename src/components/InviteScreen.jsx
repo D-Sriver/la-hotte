@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { api } from '../api.js';
 import LogoutButton from './LogoutButton.jsx';
 
-// « Léa et Tom y sont déjà », ou le nombre si on n'a pas les prénoms.
+// « Léa et Tom y sont déjà », ou le nombre si on n'a pas les prénoms.
 function membersLabel({ members = [], member_count: count }) {
   if (!members.length) return count === 1 ? '1 personne y est déjà' : `${count} personnes y sont déjà`;
   const others = count - members.length;

@@ -77,7 +77,7 @@ function FamilyRow({ family, current, onChanged }) {
           type="button"
           className="button button-small button-leave"
           onClick={() =>
-            window.confirm(`Quitter « ${family.name} » ? Tu ne verras plus ses membres.`) &&
+            window.confirm(`Quitter « ${family.name} » ? Tu ne verras plus ses membres.`) &&
             act(() => api.leaveFamily(family.id))
           }
         >
@@ -93,7 +93,7 @@ function FamilyRow({ family, current, onChanged }) {
   );
 }
 
-// « Mes familles » dans le profil : codes à partager, renommer, quitter, en rejoindre ou en créer une autre.
+// « Mes familles » dans le profil : codes à partager, renommer, quitter, en rejoindre ou en créer une autre.
 export default function FamiliesPanel({ me, onChanged }) {
   const [adding, setAdding] = useState(false);
   return (

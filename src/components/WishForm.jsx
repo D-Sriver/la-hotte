@@ -7,7 +7,7 @@ import { formatFrame, parseFrame } from '../photoFrame.js';
 
 const EMPTY = { title: '', url: '', price: '', note: '', favorite: false };
 
-// Ce qui a été tapé dans « Lien », rendu utilisable : « amazon.fr/truc » → https://amazon.fr/truc ; sinon null.
+// Ce qui a été tapé dans « Lien », rendu utilisable : « amazon.fr/truc » → https://amazon.fr/truc ; sinon null.
 export function asLink(text) {
   const value = String(text || '').trim();
   if (/^https?:\/\/\S+\.\S+/i.test(value)) return value;
@@ -122,7 +122,7 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
     e.preventDefault();
     setSaving(true);
     setError('');
-    // « amazon » n'est pas un lien : on ne bloque pas, on le garde dans la note.
+    // « amazon » n'est pas un lien : on ne bloque pas, on le garde dans la note.
     const link = asLink(form.url);
     const leftover = form.url.trim() && !link ? form.url.trim() : '';
     const payload = {

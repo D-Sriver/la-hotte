@@ -63,7 +63,7 @@ export default function MePage({ me }) {
           <summary className="section-title">
             Cadeaux reçus<span className="count">{archived.length}</span>
           </summary>
-          <p className="muted small">Ce que tu as marqué « Reçu ». La famille ne les voit plus dans ta liste.</p>
+          <p className="muted small">Ce que tu as marqué « Reçu ». La famille ne les voit plus dans ta liste.</p>
           <ul className="archive-list">
             {archived.map((w) => (
               <li key={w.id} className="archive-item">
