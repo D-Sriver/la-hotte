@@ -13,10 +13,11 @@ export async function onRequestPost({ request, env, data }) {
   if (!owner) return fail(404, 'Personne introuvable.');
 
   const wish = await env.DB.prepare(
-    `INSERT INTO wishes (owner_id, added_by, title, url, price, note, photo)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7) RETURNING id`,
+    `INSERT INTO wishes (owner_id, added_by, title, url, price, note, photo, favorite)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) RETURNING id`,
   )
-    .bind(ownerId, data.me.id, title, cleanUrl(body.url), clean(body.price, 40), clean(body.note, 500), photo)
+    .bind(ownerId, data.me.id, title, cleanUrl(body.url), clean(body.price, 40), clean(body.note, 500), photo,
+      ownerId === data.me.id && body.favorite ? 1 : 0)
     .first();
   return json({ id: wish.id }, 201);
 }

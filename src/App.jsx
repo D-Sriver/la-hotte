@@ -4,16 +4,19 @@ import { useHashRoute } from './useHashRoute.js';
 import Home from './components/Home.jsx';
 import PersonPage from './components/PersonPage.jsx';
 import MePage from './components/MePage.jsx';
+import GiftsPage from './components/GiftsPage.jsx';
 import ProfilePage from './components/ProfilePage.jsx';
 import ProfileForm from './components/ProfileForm.jsx';
 import JoinForm from './components/JoinForm.jsx';
 import Icon from './components/Icon.jsx';
+import LogoutButton from './components/LogoutButton.jsx';
 import { gsap, useGSAP } from './motion.js';
 import { zoomBackHome } from './zoom.js';
 
 const TABS = [
   { page: 'home', href: '#/', label: 'Famille', icon: 'family' },
   { page: 'me', href: '#/moi', label: 'Ma liste', icon: 'gift' },
+  { page: 'gifts', href: '#/cadeaux', label: 'À offrir', icon: 'bag' },
   { page: 'profile', href: '#/profil', label: 'Profil', icon: 'user' },
 ];
 
@@ -94,6 +97,7 @@ export default function App() {
           <h1 className="title">Bienvenue dans La Hotte</h1>
           <p className="lead">C’est l’espace cadeaux de la famille. Entre le code familial pour rejoindre les autres.</p>
           <JoinForm onJoined={loadMe} />
+          <LogoutButton email={me.email} quiet />
         </div>
       </main>
     );
@@ -110,6 +114,7 @@ export default function App() {
             et toi pour leur en trouver.
           </p>
           <ProfileForm initial={me} submitLabel="Créer mon profil" onSaved={setMe} />
+          <LogoutButton email={me.email} quiet />
         </div>
       </main>
     );
@@ -124,6 +129,7 @@ export default function App() {
       <main className="page">
         {route.page === 'home' && <Home me={me} />}
         {route.page === 'me' && <MePage me={me} />}
+        {route.page === 'gifts' && <GiftsPage />}
         {route.page === 'profile' && <ProfilePage me={me} onSaved={setMe} />}
         {route.page === 'person' && <PersonPage key={route.id} id={route.id} />}
       </main>

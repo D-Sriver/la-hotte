@@ -1,45 +1,9 @@
 import { useState } from 'react';
-import { api } from '../api.js';
 import Icon from './Icon.jsx';
-import { shrinkPhoto } from '../photo.js';
+import WishForm from './WishForm.jsx';
 
 export default function AddWishForm({ ownerId, forSomeoneElse, onAdded }) {
-  const empty = { title: '', url: '', price: '', note: '', photo: '' };
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState(empty);
-  const [error, setError] = useState('');
-  const [saving, setSaving] = useState(false);
-  const set = (key) => (e) => setForm({ ...form, [key]: e.target.value });
-
-  async function pickPhoto(e) {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file) return;
-    setError('');
-    try {
-      setForm((f) => ({ ...f, photo: '' }));
-      const photo = await shrinkPhoto(file);
-      setForm((f) => ({ ...f, photo }));
-    } catch (err) {
-      setError(err.message);
-    }
-  }
-
-  async function submit(e) {
-    e.preventDefault();
-    setSaving(true);
-    setError('');
-    try {
-      await api.addWish({ ...form, owner_id: ownerId });
-      setForm(empty);
-      setOpen(false);
-      onAdded();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setSaving(false);
-    }
-  }
 
   if (!open) {
     return (
@@ -51,45 +15,11 @@ export default function AddWishForm({ ownerId, forSomeoneElse, onAdded }) {
   }
 
   return (
-    <form className="form card card-pad" onSubmit={submit}>
-      {forSomeoneElse && <p className="notice"><Icon name="lock" size={15} />Chut. Cette idée reste secrète : la personne ne la verra pas.</p>}
-      <label className="field">
-        <span className="field-label">Quoi</span>
-        <input value={form.title} onChange={set('title')} required maxLength={200} autoFocus />
-      </label>
-      <label className="field">
-        <span className="field-label">Lien</span>
-        <input type="url" inputMode="url" placeholder="https://" value={form.url} onChange={set('url')} />
-      </label>
-      <div className="field-row">
-        <label className="field">
-          <span className="field-label">Prix</span>
-          <input value={form.price} onChange={set('price')} placeholder="≈ 30 €" maxLength={40} />
-        </label>
-        <label className="field field-grow">
-          <span className="field-label">Note</span>
-          <input value={form.note} onChange={set('note')} placeholder="Couleur, taille, édition…" maxLength={500} />
-        </label>
-      </div>
-      <div className="field">
-        <span className="field-label">Photo</span>
-        {form.photo ? (
-          <div className="photo-preview">
-            <img src={form.photo} alt="" />
-            <button type="button" className="button button-quiet button-small" onClick={() => setForm({ ...form, photo: '' })}>Retirer</button>
-          </div>
-        ) : (
-          <label className="photo-pick">
-            <Icon name="camera" size={18} />Ajouter une photo
-            <input type="file" accept="image/*" onChange={pickPhoto} />
-          </label>
-        )}
-      </div>
-      <div className="form-actions">
-        <button className="button" disabled={saving}>{saving ? 'Ajout…' : 'Ajouter'}</button>
-        <button type="button" className="button button-quiet" onClick={() => setOpen(false)}>Annuler</button>
-        {error && <span className="error" role="alert">{error}</span>}
-      </div>
-    </form>
+    <WishForm
+      ownerId={ownerId}
+      forSomeoneElse={forSomeoneElse}
+      onDone={() => { setOpen(false); onAdded(); }}
+      onCancel={() => setOpen(false)}
+    />
   );
 }

@@ -3,6 +3,7 @@ const MAX_SIDE = 900;
 const MAX_LENGTH = 650_000; // limite acceptée par le serveur (cleanPhoto)
 
 export async function shrinkPhoto(file) {
+  if (typeof file === 'string') file = await (await fetch(file)).blob(); // data URL venue de l'aperçu d'un lien
   if (!file.type.startsWith('image/')) throw new Error('Ce fichier n’est pas une image.');
   let bitmap;
   try {

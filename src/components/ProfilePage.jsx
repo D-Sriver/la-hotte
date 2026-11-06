@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import Avatar from './Avatar.jsx';
 import ProfileForm from './ProfileForm.jsx';
+import LogoutButton from './LogoutButton.jsx';
 import { profileCompletion } from '../profile.js';
 import { gsap, useGSAP, usePageIntro, MOTION_OK } from '../motion.js';
 
@@ -44,6 +45,11 @@ export default function ProfilePage({ me, onSaved }) {
         <h2 className="section-title">Ce que la famille sait de toi</h2>
         <p className="muted small">Plus c’est précis, meilleures seront les idées qu’on te trouvera.</p>
         <ProfileForm initial={me} onSaved={onSaved} />
+      </section>
+
+      <section className="tile section">
+        <h2 className="section-title">Mon compte</h2>
+        <LogoutButton email={me.email} />
       </section>
     </div>
   );

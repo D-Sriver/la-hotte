@@ -124,7 +124,7 @@ p { margin: 0; }
     padding: 6px;
     box-shadow: 0 10px 30px -8px rgb(20 26 46 / 0.35), 0 0 0 1px var(--line);
   }
-  .tab { flex-direction: column; gap: 2px; min-height: 52px; min-width: 76px; padding: 0 0.75rem; font-size: 0.72rem; justify-content: center; }
+  .tab { flex-direction: column; gap: 2px; min-height: 52px; min-width: 64px; padding: 0 0.6rem; font-size: 0.72rem; justify-content: center; }
   .page { padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px) + 2rem) !important; }
 }
 
@@ -442,14 +442,15 @@ a.tile:active { transform: scale(0.97); }
 
 /* ---------- Liste d'envies ---------- */
 .wish-list { list-style: none; padding: 0; margin: 0 0 0.75rem; display: grid; gap: 8px; }
-.wish { display: flex; align-items: center; gap: 0.85rem; padding: 0.75rem; border-radius: var(--r-inner); background: var(--bg); }
+.wish { display: flex; flex-wrap: wrap; align-items: center; gap: 0.85rem; padding: 0.75rem; border-radius: var(--r-inner); background: var(--bg); }
 .wish-thumb { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; border-radius: 12px; background: var(--red); color: #fff; }
 .wish:nth-child(4n+2) .wish-thumb { background: var(--green); }
 .wish:nth-child(4n+3) .wish-thumb { background: var(--gold); color: #2b1d00; }
 .wish:nth-child(4n) .wish-thumb { background: var(--night); }
 .wish-photo { overflow: hidden; outline: 1px solid rgb(0 0 0 / 0.08); outline-offset: -1px; }
 .wish-photo img { width: 100%; height: 100%; object-fit: cover; }
-.wish-main { flex: 1; min-width: 0; }
+.wish-main { flex: 1 1 10rem; min-width: 0; }
+.wish-actions:empty { display: none; }
 .wish-title { font-weight: 600; overflow-wrap: anywhere; }
 .wish-title a { text-decoration: none; }
 .wish-title a:hover { text-decoration: underline; text-underline-offset: 3px; }
@@ -458,10 +459,22 @@ a.tile:active { transform: scale(0.97); }
 .badges { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.4rem; }
 .badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.15rem 0.55rem; border-radius: 999px; font-size: 0.78rem; font-weight: 700; }
 .badge-secret { background: var(--pink); color: #3a0d22; }
+.badge-favorite { background: var(--gold); color: #2b1d00; }
+.badge-group { background: var(--tile); color: var(--ink); }
+.badge-bought { background: var(--cream); color: #6b4a00; }
 .badge-taken { background: var(--green-soft); color: var(--green); }
 .wish-taken { opacity: 0.6; }
+.wish-bought .wish-title { text-decoration: line-through; text-decoration-color: var(--ink-soft); }
 .wish-taken .wish-title { text-decoration: line-through; }
-.wish-actions { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
+.wish-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 0.35rem; margin-left: auto; }
+.wish-actions .button { display: inline-flex; align-items: center; gap: 0.35rem; }
+.wish-favorite { box-shadow: inset 0 0 0 2px var(--gold); }
+.wish-editing { list-style: none; }
+.input-with-button { display: flex; gap: 0.5rem; }
+.input-with-button input { flex: 1; min-width: 0; }
+.input-with-button .button { display: inline-flex; align-items: center; gap: 0.35rem; flex-shrink: 0; }
+.check { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; cursor: pointer; }
+.check input { width: 20px; height: 20px; accent-color: var(--red); }
 
 .empty-inline { margin-bottom: 0.75rem; padding: 1.25rem; border-radius: var(--r-inner); background: var(--bg); color: var(--ink-soft); text-align: center; }
 
@@ -535,6 +548,9 @@ input:focus, textarea:focus { outline: none; border-color: var(--focus); backgro
 .photo-pick input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .photo-preview { display: flex; align-items: center; gap: 0.75rem; }
 .photo-preview img { width: 72px; height: 72px; border-radius: 12px; object-fit: cover; outline: 1px solid rgb(0 0 0 / 0.08); outline-offset: -1px; }
+.logout { display: grid; gap: 0.6rem; justify-items: start; }
+.logout .button { display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+.logout-quiet { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--line); justify-items: center; text-align: center; }
 .form-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
 
 /* ---------- Boutons ---------- */
@@ -559,12 +575,14 @@ input:focus, textarea:focus { outline: none; border-color: var(--focus); backgro
 .button-accent { background: var(--red); color: #fff; }
 .button-quiet { background: var(--bg); color: var(--ink); }
 .button-small { min-height: 40px; padding: 0.4rem 1rem; font-size: 0.9rem; }
-.wish-actions .button:not(.button-done) { background: var(--green); color: #fff; }
+.button-go { background: var(--green); color: #fff; }
+.button-bought { background: var(--gold); color: #2b1d00; }
 .button-done { background: var(--green-soft); color: var(--green); }
 .button-done .icon { animation: icon-in 260ms cubic-bezier(.2, .8, .3, 1) both; }
 @keyframes icon-in { from { opacity: 0; transform: scale(0.25); filter: blur(4px); } }
 .icon-button { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 12px; background: none; color: var(--ink-soft); cursor: pointer; }
-.icon-button:hover { color: var(--danger); background: var(--tile); }
+.icon-button:hover { color: var(--ink); background: var(--tile); }
+.icon-button-danger:hover { color: var(--danger); }
 .icon-button:active { transform: scale(0.96); }
 @media (pointer: coarse) {
   .icon-button { width: 44px; height: 44px; }

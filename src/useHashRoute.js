@@ -4,6 +4,7 @@ const parse = () => {
   const hash = window.location.hash.replace(/^#\/?/, '');
   const [page, id] = hash.split('/');
   if (page === 'moi') return { page: 'me' };
+  if (page === 'cadeaux') return { page: 'gifts' };
   if (page === 'profil') return { page: 'profile' };
   if (page === 'p' && Number(id)) return { page: 'person', id: Number(id) };
   return { page: 'home' };

@@ -21,8 +21,12 @@ export const api = {
   people: () => request('/people'),
   person: (id) => request(`/people/${id}`),
   addWish: (wish) => request('/wishes', { method: 'POST', body: wish }),
+  updateWish: (id, wish) => request(`/wishes/${id}`, { method: 'PUT', body: wish }),
   deleteWish: (id) => request(`/wishes/${id}`, { method: 'DELETE' }),
-  toggleReserve: (id) => request(`/wishes/${id}/reserve`, { method: 'POST' }),
+  // action : reserve, group, join, leave ou bought
+  gift: (id, action) => request(`/wishes/${id}/reserve`, { method: 'POST', body: { action } }),
+  reservations: () => request('/reservations'),
+  preview: (url) => request('/preview', { method: 'POST', body: { url } }),
   photoUrl: (id) => `/api/wishes/${id}/photo${devAs ? `?as=${encodeURIComponent(devAs)}` : ''}`,
   findIdeas: (query) => request('/ideas', { method: 'POST', body: query }),
 };
