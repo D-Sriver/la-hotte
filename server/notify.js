@@ -4,14 +4,19 @@ import { notifyUser, pushConfigured } from './push.js';
  * Prévient des membres de la famille sur leur téléphone quand il se passe quelque chose autour d'un cadeau
  * (message dans la discussion secrète, cagnotte lancée ou rejointe).
  * Règle d'or : jamais la personne gâtée. Seulement les membres de la famille affichée qui ont gardé
- * « Rappels » coché. L'envoi part après la réponse (waitUntil) : il ne ralentit jamais l'action.
+ * ce type de notification (Profil → Notifications). L'envoi part après la réponse (waitUntil) : il ne ralentit jamais l'action.
  */
-export async function recipients(db, { userIds, familyId, ownerId, senderId }) {
+// kind : 'messages' (discussions) ou 'groups' (cagnottes), selon ce que chacun a choisi de recevoir.
+const KIND_COLUMN = { messages: 'notify_messages', groups: 'notify_groups' };
+
+export async function recipients(db, { userIds, familyId, ownerId, senderId, kind }) {
+  const column = KIND_COLUMN[kind];
+  if (!column) throw new Error(`Type de notification inconnu : ${kind}`);
   const ids = [...new Set(userIds)].filter((id) => id && id !== ownerId && id !== senderId);
   if (!ids.length) return [];
   const { results } = await db.prepare(
     `SELECT u.id FROM users u JOIN memberships m ON m.user_id = u.id AND m.family_id = ?1
-     WHERE u.notify_email = 1 AND u.id IN (SELECT value FROM json_each(?2))`,
+     WHERE u.${column} = 1 AND u.id IN (SELECT value FROM json_each(?2))`,
   ).bind(familyId, JSON.stringify(ids)).all();
   return results.map((r) => r.id);
 }

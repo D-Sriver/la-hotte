@@ -5,7 +5,8 @@ import { usesEmailLogin } from '../../server/auth.js';
 const publicProfile = (u) => ({
   id: u.id, email: u.email, name: u.name, likes: u.likes, dislikes: u.dislikes,
   owns: u.owns, sizes: u.sizes, budget_hint: u.budget_hint,
-  birthday: u.birthday, notify_email: !!u.notify_email,
+  birthday: u.birthday,
+  notify: { reminders: !!u.notify_email, messages: !!u.notify_messages, groups: !!u.notify_groups },
 });
 
 // AAAA-MM-JJ valide, sinon rien.
@@ -31,11 +32,11 @@ export async function onRequestPut({ request, env, data }) {
 
   const me = await env.DB.prepare(
     `UPDATE users SET name = ?1, likes = ?2, dislikes = ?3, owns = ?4, sizes = ?5,
-       budget_hint = ?6, birthday = ?8, notify_email = ?9, updated_at = datetime('now')
+       budget_hint = ?6, birthday = ?8, updated_at = datetime('now')
      WHERE id = ?7 RETURNING *`,
   )
     .bind(name, clean(body.likes), clean(body.dislikes), clean(body.owns), clean(body.sizes, 300),
-      clean(body.budget_hint, 60), data.me.id, cleanBirthday(body.birthday), body.notify_email === false ? 0 : 1)
+      clean(body.budget_hint, 60), data.me.id, cleanBirthday(body.birthday))
     .first();
   return json({ me: { ...publicProfile(me), families: data.families, family: data.family } });
 }

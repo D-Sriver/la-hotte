@@ -80,6 +80,8 @@ export const api = {
   pushSubscribe: (subscription) => request('/push', { method: 'POST', body: subscription }),
   pushUnsubscribe: (endpoint) => request('/push', { method: 'DELETE', body: { endpoint } }),
   pushTest: () => request('/push/test', { method: 'POST' }),
+  // { reminders, messages, groups } : seuls les choix envoyés changent.
+  setNotify: (choices) => request('/me/notifications', { method: 'PUT', body: choices }),
   preview: (url) => request('/preview', { method: 'POST', body: { url } }),
   photoUrl: (wishId, photoId) => `/api/wishes/${wishId}/photo?p=${photoId}${devAs ? `&as=${encodeURIComponent(devAs)}` : ''}`,
   // onEvent reçoit { idea }, puis { done, remaining } ou { error }.

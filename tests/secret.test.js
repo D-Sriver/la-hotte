@@ -144,7 +144,17 @@ test('modifier une envie après sa réservation prévient celui qui l’offre', 
 
 test('notifications : jamais la personne gâtée, seulement la famille affichée, et pas ceux qui ont dit non', async () => {
   const { recipients } = await import('../server/notify.js');
-  db.sqlite.prepare('UPDATE users SET notify_email = 0 WHERE id = ?').run(carol);
-  const to = await recipients(db, { userIds: [alice, bob, carol, dave, bob], familyId: f1, ownerId: alice, senderId: null });
+  db.sqlite.prepare('UPDATE users SET notify_messages = 0 WHERE id = ?').run(carol);
+  const to = await recipients(db, { userIds: [alice, bob, carol, dave, bob], familyId: f1, ownerId: alice, senderId: null, kind: 'messages' });
   assert.deepEqual(to, [bob]);
+  const groups = await recipients(db, { userIds: [alice, bob, carol, dave], familyId: f1, ownerId: alice, senderId: null, kind: 'groups' });
+  assert.deepEqual(groups.sort(), [bob, carol].sort(), 'Carol a coupé les messages, pas les cagnottes');
+});
+
+test('préférences de notification : chaque interrupteur ne change que le sien', async () => {
+  const { onRequestPut: prefs } = await import('../functions/api/me/notifications.js');
+  const put = (body) => call(prefs, { db, me: bob, family: f1, body });
+  assert.deepEqual((await put({ messages: false })).body, { reminders: true, messages: false, groups: true });
+  assert.deepEqual((await put({ reminders: false, groups: false })).body, { reminders: false, messages: false, groups: false });
+  assert.equal((await put({ messages: 'oui' })).status, 400);
 });

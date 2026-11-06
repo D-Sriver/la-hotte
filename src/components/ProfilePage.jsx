@@ -53,7 +53,7 @@ export default function ProfilePage({ me, onSaved, onFamiliesChanged }) {
 
       {/* Sur grand écran, à droite de « Mes familles » plutôt qu'en dessous. */}
       <div className="profile-side">
-        <NotificationsPanel />
+        <NotificationsPanel me={me} onChanged={(notify) => onSaved({ ...me, notify })} />
 
         <section className="tile section">
           <h2 className="section-title">Mon compte</h2>

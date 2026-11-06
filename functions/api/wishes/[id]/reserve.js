@@ -57,7 +57,7 @@ export async function onRequestPost(context) {
       ]);
       // Nouvelle cagnotte : toute la famille est prévenue (sauf la personne gâtée).
       if (!wish.group_gift) {
-        const to = await recipients(db, { userIds: await familyMembers(db, data.family.id), familyId: data.family.id, ownerId: wish.owner_id, senderId: me });
+        const to = await recipients(db, { userIds: await familyMembers(db, data.family.id), familyId: data.family.id, ownerId: wish.owner_id, senderId: me, kind: 'groups' });
         notifyLater(context, to, {
           title: `🎁 Cagnotte pour ${await ownerName(db, wish)}`,
           body: `${data.me.name} lance une cagnotte : ${wish.title}. Tu participes ?`,
@@ -72,7 +72,7 @@ export async function onRequestPost(context) {
       await addMe.run();
       // L'organisateur sait qui le rejoint.
       if (!participating) {
-        const to = await recipients(db, { userIds: [wish.reserved_by], familyId: data.family.id, ownerId: wish.owner_id, senderId: me });
+        const to = await recipients(db, { userIds: [wish.reserved_by], familyId: data.family.id, ownerId: wish.owner_id, senderId: me, kind: 'groups' });
         notifyLater(context, to, {
           title: `🎁 ${wish.title}`,
           body: `${data.me.name} participe à ta cagnotte pour ${await ownerName(db, wish)}${amount ? ` (${amount} €)` : ''}.`,

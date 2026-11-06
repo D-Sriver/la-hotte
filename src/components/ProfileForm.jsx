@@ -11,7 +11,7 @@ const FIELDS = [
 const fromProfile = (initial) => ({
     name: initial.name || '', likes: initial.likes || '', owns: initial.owns || '',
     dislikes: initial.dislikes || '', sizes: initial.sizes || '', budget_hint: initial.budget_hint || '',
-    birthday: initial.birthday || '', notify_email: initial.notify_email !== false,
+    birthday: initial.birthday || '',
 });
 
 // quick : premier passage, juste le prénom et les goûts ; le reste se complète plus tard dans Profil.
@@ -64,10 +64,6 @@ export default function ProfileForm({ initial, submitLabel = 'Enregistrer', quic
         <span className="field-label">Anniversaire</span>
         <span className="field-hint">Pour que la famille y pense. Seuls le jour et le mois sont montrés.</span>
         <input type="date" value={form.birthday} onChange={set('birthday')} max={new Date().toISOString().slice(0, 10)} />
-      </label>
-      <label className="check">
-        <input type="checkbox" checked={form.notify_email} onChange={(e) => setForm({ ...form, notify_email: e.target.checked })} />
-        Rappels (Noël, anniversaires, cagnottes)
       </label>
       </>)}
       <div className={`form-actions${dirty ? ' form-actions-sticky' : ''}`}>
