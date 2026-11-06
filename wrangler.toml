@@ -5,7 +5,7 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "la-hotte"
-database_id = "REMPLACE_PAR_TON_ID"   # donné par `wrangler d1 create la-hotte`
+database_id = "874fe530-e678-4ab7-be0d-fa3d2d6c77d7"
 
 [vars]
 CLAUDE_MODEL = "claude-sonnet-5-5"
