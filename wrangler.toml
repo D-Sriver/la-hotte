@@ -1,0 +1,16 @@
+name = "la-hotte"
+compatibility_date = "2025-06-01"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "la-hotte"
+database_id = "874fe530-e678-4ab7-be0d-fa3d2d6c77d7"   # donné par `wrangler d1 create la-hotte`
+
+[ai]
+binding = "AI"
+
+[vars]
+AI_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+IDEAS_PER_DAY = "10"
+# ACCESS_TEAM_DOMAIN et ACCESS_AUD : à mettre dans le dashboard Pages (voir README)

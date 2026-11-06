@@ -1,0 +1,3 @@
+# Copie ce fichier en .dev.vars (jamais commité) pour le dev local.
+DEV_MODE=1
+DEV_EMAIL=sebastien@test.fr
