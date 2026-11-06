@@ -993,6 +993,9 @@ input:focus, textarea:focus { outline: none; border-color: var(--focus); backgro
 .archive-title { font-weight: 600; text-decoration: line-through; text-decoration-color: var(--green); }
 .person-birthday { display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.35rem; padding: 0.15rem 0.55rem; border-radius: 999px; background: rgb(255 255 255 / 0.85); color: #141a2e; font-size: 0.78rem; font-weight: 700; justify-self: start; align-self: start; }
 
+.notif-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+.notif-actions .button { display: inline-flex; align-items: center; gap: 0.4rem; }
+
 /* ---------- Animations des actions ---------- */
 /* Halo vert quand une action réussit (réserver, participer, acheté, ma part). */
 .wish-flash { animation: wish-flash 700ms ease-out; }

@@ -56,7 +56,7 @@ export default function ProfileForm({ initial, submitLabel = 'Enregistrer', onSa
       </label>
       <label className="check">
         <input type="checkbox" checked={form.notify_email} onChange={(e) => setForm({ ...form, notify_email: e.target.checked })} />
-        Rappels par email (Noël, anniversaires, cagnottes)
+        Rappels (Noël, anniversaires, cagnottes)
       </label>
       <div className="form-actions">
         <button className="button" disabled={status.saving}>{status.saving ? 'Enregistrement…' : submitLabel}</button>

@@ -3,6 +3,7 @@ import Avatar from './Avatar.jsx';
 import ProfileForm from './ProfileForm.jsx';
 import LogoutButton from './LogoutButton.jsx';
 import FamiliesPanel from './FamiliesPanel.jsx';
+import NotificationsPanel from './NotificationsPanel.jsx';
 import { profileCompletion } from '../profile.js';
 import { gsap, useGSAP, usePageIntro, MOTION_OK } from '../motion.js';
 
@@ -49,6 +50,8 @@ export default function ProfilePage({ me, onSaved, onFamiliesChanged }) {
       </section>
 
       <FamiliesPanel me={me} onChanged={onFamiliesChanged} />
+
+      <NotificationsPanel />
 
       <section className="tile section">
         <h2 className="section-title">Mon compte</h2>

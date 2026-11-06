@@ -1,9 +1,10 @@
-# Rappels par email de La Hotte : un Worker qui tourne chaque matin (les Pages n'ont pas de tâches programmées).
+# Rappels de La Hotte : un Worker qui tourne chaque matin (les Pages n'ont pas de tâches programmées).
+# Envoie des notifications (clés VAPID, voir npm run setup:push), ou des emails si RESEND_API_KEY est configuré.
 # Déploiement : npm run deploy:reminders
-# Secret : npx wrangler secret put RESEND_API_KEY --config reminders/wrangler.toml
 name = "la-hotte-reminders"
 main = "index.js"
 compatibility_date = "2025-06-01"
+workers_dev = false # pas d'adresse web : ce Worker ne fait que tourner chaque matin
 
 [triggers]
 crons = ["0 8 * * *"] # 8 h UTC, soit 9 h ou 10 h à Paris
@@ -15,4 +16,4 @@ database_id = "874fe530-e678-4ab7-be0d-fa3d2d6c77d7"
 
 [vars]
 APP_URL = "https://la-hotte.pages.dev"
-EMAIL_FROM = "" # ex. "La Hotte <rappels@votre-domaine.fr>", à remplir avec l'adresse vérifiée chez Resend
+EMAIL_FROM = "" # facultatif : adresse vérifiée chez Resend, si un jour on envoie aussi des emails

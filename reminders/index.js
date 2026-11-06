@@ -1,7 +1,9 @@
 import { sendEmail, emailLayout } from '../server/email.js';
+import { notifyUser, pushConfigured } from '../server/push.js';
 import { priceValue } from '../server/wishes.js';
 
-// Rappels envoyés à J-30, J-14, J-7 et J-3 avant Noël, et à J-7 et J-1 avant un anniversaire.
+// Rappels envoyés à J-30, J-14, J-7 et J-3 avant Noël, et à J-7 et J-1 avant un anniversaire :
+// en notification sur le téléphone, ou par email si l'envoi d'emails est configuré.
 const XMAS_DAYS = [30, 14, 7, 3];
 const BIRTHDAY_DAYS = [7, 1];
 const MAX_EMAILS_PER_RUN = 300;
@@ -86,8 +88,12 @@ export default {
 
   async run(env, now) {
     const db = env.DB;
+    const canEmail = !!(env.RESEND_API_KEY && env.EMAIL_FROM);
+    // Les personnes qui veulent des rappels et qu'on peut joindre : notifications, ou email si configuré.
     const { results: users } = await db.prepare(
-      `SELECT u.id, u.email, u.name FROM users u
+      `SELECT u.id, u.email, u.name,
+              EXISTS (SELECT 1 FROM push_subscriptions p WHERE p.user_id = u.id) AS has_push
+       FROM users u
        WHERE u.notify_email = 1 AND u.name IS NOT NULL
          AND EXISTS (SELECT 1 FROM memberships m WHERE m.user_id = u.id)`,
     ).all();
@@ -95,16 +101,31 @@ export default {
     let sentCount = 0;
     for (const user of users) {
       if (sentCount >= MAX_EMAILS_PER_RUN) break;
+      const byPush = user.has_push && pushConfigured(env);
+      if (!byPush && !canEmail) continue;
       const { lines, keys } = await remindersFor(db, user, now);
       if (!lines.length) continue;
       try {
+        if (byPush) {
+          // Une notification par rappel (elles s'empilent sur le téléphone), au plus 3.
+          let delivered = 0;
+          for (const [i, line] of lines.slice(0, 3).entries()) {
+            delivered += await notifyUser(env, user.id, { title: 'La Hotte 🎁', body: line, url: '/#/', tag: `rappel-${i}` });
+          }
+          if (!delivered && !canEmail) continue; // plus aucun appareil joignable : on réessaiera demain
+          if (delivered) {
+            await db.batch(keys.map((key) => db.prepare('INSERT OR IGNORE INTO reminders_sent (user_id, key) VALUES (?1, ?2)').bind(user.id, key)));
+            sentCount++;
+            continue;
+          }
+        }
         await sendEmail(env, {
           to: user.email,
           subject: lines[0],
-          text: `${lines.join('\n')}\n\n${env.APP_URL}\n\nPlus de rappels : décoche « Rappels par email » dans ton profil.`,
+          text: `${lines.join('\n')}\n\n${env.APP_URL}\n\nPlus de rappels : décoche « Rappels » dans ton profil.`,
           html: emailLayout({
             title: `Salut ${user.name} !`,
-            paragraphs: [...lines, 'Tu ne veux plus de rappels ? Décoche « Rappels par email » dans ton profil.'],
+            paragraphs: [...lines, 'Tu ne veux plus de rappels ? Décoche « Rappels » dans ton profil.'],
             button: { label: 'Ouvrir La Hotte', url: env.APP_URL },
           }),
         });
@@ -115,5 +136,6 @@ export default {
       }
     }
     console.log(`Rappels envoyés : ${sentCount}`);
+    return sentCount;
   },
 };

@@ -9,6 +9,11 @@ requestAnimationFrame(() => requestAnimationFrame(() => {
   setTimeout(() => document.documentElement.classList.remove('first-load'), 600);
 }));
 
+// Le service worker affiche les notifications (rappels de Noël, anniversaires…).
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+}
+
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <App />
