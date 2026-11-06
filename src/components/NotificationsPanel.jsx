@@ -1,19 +1,34 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import Icon from './Icon.jsx';
-import { currentSubscription, disablePush, enablePush, isInstalled, isIos, pushSupported } from '../push.js';
+import { disablePush, enablePush, isInstalled, isIos, pushSupported, syncPush } from '../push.js';
 
-// Notifications sur ce téléphone : rappels de Noël, anniversaires et cagnottes.
+// Notifications sur cet appareil (téléphone ou ordinateur) : rappels, cagnottes, discussions.
 export default function NotificationsPanel() {
   const [status, setStatus] = useState(null);
   const [subscribed, setSubscribed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState({ text: '', error: false });
 
+  // On remet l'abonnement de cet appareil d'accord avec le serveur à chaque visite.
   useEffect(() => {
-    api.pushStatus().then(setStatus).catch(() => setStatus({ configured: false }));
-    currentSubscription().then((s) => setSubscribed(!!s)).catch(() => {});
+    api.pushStatus()
+      .then((s) => {
+        setStatus(s);
+        if (s.configured) syncPush(s.public_key).then(setSubscribed).catch(() => setSubscribed(false));
+      })
+      .catch(() => setStatus({ configured: false }));
   }, []);
+
+  // Le test échoue : on réinscrit cet appareil, puis on réessaie une fois.
+  async function test() {
+    try {
+      await api.pushTest();
+    } catch {
+      await enablePush(status.public_key);
+      await api.pushTest();
+    }
+  }
 
   async function act(action, success) {
     setBusy(true);
@@ -45,7 +60,7 @@ export default function NotificationsPanel() {
         {subscribed ? (
           <>
             <button className="button button-small button-go" disabled={busy}
-              onClick={() => act(() => api.pushTest(), 'Notification envoyée, regarde ton téléphone !')}>
+              onClick={() => act(test, 'Notification envoyée : elle arrive dans quelques secondes.')}>
               <Icon name="bell" size={16} />M’envoyer un test
             </button>
             <button className="button button-small button-leave" disabled={busy}
@@ -66,7 +81,7 @@ export default function NotificationsPanel() {
   return (
     <section className="tile section">
       <h2 className="section-title">Notifications</h2>
-      <p className="muted small">Un petit rappel avant Noël et les anniversaires, et quand une cagnotte n’est pas bouclée. Jamais de pub.</p>
+      <p className="muted small">Sur ce téléphone ou cet ordinateur : rappels avant Noël et les anniversaires, cagnottes et messages entre ceux qui offrent. Jamais de pub.</p>
       {content}
       {message.text && <p className={message.error ? 'error small' : 'success small'} role={message.error ? 'alert' : 'status'}>{message.text}</p>}
     </section>

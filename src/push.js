@@ -18,18 +18,46 @@ export async function currentSubscription() {
   return registration ? registration.pushManager.getSubscription() : null;
 }
 
-export async function enablePush(publicKey) {
-  const permission = await Notification.requestPermission();
-  if (permission !== 'granted') {
-    throw new Error('Notifications refusées. Autorise-les pour La Hotte dans les réglages du téléphone ou du navigateur.');
-  }
+const sameKey = (buffer, publicKey) => {
+  if (!buffer) return false;
+  const a = new Uint8Array(buffer);
+  const b = keyBytes(publicKey);
+  return a.length === b.length && a.every((byte, i) => byte === b[i]);
+};
+
+// S'abonne sur cet appareil et l'enregistre côté serveur. Un abonnement fait avec d'autres clés est refait.
+async function subscribe(publicKey) {
   const registration = await navigator.serviceWorker.register('/sw.js');
   await navigator.serviceWorker.ready;
-  const subscription = await registration.pushManager.subscribe({
+  let subscription = await registration.pushManager.getSubscription();
+  if (subscription && !sameKey(subscription.options?.applicationServerKey, publicKey)) {
+    await subscription.unsubscribe();
+    subscription = null;
+  }
+  subscription ||= await registration.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: keyBytes(publicKey),
   });
   await api.pushSubscribe(subscription.toJSON());
+}
+
+export async function enablePush(publicKey) {
+  const permission = await Notification.requestPermission();
+  if (permission !== 'granted') {
+    throw new Error('Notifications refusées. Autorise-les pour La Hotte dans les réglages de l’appareil ou du navigateur.');
+  }
+  await subscribe(publicKey);
+}
+
+/**
+ * Le navigateur se croit abonné, mais le serveur a pu perdre l'abonnement (expiré, clés changées) :
+ * on le renvoie (ou on le refait) sans rien demander. Renvoie vrai si l'appareil est bien inscrit.
+ */
+export async function syncPush(publicKey) {
+  if (!pushSupported() || Notification.permission !== 'granted') return false;
+  if (!(await currentSubscription())) return false;
+  await subscribe(publicKey);
+  return true;
 }
 
 export async function disablePush() {

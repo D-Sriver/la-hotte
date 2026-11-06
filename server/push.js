@@ -67,7 +67,7 @@ export async function encryptPayload(subscription, payload) {
   return concat(salt, recordSize, new Uint8Array([asPublic.length]), asPublic, ciphertext);
 }
 
-// Envoie une notification. Renvoie 'sent', 'gone' (abonnement expiré : à supprimer) ou 'failed'.
+// Envoie une notification. Renvoie 'sent', 'gone' (abonnement expiré : à supprimer) ou la raison du refus.
 export async function sendPush(env, subscription, message) {
   const body = await encryptPayload(subscription, JSON.stringify(message));
   const response = await fetch(subscription.endpoint, {
@@ -84,8 +84,9 @@ export async function sendPush(env, subscription, message) {
   });
   if (response.status === 404 || response.status === 410) return 'gone';
   if (!response.ok) {
-    console.warn('push', response.status, (await response.text()).slice(0, 200));
-    return 'failed';
+    const detail = (await response.text()).slice(0, 200);
+    console.warn('push', response.status, detail);
+    return `refus ${response.status}${detail ? ` ${detail.slice(0, 80)}` : ''}`;
   }
   return 'sent';
 }
