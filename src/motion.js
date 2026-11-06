@@ -34,13 +34,17 @@ export function usePageIntro(ready = true) {
 }
 
 // Fait apparaître en cascade les enfants d'une liste quand leur nombre change.
+// Si la liste grandit (idées qui arrivent une à une), seuls les nouveaux enfants sont animés.
 export function useStagger(count) {
   const scope = useRef(null);
+  const shown = useRef(0);
   useGSAP(() => {
+    const from = count > shown.current ? shown.current : 0;
+    shown.current = count;
     if (!count) return;
     const mm = gsap.matchMedia();
     mm.add(MOTION_OK, () => {
-      gsap.from(scope.current.children, {
+      gsap.from([...scope.current.children].slice(from), {
         y: 16,
         opacity: 0,
         duration: 0.45,

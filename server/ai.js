@@ -30,7 +30,7 @@ const OCCASIONS = { christmas: 'pour Noël', birthday: 'pour son anniversaire' }
 const wishLine = (w) => [w.title, w.price && `(${w.price})`, w.favorite && '— coup de cœur', w.note && `— ${w.note}`]
   .filter(Boolean).join(' ').slice(0, 200);
 
-function buildPrompt({ person, wishes, received, budget, note, occasion }) {
+function buildPrompt({ person, wishes, received, history = [], budget, note, occasion }) {
   const lines = [
     `Propose 5 idées de cadeaux pour ${person.name}${OCCASIONS[occasion] ? ` ${OCCASIONS[occasion]}` : ''}.`,
     `Ce qu'il/elle aime : ${person.likes || 'non précisé'}`,
@@ -41,6 +41,13 @@ function buildPrompt({ person, wishes, received, budget, note, occasion }) {
   ];
   if (wishes.length) lines.push(`Sa liste d'envies (ne pas reproposer, mais s'en inspirer) :\n${wishes.map((w) => `- ${wishLine(w)}`).join('\n')}`);
   if (received.length) lines.push(`Cadeaux déjà reçus (ne pas reproposer) : ${received.join(' ; ')}`);
+  // Les idées déjà proposées, avec l'avis de la famille : on s'en inspire sans les répéter.
+  const liked = history.filter((i) => i.rating === 1 || i.kept).map((i) => i.title);
+  const disliked = history.filter((i) => i.rating === -1 && !i.kept).map((i) => i.title);
+  const others = history.filter((i) => !i.rating && !i.kept).map((i) => i.title).slice(0, 20);
+  if (liked.length) lines.push(`Idées déjà proposées qui ont plu (même esprit, mais ne pas les répéter) : ${liked.join(' ; ')}`);
+  if (disliked.length) lines.push(`Idées déjà proposées jugées à côté (éviter ce genre) : ${disliked.join(' ; ')}`);
+  if (others.length) lines.push(`Idées déjà proposées (ne pas reproposer) : ${others.join(' ; ')}`);
   if (note) lines.push(`Précision de la personne qui offre : ${note}`);
   return lines.join('\n');
 }
@@ -69,8 +76,84 @@ function parseIdeas(text) {
   }
 }
 
-export async function findIdeas(env, input) {
-  const result = await env.AI.run(env.AI_MODEL || '@cf/openai/gpt-oss-120b', {
+// Une idée telle que renvoyée au site (on ne fait pas confiance à la forme donnée par le modèle).
+export function cleanIdea(idea) {
+  if (!idea || typeof idea.title !== 'string' || !idea.title.trim()) return null;
+  const query = String(idea.search || idea.title).slice(0, 150);
+  return {
+    title: idea.title.trim().slice(0, 200),
+    why: String(idea.why || '').slice(0, 400),
+    price: String(idea.price || '').slice(0, 40),
+    shop: String(idea.where || idea.shop || '').slice(0, 80),
+    search_url: `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(query)}`,
+  };
+}
+
+/**
+ * Lit le tableau JSON au fur et à mesure qu'il arrive et rend chaque idée dès que son objet est fermé.
+ * push(texte) renvoie les nouvelles idées complètes ; finish() celles qu'on n'a pu lire qu'à la fin.
+ */
+export function ideaReader() {
+  let text = '';
+  let pos = -1; // -1 : on n'a pas encore trouvé le « [ » du tableau
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  let objectStart = -1;
+  const seen = new Set();
+
+  const take = (raw) => {
+    const idea = cleanIdea(raw);
+    if (!idea || seen.has(idea.title.toLowerCase())) return null;
+    seen.add(idea.title.toLowerCase());
+    return idea;
+  };
+
+  return {
+    push(chunk) {
+      text += chunk;
+      const found = [];
+      if (pos === -1) {
+        // Une réflexion écrite dans la réponse (<think>…</think>) peut contenir des crochets : on la saute.
+        const thinkStart = text.lastIndexOf('<think>');
+        const thinkEnd = text.lastIndexOf('</think>');
+        if (thinkStart > thinkEnd) return found;
+        const from = thinkEnd === -1 ? 0 : thinkEnd + '</think>'.length;
+        const bracket = text.indexOf('[', from);
+        if (bracket === -1) return found;
+        pos = bracket + 1;
+      }
+      for (; pos < text.length; pos++) {
+        const c = text[pos];
+        if (inString) {
+          if (escaped) escaped = false;
+          else if (c === '\\') escaped = true;
+          else if (c === '"') inString = false;
+        } else if (c === '"') inString = true;
+        else if (c === '{') {
+          if (depth === 0) objectStart = pos;
+          depth++;
+        } else if (c === '}' && depth > 0) {
+          depth--;
+          if (depth === 0 && objectStart !== -1) {
+            try {
+              const idea = take(JSON.parse(text.slice(objectStart, pos + 1)));
+              if (idea) found.push(idea);
+            } catch { /* objet mal formé : on l'ignore */ }
+            objectStart = -1;
+          }
+        }
+      }
+      return found;
+    },
+    finish() {
+      return parseIdeas(text).map(take).filter(Boolean);
+    },
+  };
+}
+
+function aiInput(input, stream) {
+  return {
     messages: [
       { role: 'system', content: SYSTEM },
       { role: 'user', content: buildPrompt(input) },
@@ -78,20 +161,67 @@ export async function findIdeas(env, input) {
     // Large : les modèles qui réfléchissent avant de répondre comptent leur réflexion dedans.
     max_tokens: 4000,
     temperature: 0.8,
-  });
+    stream,
+  };
+}
 
-  return parseIdeas(extractText(result))
-    .slice(0, 6)
-    .filter((idea) => idea && typeof idea.title === 'string' && idea.title.trim())
-    .map((idea) => {
-      const query = String(idea.search || idea.title).slice(0, 150);
-      return {
-        title: idea.title.trim().slice(0, 200),
-        why: String(idea.why || '').slice(0, 400),
-        price: String(idea.price || '').slice(0, 40),
-        shop: String(idea.where || idea.shop || '').slice(0, 80),
-        url: null,
-        search_url: `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(query)}`,
-      };
-    });
+// Un morceau de réponse en flux (format Workers AI ou format OpenAI). La réflexion n'est pas gardée.
+function chunkText(data) {
+  if (typeof data?.response === 'string') return data.response;
+  const choice = data?.choices?.[0];
+  return choice?.delta?.content || choice?.text || '';
+}
+
+// Lit le flux d'événements (« data: {...} ») renvoyé par Workers AI quand stream = true.
+async function* streamText(stream) {
+  const reader = stream.pipeThrough(new TextDecoderStream()).getReader();
+  let buffer = '';
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += value;
+    const lines = buffer.split('\n');
+    buffer = lines.pop();
+    for (const line of lines) {
+      const data = line.startsWith('data:') ? line.slice(5).trim() : '';
+      if (!data || data === '[DONE]') continue;
+      try {
+        yield chunkText(JSON.parse(data));
+      } catch { /* ligne incomplète ou autre événement */ }
+    }
+  }
+}
+
+/**
+ * Cherche des idées et appelle onIdea(idée) pour chacune, dès qu'elle arrive.
+ * Si le modèle ne sait pas répondre en flux, on refait une demande classique.
+ */
+export async function findIdeas(env, input, onIdea) {
+  const model = env.AI_MODEL || '@cf/openai/gpt-oss-120b';
+  const reader = ideaReader();
+  let count = 0;
+  let received = '';
+  const emit = async (ideas) => {
+    for (const idea of ideas) {
+      if (count >= 6) return;
+      count++;
+      await onIdea(idea);
+    }
+  };
+
+  const stream = await env.AI.run(model, aiInput(input, true));
+  if (stream instanceof ReadableStream) {
+    for await (const text of streamText(stream)) {
+      received += text;
+      await emit(reader.push(text));
+    }
+    await emit(reader.finish());
+  }
+  if (count || received.trim()) return count;
+
+  const result = stream instanceof ReadableStream ? await env.AI.run(model, aiInput(input, false)) : stream;
+  const fallback = ideaReader();
+  await emit(fallback.push(extractText(result)));
+  await emit(fallback.finish());
+  return count;
 }

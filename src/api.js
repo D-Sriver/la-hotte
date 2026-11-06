@@ -11,23 +11,46 @@ export function setFamily(id) {
   try { localStorage.setItem(FAMILY_KEY, String(id)); } catch { /* stockage indisponible */ }
 }
 
-async function request(path, { method = 'GET', body } = {}) {
+function send(path, { method = 'GET', body } = {}) {
   const headers = { 'content-type': 'application/json' };
   if (devAs) headers['x-dev-email'] = devAs;
   if (familyId) headers['x-family'] = String(familyId);
-  const res = await fetch(`/api${path}`, {
+  return fetch(`/api${path}`, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
   });
+}
+
+async function failure(res) {
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const error = new Error(data.error || `Erreur ${res.status}`);
-    // 401 + login : il faut afficher l'écran de connexion par email.
-    error.needsLogin = res.status === 401 && data.login === true;
-    throw error;
+  const error = new Error(data.error || `Erreur ${res.status}`);
+  // 401 + login : il faut afficher l'écran de connexion par email.
+  error.needsLogin = res.status === 401 && data.login === true;
+  return error;
+}
+
+async function request(path, options) {
+  const res = await send(path, options);
+  if (!res.ok) throw await failure(res);
+  return res.json().catch(() => ({}));
+}
+
+// Réponse ligne par ligne (une ligne JSON par événement) : onEvent est appelé pour chacune.
+async function stream(path, options, onEvent) {
+  const res = await send(path, options);
+  if (!res.ok) throw await failure(res);
+  const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+  let buffer = '';
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += value;
+    const lines = buffer.split('\n');
+    buffer = lines.pop();
+    for (const line of lines) if (line.trim()) onEvent(JSON.parse(line));
   }
-  return data;
+  if (buffer.trim()) onEvent(JSON.parse(buffer));
 }
 
 export const api = {
@@ -59,5 +82,8 @@ export const api = {
   pushTest: () => request('/push/test', { method: 'POST' }),
   preview: (url) => request('/preview', { method: 'POST', body: { url } }),
   photoUrl: (wishId, photoId) => `/api/wishes/${wishId}/photo?p=${photoId}${devAs ? `&as=${encodeURIComponent(devAs)}` : ''}`,
-  findIdeas: (query) => request('/ideas', { method: 'POST', body: query }),
+  // onEvent reçoit { idea }, puis { done, remaining } ou { error }.
+  findIdeas: (query, onEvent) => stream('/ideas', { method: 'POST', body: query }, onEvent),
+  ideaHistory: (personId) => request(`/ideas?person_id=${personId}`),
+  rateIdea: (id, change) => request(`/ideas/${id}`, { method: 'PUT', body: change }),
 };

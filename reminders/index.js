@@ -9,6 +9,7 @@ const BIRTHDAY_DAYS = [7, 1];
 const MAX_EMAILS_PER_RUN = 300;
 
 const DAY = 86_400_000;
+
 const startOfDay = (date) => Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
 
 function daysUntil(month, day, now) {
@@ -22,7 +23,7 @@ const euros = (n) => `${n.toLocaleString('fr-FR', { maximumFractionDigits: 2 })}
 const list = (names) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} et ${names.at(-1)}` : names[0]);
 
 // Ce qu'il faut rappeler à une personne aujourd'hui : des lignes de texte et les clés qui évitent les doublons.
-async function remindersFor(db, user, now) {
+export async function remindersFor(db, user, now) {
   const lines = [];
   const keys = [];
   const sent = new Set((await db.prepare('SELECT key FROM reminders_sent WHERE user_id = ?1').bind(user.id).all()).results.map((r) => r.key));
@@ -38,15 +39,39 @@ async function remindersFor(db, user, now) {
   if (XMAS_DAYS.includes(xmas.days)) {
     const key = `xmas-${xmas.year}-${xmas.days}`;
     if (!sent.has(key)) {
-      // Personne pour qui je n'ai encore rien réservé (seul ou à plusieurs).
-      const { results: covered } = await db.prepare(
-        `SELECT DISTINCT w.owner_id FROM wishes w
-         WHERE w.received_at IS NULL AND (w.reserved_by = ?1
-           OR EXISTS (SELECT 1 FROM contributions c WHERE c.wish_id = w.id AND c.user_id = ?1))`,
-      ).bind(user.id).all();
-      const coveredIds = new Set(covered.map((r) => r.owner_id));
-      const missing = people.filter((p) => !coveredIds.has(p.id)).map((p) => p.name);
-      if (missing.length) lines.push(`Noël dans ${xmas.days} jours : rien de prévu pour ${list(missing)}.`);
+      // Ma propre liste est vide : la famille n'a rien pour se guider.
+      const own = await db.prepare(
+        'SELECT COUNT(*) AS n FROM wishes WHERE owner_id = ?1 AND added_by = ?1 AND received_at IS NULL',
+      ).bind(user.id).first();
+      if (!own.n) lines.push(`Noël dans ${xmas.days} jours et ta liste est vide : ajoute quelques envies pour aider ta famille.`);
+
+      // Pour chaque proche : ce que j’ai prévu, ce que les autres ont prévu (toutes familles, sans dire qui), et ses envies.
+      const { results: status } = await db.prepare(
+        `SELECT u.id,
+           EXISTS (SELECT 1 FROM wishes w WHERE w.owner_id = u.id AND w.received_at IS NULL
+             AND (w.reserved_by = ?1 OR EXISTS (SELECT 1 FROM contributions c WHERE c.wish_id = w.id AND c.user_id = ?1))) AS by_me,
+           EXISTS (SELECT 1 FROM wishes w WHERE w.owner_id = u.id AND w.received_at IS NULL
+             AND (w.reserved_by IS NOT NULL OR EXISTS (SELECT 1 FROM contributions c WHERE c.wish_id = w.id))) AS by_anyone,
+           (SELECT COUNT(*) FROM wishes w WHERE w.owner_id = u.id AND w.added_by = u.id AND w.received_at IS NULL) AS own_wishes
+         FROM users u WHERE u.id IN (SELECT value FROM json_each(?2))`,
+      ).bind(user.id, JSON.stringify(people.map((p) => p.id))).all();
+      const byId = new Map(status.map((s) => [s.id, s]));
+      const nobody = [];
+      const notMe = [];
+      const emptyList = [];
+      for (const person of people) {
+        const s = byId.get(person.id);
+        if (!s || s.by_me) continue;
+        (s.by_anyone ? notMe : nobody).push(person.name);
+        if (!s.own_wishes) emptyList.push(person.name);
+      }
+      if (nobody.length) lines.push(`Noël dans ${xmas.days} jours : personne n’a encore rien prévu pour ${list(nobody)}.`);
+      if (notMe.length) lines.push(`Noël dans ${xmas.days} jours : tu n’as encore rien prévu pour ${list(notMe)}.`);
+      if (emptyList.length) {
+        lines.push(emptyList.length > 1
+          ? `Les listes de ${list(emptyList)} sont vides : une idée secrète ou l’IA peuvent t’aider.`
+          : `La liste de ${emptyList[0]} est vide : une idée secrète ou l’IA peuvent t’aider.`);
+      }
 
       // Cagnottes auxquelles je participe et qui ne sont pas bouclées.
       const { results: pots } = await db.prepare(

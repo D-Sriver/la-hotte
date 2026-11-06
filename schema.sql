@@ -1,4 +1,5 @@
--- La Hotte : schéma D1 (SQLite)
+-- La Hotte : schéma D1 (SQLite), état de la base après la migration 010.
+-- Base neuve : npm run db:local (ou db:remote), qui lance ce fichier puis les migrations suivantes (011 et après).
 -- Cloudflare Access laisse entrer tout le monde (code par email) ;
 -- on voit les autres une fois qu'on a créé ou rejoint une famille (memberships).
 
@@ -135,3 +136,13 @@ CREATE TABLE IF NOT EXISTS wish_photos (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_wish_photos ON wish_photos(wish_id, position);
+
+-- Les migrations 001 à 010 sont déjà comprises dans ce fichier : wrangler ne les relancera pas.
+CREATE TABLE IF NOT EXISTS d1_migrations (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  name       TEXT UNIQUE,
+  applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+INSERT OR IGNORE INTO d1_migrations (name) VALUES
+  ('001_join_code.sql'), ('002_wish_photo.sql'), ('003_group_bought_favorite.sql'), ('004_price_searches.sql'),
+  ('005_contribution_amount.sql'), ('006_families.sql'), ('008_more.sql'), ('009_push.sql'), ('010_photos.sql');

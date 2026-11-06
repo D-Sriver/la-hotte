@@ -34,12 +34,16 @@ export default function GiftsPage() {
   if (error) return <p className="error" role="alert">{error}</p>;
   if (!data) return <Skeleton rows={4} />;
 
-  const { gifts, total, unpriced } = data;
+  const { gifts, given = [], total, year_total: yearTotal = total, unpriced } = data;
   const bought = gifts.filter((g) => g.bought).length;
-  const byPerson = Object.values(gifts.reduce((groups, g) => {
-    (groups[g.owner_id] ||= { id: g.owner_id, name: g.owner_name, gifts: [] }).gifts.push(g);
+  // Par personne : ce qui est prévu, puis ce qui a déjà été offert cette année, avec le total des deux.
+  const byPerson = Object.values([...gifts, ...given].reduce((groups, g) => {
+    const person = (groups[g.owner_id] ||= { id: g.owner_id, name: g.owner_name, gifts: [], total: 0 });
+    person.gifts.push(g);
+    person.total += g.my_share || 0;
     return groups;
   }, {}));
+  const year = new Date().getFullYear();
 
   return (
     <div className="bento-page gifts-page" ref={scope}>
@@ -51,6 +55,7 @@ export default function GiftsPage() {
           `${gifts.length} cadeau${gifts.length > 1 ? 'x' : ''}`,
           `${euros(total)} de budget${unpriced ? ` (+ ${unpriced} sans prix)` : ''}`,
           `${bought} acheté${bought > 1 ? 's' : ''}`,
+          ...(given.length ? [`${euros(yearTotal)} en ${year}, déjà offerts compris`] : []),
         ]}
       />
       {gifts.some((g) => g.group_gift) && (
@@ -68,10 +73,11 @@ export default function GiftsPage() {
         <section key={person.id} className="tile section">
           <div className="section-head">
             <h2 className="section-title"><a href={`#/p/${person.id}`}>{person.name}</a><span className="count">{person.gifts.length}</span></h2>
+            {person.total > 0 && <span className="price person-total">{euros(Math.round(person.total * 100) / 100)}</span>}
           </div>
           <ul className="wish-list">
             {person.gifts.map((g) => (
-              <li key={g.id} className={`wish${g.bought ? ' wish-bought' : ''}`}>
+              <li key={g.id} className={`wish${g.bought || g.received ? ' wish-bought' : ''}`}>
                 {g.cover && (
                   <span className={`wish-photo wish-photo-box${g.cover.frame ? ' is-framed' : ''}`}>
                     <img src={api.photoUrl(g.id, g.cover.id)} alt="" loading="lazy" style={frameStyle(parseFrame(g.cover.frame))} />
@@ -88,6 +94,9 @@ export default function GiftsPage() {
                       : g.price ? '' : 'prix non indiqué'}
                   </p>
                 </div>
+                {g.received ? (
+                  <span className="badge badge-taken"><Icon name="gift" size={14} />Offert</span>
+                ) : (
                 <div className="wish-actions">
                   <button
                     className={`button button-small button-quiet${g.bought ? ' button-bought' : ''}`}
@@ -98,6 +107,7 @@ export default function GiftsPage() {
                     <Icon name={g.bought ? 'check' : 'bag'} size={16} />{g.bought ? 'Acheté' : 'Marquer acheté'}
                   </button>
                 </div>
+                )}
               </li>
             ))}
           </ul>
