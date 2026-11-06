@@ -97,6 +97,16 @@ test('findIdeas transmet à l’IA les avis sur les idées précédentes', async
   assert.match(prompt, /déjà reçus[^\n]*Écharpe/);
 });
 
+test('findIdeas tutoie la personne quand elle cherche pour elle-même', async () => {
+  const prompt = async (forSelf) => {
+    const ai = fakeAi('[]');
+    await findIdeas({ AI: ai }, { person: { name: 'Alice' }, wishes: [], received: [], forSelf }, () => {});
+    return ai.calls[0].messages[1].content;
+  };
+  assert.match(await prompt(true), /en la tutoyant/);
+  assert.match(await prompt(false), /par son prénom/);
+});
+
 let db, alice, bob, dave, f1, f2;
 beforeEach(() => {
   db = testDb();

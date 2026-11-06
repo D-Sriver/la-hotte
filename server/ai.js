@@ -30,8 +30,11 @@ const OCCASIONS = { christmas: 'pour Noël', birthday: 'pour son anniversaire' }
 const wishLine = (w) => [w.title, w.price && `(${w.price})`, w.favorite && '— coup de cœur', w.note && `— ${w.note}`]
   .filter(Boolean).join(' ').slice(0, 200);
 
-function buildPrompt({ person, wishes, received, history = [], budget, note, occasion }) {
+function buildPrompt({ person, wishes, received, history = [], budget, note, occasion, forSelf = false }) {
   const lines = [
+    forSelf
+      ? `C'est ${person.name} qui cherche des idées pour sa propre liste : dans "why", parle-lui directement en la tutoyant (« Tu pourras… »).`
+      : `C'est un proche qui cherche un cadeau pour ${person.name} : dans "why", parle de ${person.name} par son prénom.`,
     `Propose 5 idées de cadeaux pour ${person.name}${OCCASIONS[occasion] ? ` ${OCCASIONS[occasion]}` : ''}.`,
     `Ce qu'il/elle aime : ${person.likes || 'non précisé'}`,
     `À éviter : ${person.dislikes || 'rien de précisé'}`,

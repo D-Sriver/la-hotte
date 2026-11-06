@@ -100,9 +100,14 @@ export default function Home({ me }) {
   const [luck] = useState(() => Math.random());
   const scope = usePageIntro(people !== null || error !== '');
 
+  const [myWishes, setMyWishes] = useState(null);
+
   useEffect(() => {
     api.people()
-      .then((d) => setPeople(d.people.filter((p) => !p.is_me)))
+      .then((d) => {
+        setPeople(d.people.filter((p) => !p.is_me));
+        setMyWishes(d.people.find((p) => p.is_me)?.wish_count ?? null);
+      })
       .catch((e) => setError(e.message));
     api.reservations().then((d) => setGifts(d.gifts)).catch(() => setGifts([]));
   }, []);
@@ -176,6 +181,15 @@ export default function Home({ me }) {
           })}
           <InviteCard family={me.family} alone={alone} />
         </div>
+      )}
+
+      {/* Liste vide : la famille n'a rien pour se guider, on le rappelle tout de suite. */}
+      {myWishes === 0 && (
+        <section className="tile tile-wide section my-list-nudge">
+          <h2 className="section-title">Et toi, qu’est-ce qui te ferait plaisir&nbsp;?</h2>
+          <p className="muted small">Ta liste est vide : ajoute une ou deux envies pour aider la famille. Personne ne saura ce qu’on t’offre.</p>
+          <a className="button button-accent" href="#/moi"><Icon name="plus" size={18} />Remplir ma liste</a>
+        </section>
       )}
 
       <GivingSummary gifts={gifts} suggestion={suggestion} />

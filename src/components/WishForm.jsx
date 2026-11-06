@@ -122,7 +122,11 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
     <form className="form card card-pad" onSubmit={submit}>
       {forSomeoneElse && !editing && <p className="notice"><Icon name="lock" size={15} />Chut. Cette idée reste secrète : la personne ne la verra pas.</p>}
       <label className="field">
-        <span className="field-label">Lien</span>
+        <span className="field-label">Quoi</span>
+        <input value={form.title} placeholder={forSomeoneElse ? 'ex. un pull bien chaud' : 'ex. un sécateur'} onChange={set('title')} required maxLength={200} autoFocus />
+      </label>
+      <label className="field">
+        <span className="field-label">Lien <span className="muted small">(facultatif)</span></span>
         <div className="input-with-button">
           <input
             type="url"
@@ -135,19 +139,14 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
               const pasted = e.clipboardData.getData('text').trim();
               if (/^https?:\/\/\S+\.\S+/.test(pasted) && !reading) setTimeout(() => fillFromLink(pasted), 0);
             }}
-            autoFocus={!editing}
           />
           <button type="button" className="button button-quiet button-small" disabled={!canRead || reading} onClick={() => fillFromLink()}>
             <Icon name="sparkle" size={16} />{reading ? 'Lecture…' : 'Remplir'}
           </button>
         </div>
         <span className="field-hint" role="status">
-          {reading ? 'Lecture de la page…' : hint || 'Colle le lien : le nom, le prix et la photo arrivent tout seuls (quand le site le permet).'}
+          {reading ? 'Lecture de la page…' : hint || 'Tu as trouvé l’objet sur un site ? Colle le lien : le prix et la photo arrivent tout seuls.'}
         </span>
-      </label>
-      <label className="field">
-        <span className="field-label">Quoi</span>
-        <input value={form.title} onChange={set('title')} required maxLength={200} autoFocus={editing} />
       </label>
       <div className="field-row">
         <label className="field">

@@ -14,7 +14,8 @@ const fromProfile = (initial) => ({
     birthday: initial.birthday || '', notify_email: initial.notify_email !== false,
 });
 
-export default function ProfileForm({ initial, submitLabel = 'Enregistrer', onSaved }) {
+// quick : premier passage, juste le prénom et les goûts ; le reste se complète plus tard dans Profil.
+export default function ProfileForm({ initial, submitLabel = 'Enregistrer', quick = false, onSaved }) {
   const [saved, setSaved] = useState(() => fromProfile(initial));
   const [form, setForm] = useState(saved);
   // Modifié mais pas encore enregistré : le bouton reste visible en bas de l'écran.
@@ -42,7 +43,7 @@ export default function ProfileForm({ initial, submitLabel = 'Enregistrer', onSa
         <span className="field-label">Prénom</span>
         <input value={form.name} onChange={set('name')} required maxLength={60} autoComplete="given-name" />
       </label>
-      {FIELDS.map((f) => (
+      {(quick ? FIELDS.slice(0, 1) : FIELDS).map((f) => (
         <label className="field" key={f.key}>
           <span className="field-label">{f.label}</span>
           <span className="field-hint">{f.hint}</span>
@@ -51,6 +52,9 @@ export default function ProfileForm({ initial, submitLabel = 'Enregistrer', onSa
             : <input value={form[f.key]} onChange={set(f.key)} />}
         </label>
       ))}
+      {quick ? (
+        <p className="field-hint">Tailles, budget, anniversaire… tu pourras compléter quand tu veux dans « Profil ».</p>
+      ) : (<>
       <label className="field">
         <span className="field-label">Budget idéal</span>
         <span className="field-hint">Une indication pour la famille, ex. « 20 à 50 € ».</span>
@@ -65,9 +69,10 @@ export default function ProfileForm({ initial, submitLabel = 'Enregistrer', onSa
         <input type="checkbox" checked={form.notify_email} onChange={(e) => setForm({ ...form, notify_email: e.target.checked })} />
         Rappels (Noël, anniversaires, cagnottes)
       </label>
+      </>)}
       <div className={`form-actions${dirty ? ' form-actions-sticky' : ''}`}>
         <button className="button" disabled={status.saving}>{status.saving ? 'Enregistrement…' : submitLabel}</button>
-        {dirty && !status.saving && <span className="muted small">Modifications non enregistrées</span>}
+        {dirty && !status.saving && !quick && <span className="muted small">Modifications non enregistrées</span>}
         {status.message && <span className="success" role="status">{status.message}</span>}
         {status.error && <span className="error" role="alert">{status.error}</span>}
       </div>

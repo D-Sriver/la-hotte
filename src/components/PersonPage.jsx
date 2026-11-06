@@ -63,6 +63,9 @@ export default function PersonPage({ id }) {
         <div className="section-head">
           <h2 className="section-title">Sa liste<span className="count">{wishes.length}</span></h2>
         </div>
+        {!person.is_me && (
+          <p className="notice"><Icon name="lock" size={15} />{person.name} ne voit ni ce qui est réservé, ni par qui, ni les idées secrètes.</p>
+        )}
         <WishList wishes={wishes} emptyText="Rien pour l’instant. Des idées t’attendent juste en dessous." onChanged={load} />
         <AddWishForm ownerId={person.id} forSomeoneElse onAdded={load} />
       </section>

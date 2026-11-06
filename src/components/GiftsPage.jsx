@@ -96,6 +96,10 @@ export default function GiftsPage() {
                 </div>
                 {g.received ? (
                   <span className="badge badge-taken"><Icon name="gift" size={14} />Offert</span>
+                ) : !g.i_buy ? (
+                  <span className={`badge ${g.bought ? 'badge-bought' : 'badge-group'}`}>
+                    <Icon name={g.bought ? 'check' : 'family'} size={14} />{g.bought ? 'Acheté' : 'L’organisateur achète'}
+                  </span>
                 ) : (
                 <div className="wish-actions">
                   <button

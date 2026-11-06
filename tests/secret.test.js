@@ -6,12 +6,12 @@ import { visibleWishes, personInFamily, wishInFamily } from '../server/wishes.js
 import { onRequestGet as getPerson } from '../functions/api/people/[id].js';
 import { onRequestGet as getPeople } from '../functions/api/people/index.js';
 
-let db, alice, bob, carol, dave, f1, f2, own, received, secretF1, secretF2, pot;
+let db, s, alice, bob, carol, dave, f1, f2, own, received, secretF1, secretF2, pot;
 
 // Famille 1 : Alice, Bob, Carol. Famille 2 : Alice, Dave.
 beforeEach(() => {
   db = testDb();
-  const s = seed(db);
+  s = seed(db);
   [alice, bob, carol, dave] = ['Alice', 'Bob', 'Carol', 'Dave'].map((n) => s.user(n));
   f1 = s.family('Un', alice, bob, carol);
   f2 = s.family('Deux', alice, dave);
@@ -93,4 +93,23 @@ test('route /api/people : le compteur d’envies ne trahit pas les idées secrè
   assert.equal(body.people.find((p) => p.id === alice).wish_count, 2);
   const carolSees = await call(getPeople, { db, me: carol, family: f1 });
   assert.equal(carolSees.body.people.find((p) => p.id === alice).wish_count, 3);
+});
+
+test('cadeau à plusieurs : seul l’organisateur coche « acheté » ou « offert »', async () => {
+  const { onRequestPost: gift } = await import('../functions/api/wishes/[id]/reserve.js');
+  s = seed(db);
+  s.contribute(pot, carol, 50);
+  const act = (me, action) => call(gift, { db, me, family: f1, params: { id: String(pot) }, body: { action } });
+  assert.equal((await act(carol, 'bought')).status, 403);
+  assert.equal((await act(carol, 'given')).status, 403);
+  assert.equal((await act(bob, 'bought')).status, 200);
+});
+
+test('invitation : on voit les prénoms des membres avant de rejoindre', async () => {
+  const { onRequestGet: invitation } = await import('../functions/api/join.js');
+  const eve = await db.prepare('SELECT * FROM users WHERE id = ?1').bind(s.user('Eve')).first();
+  db.sqlite.prepare("UPDATE families SET code = 'K7PQ-M3XA' WHERE id = ?").run(f1);
+  const { body } = await call(invitation, { db, me: eve, family: null, url: 'https://test/api/join?code=k7pq m3xa' });
+  assert.deepEqual(body.family.members.sort(), ['Alice', 'Bob', 'Carol']);
+  assert.equal(body.member, false);
 });

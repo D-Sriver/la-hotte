@@ -371,6 +371,9 @@ a.tile:active { transform: scale(0.97); }
 /* « Ce que j'offre » vide : un bouton vers la liste de la prochaine occasion. */
 .giving-empty { display: grid; gap: 0.9rem; justify-items: start; }
 .giving-cta { display: inline-flex; align-items: center; gap: 0.45rem; }
+.my-list-nudge { display: grid; gap: 0.6rem; justify-items: start; }
+.my-list-nudge .section-title { margin: 0; }
+.my-list-nudge .button { display: inline-flex; align-items: center; gap: 0.45rem; }
 
 /* Le code de la famille sur une seule ligne. */
 .code-bar { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; padding: 0.85rem 0.9rem 0.85rem 1.2rem; }
@@ -811,6 +814,8 @@ a.tile:active { transform: scale(0.97); }
 .progress-text { font-size: 0.9rem; color: var(--ink-soft); }
 .progress-text strong { color: var(--ink); font-size: 1.05rem; }
 .group-done .progress-text strong { color: var(--green); }
+.group-organizer { display: flex; align-items: center; gap: 0.4rem; margin: 0; font-size: 0.88rem; color: inherit; opacity: 0.8; text-wrap: pretty; }
+.group-organizer .icon { flex: none; }
 .chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0; padding: 0; list-style: none; }
 .chip { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.6rem 0.2rem 0.2rem; border-radius: 999px; background: var(--tile); font-size: 0.85rem; box-shadow: 0 1px 2px rgb(20 26 46 / 0.06); }
 .chip strong { font-weight: 700; }

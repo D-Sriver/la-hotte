@@ -5,7 +5,7 @@ import { priceValue } from '../../server/wishes.js';
 // plus ce que j'ai déjà offert cette année (reçu), pour le bilan de l'année par personne.
 export async function onRequestGet({ env, data }) {
   const { results } = await env.DB.prepare(
-    `SELECT w.id, w.title, w.url, w.price, w.bought, w.group_gift, (SELECT json_object('id', id, 'frame', frame) FROM wish_photos WHERE wish_id = w.id ORDER BY position, id LIMIT 1) AS cover,
+    `SELECT w.id, w.title, w.url, w.price, w.bought, w.group_gift, w.reserved_by, (SELECT json_object('id', id, 'frame', frame) FROM wish_photos WHERE wish_id = w.id ORDER BY position, id LIMIT 1) AS cover,
             o.id AS owner_id, o.name AS owner_name,
             (SELECT COUNT(*) FROM contributions c WHERE c.wish_id = w.id) AS participant_count,
             (SELECT amount FROM contributions c WHERE c.wish_id = w.id AND c.user_id = ?1) AS my_amount,
@@ -41,6 +41,8 @@ export async function onRequestGet({ env, data }) {
       my_share: myShare === null ? null : Math.round(myShare * 100) / 100,
       my_amount_set: !!(w.group_gift && w.my_amount),
       received: !!w.received_at,
+      // À plusieurs, seul l'organisateur achète.
+      i_buy: w.reserved_by === data.me.id,
     };
   });
   const sum = (list) => Math.round(list.reduce((total, g) => total + (g.my_share || 0), 0) * 100) / 100;

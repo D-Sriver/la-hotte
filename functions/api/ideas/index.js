@@ -53,6 +53,7 @@ export async function onRequestPost({ request, env, data }) {
     budget: clean(body.budget, 60),
     occasion: body.occasion === 'birthday' ? 'birthday' : 'christmas',
     note: clean(body.note, 300),
+    forSelf: person.id === data.me.id,
   };
 
   const { readable, writable } = new TransformStream();

@@ -29,7 +29,12 @@ export async function onRequestGet({ request, env, data }) {
   if (isBlocked(me)) return fail(429, 'Trop d’essais. Réessaie dans une heure.');
   const family = await findFamily(env, me, new URL(request.url).searchParams.get('code'));
   if (!family) return fail(404, 'Ce lien d’invitation ne correspond à aucune famille.');
-  return json({ family, member: await isMember(env.DB, family.id, me.id) });
+  // Les prénoms des membres, pour savoir qui on rejoint.
+  const { results } = await env.DB.prepare(
+    `SELECT u.name FROM memberships m JOIN users u ON u.id = m.user_id
+     WHERE m.family_id = ?1 AND u.name IS NOT NULL ORDER BY m.joined_at LIMIT 6`,
+  ).bind(family.id).all();
+  return json({ family: { ...family, members: results.map((r) => r.name) }, member: await isMember(env.DB, family.id, me.id) });
 }
 
 // Rejoindre une famille avec son code.

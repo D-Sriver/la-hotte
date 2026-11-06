@@ -162,10 +162,14 @@ export default function App() {
           <img src="/icon.svg" alt="" width="56" height="56" />
           <h1 className="title">Bienvenue dans La Hotte</h1>
           <p className="lead">
-            Dis-nous ce que tu aimes. La famille s’en servira pour te trouver des cadeaux,
-            et toi pour leur en trouver.
+            Ton prénom, et ce que tu aimes si tu veux : la famille s’en servira pour te trouver des cadeaux.
           </p>
-          <ProfileForm initial={me} submitLabel="Créer mon profil" onSaved={setMe} />
+          <ProfileForm
+            initial={me}
+            quick
+            submitLabel="C’est parti"
+            onSaved={(saved) => { setMe(saved); window.scrollTo(0, 0); }}
+          />
           <LogoutButton email={me.email} emailLogin={me.email_login} quiet />
         </div>
       </main>

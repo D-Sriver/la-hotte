@@ -76,7 +76,7 @@ export async function call(handler, { db, me, family, params = {}, url = 'https:
     request,
     env: { DB: db, ...env },
     params,
-    data: { me: { id: me }, family: family ? { id: family } : null },
+    data: { me: typeof me === 'object' ? me : { id: me }, family: family ? { id: family } : null },
   });
   return { status: response.status, body: response.headers.get('content-type')?.includes('ndjson') ? await response.text() : await response.json() };
 }

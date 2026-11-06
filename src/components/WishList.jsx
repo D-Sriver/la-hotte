@@ -10,6 +10,8 @@ const hostOf = (url) => {
   try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; }
 };
 
+const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);
+
 const euros = (n) => `${n.toLocaleString('fr-FR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })} €`;
 
 // Où en est la cagnotte d'un cadeau à plusieurs : qui met combien, et la barre vers le prix.
@@ -32,6 +34,12 @@ function GroupProgress({ wish, children }) {
       ) : (
         <p className="progress-text num"><strong>{euros(wish.collected)}</strong> réunis (pas de prix indiqué)</p>
       )}
+      <p className="group-organizer">
+        <Icon name="bag" size={14} />
+        {wish.reserved_by_me
+          ? 'Tu organises : c’est toi qui achètes, les autres te donnent leur part.'
+          : `${capitalize(wish.reserved_by_name)} organise et achète : tu lui donnes ta part.`}
+      </p>
       <ul className="chips" aria-label="Participants">
         {wish.participants.map((p) => (
           <li key={p.id} className="chip">
@@ -115,10 +123,11 @@ function GiftActions({ wish, busy, run }) {
   );
 
   if (wish.group_gift) {
+    // Seul l'organisateur achète : lui seul coche « acheté » puis « offert ».
     return wish.participating ? (
       <>
-        {givenButton}
-        {boughtButton}
+        {wish.reserved_by_me && givenButton}
+        {wish.reserved_by_me && boughtButton}
         <button className="button button-small button-leave" disabled={busy} onClick={act('leave')}>Je me retire</button>
       </>
     ) : (
