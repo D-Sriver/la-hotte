@@ -52,3 +52,9 @@ CREATE TABLE IF NOT EXISTS idea_requests (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_idea_requests_user ON idea_requests(user_id, created_at);
+
+-- Compteur des recherches de prix SerpApi (palier gratuit : on s'arrête bien avant la limite).
+CREATE TABLE IF NOT EXISTS price_searches (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);

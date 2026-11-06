@@ -55,7 +55,11 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
       setForm((f) => ({ ...f, title: f.title || found.title || '', price: f.price || found.price || '' }));
       if (found.image && (photoState === 'none' || photoState === 'removed')) await applyPhoto(found.image).catch(() => {});
       const missing = [!found.price && 'le prix', !found.image && 'la photo'].filter(Boolean);
-      if (found.blocked) {
+      if (found.price_source) {
+        setHint(found.price_exact
+          ? `Prix trouvé chez ${found.price_source} par une recherche : vérifie-le avant d’acheter.`
+          : `Prix estimé d’après d’autres boutiques (dont ${found.price_source}) : vérifie-le avant d’acheter.`);
+      } else if (found.blocked) {
         setHint(`Ce site bloque la lecture automatique : le nom vient du lien, ajoute ${missing.join(' et ')} à la main.`);
       } else if (!found.title && !found.price && !found.image) {
         setHint('Rien trouvé sur cette page, remplis à la main.');

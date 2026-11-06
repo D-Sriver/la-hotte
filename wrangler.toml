@@ -13,4 +13,6 @@ binding = "AI"
 [vars]
 AI_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
 IDEAS_PER_DAY = "10"
+PRICE_SEARCHES_PER_MONTH = "200" # palier gratuit SerpApi : 250
+# Secret SERPAPI_KEY (wrangler pages secret put) : sans lui, pas de recherche de prix.
 # ACCESS_TEAM_DOMAIN et ACCESS_AUD : à mettre dans le dashboard Pages (voir README)

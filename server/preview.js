@@ -1,3 +1,5 @@
+import { searchPrice } from './pricesearch.js';
+
 // Lit une page produit pour pré-remplir une envie : titre, prix, image.
 // Au mieux de ce que le site veut bien donner (certains, comme Amazon, bloquent souvent les robots).
 
@@ -182,7 +184,7 @@ async function priceWithAi(env, title, text) {
   return /\d/.test(answer) && answer.length < 20 ? answer : '';
 }
 
-export async function previewLink(pageUrl, env = {}) {
+async function readPage(pageUrl, env) {
   const fallback = { title: titleFromUrl(pageUrl), price: '', image: null, blocked: true };
   let response;
   try {
@@ -213,4 +215,14 @@ export async function previewLink(pageUrl, env = {}) {
   price ||= aiPrice;
 
   return { title: (title || fallback.title).slice(0, 200), price, image, blocked: false };
+}
+
+export async function previewLink(pageUrl, env = {}) {
+  const found = await readPage(pageUrl, env);
+  if (found.price) return found;
+  // Pas de prix sur la page (ou page bloquée) : on tente une recherche croisée.
+  const match = await searchPrice(env, found.title, pageUrl).catch(() => null);
+  if (!match) return found;
+  const image = found.image || (match.thumbnail ? await fetchImage(match.thumbnail, pageUrl).catch(() => null) : null);
+  return { ...found, price: match.price, image, price_source: match.source, price_exact: match.exact };
 }
