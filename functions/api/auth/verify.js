@@ -1,4 +1,4 @@
-import { json, fail, readJson } from '../../../server/http.js';
+import { fail, readJson } from '../../../server/http.js';
 import { usesEmailLogin } from '../../../server/auth.js';
 import { hashCode, sessionCookie } from '../../../server/session.js';
 

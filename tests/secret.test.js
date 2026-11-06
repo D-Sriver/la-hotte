@@ -6,7 +6,7 @@ import { visibleWishes, personInFamily, wishInFamily } from '../server/wishes.js
 import { onRequestGet as getPerson } from '../functions/api/people/[id].js';
 import { onRequestGet as getPeople } from '../functions/api/people/index.js';
 
-let db, s, alice, bob, carol, dave, f1, f2, own, received, secretF1, secretF2, pot;
+let db, s, alice, bob, carol, dave, f1, f2, own, received, secretF1, pot;
 
 // Famille 1 : Alice, Bob, Carol. Famille 2 : Alice, Dave.
 beforeEach(() => {
@@ -18,7 +18,7 @@ beforeEach(() => {
   own = s.wish(alice, 'Vélo', { price: '300 €', reservedBy: bob });
   received = s.wish(alice, 'Écharpe', { receivedAt: '2026-01-02 10:00:00' });
   secretF1 = s.wish(alice, 'Surprise de Bob', { addedBy: bob, family: f1 });
-  secretF2 = s.wish(alice, 'Surprise de Dave', { addedBy: dave, family: f2 });
+  s.wish(alice, 'Surprise de Dave', { addedBy: dave, family: f2 });
   pot = s.wish(alice, 'Appareil photo', { price: '400 €', group: true, reservedBy: bob });
   s.contribute(pot, bob, 100);
 });

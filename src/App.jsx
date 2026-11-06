@@ -1,11 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { api, setFamily } from './api.js';
 import { useHashRoute } from './useHashRoute.js';
 import Home from './components/Home.jsx';
-import PersonPage from './components/PersonPage.jsx';
-import MePage from './components/MePage.jsx';
-import GiftsPage from './components/GiftsPage.jsx';
-import ProfilePage from './components/ProfilePage.jsx';
+import Skeleton from './components/Skeleton.jsx';
 import ProfileForm from './components/ProfileForm.jsx';
 import JoinForm from './components/JoinForm.jsx';
 import InviteScreen from './components/InviteScreen.jsx';
@@ -16,6 +13,20 @@ import LoginScreen from './components/LoginScreen.jsx';
 import InstallPrompt from './components/InstallPrompt.jsx';
 import { gsap, useGSAP } from './motion.js';
 import { zoomBackHome } from './zoom.js';
+
+// Les pages autres que l'accueil arrivent à part (premier affichage plus léger),
+// puis sont préchargées dès que le navigateur est libre : la navigation reste instantanée.
+const PAGES = {
+  person: () => import('./components/PersonPage.jsx'),
+  me: () => import('./components/MePage.jsx'),
+  gifts: () => import('./components/GiftsPage.jsx'),
+  profile: () => import('./components/ProfilePage.jsx'),
+};
+const PersonPage = lazy(PAGES.person);
+const MePage = lazy(PAGES.me);
+const GiftsPage = lazy(PAGES.gifts);
+const ProfilePage = lazy(PAGES.profile);
+const preloadPages = () => Object.values(PAGES).forEach((load) => load().catch(() => {}));
 
 const TABS = [
   { page: 'home', href: '#/', label: 'Famille', icon: 'family' },
@@ -137,6 +148,11 @@ export default function App() {
   }, []);
   useEffect(loadMe, [loadMe]);
 
+  useEffect(() => {
+    const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1500));
+    idle(preloadPages);
+  }, []);
+
   // Après avoir créé, rejoint ou choisi une famille : on l'affiche.
   const showFamily = useCallback((family) => {
     if (family?.id) setFamily(family.id);
@@ -237,11 +253,13 @@ export default function App() {
       {/* Changer de famille recharge toutes les pages avec les bonnes personnes. */}
       <InstallPrompt />
       <main className="page" key={me.family.id}>
+        <Suspense fallback={<Skeleton rows={4} />}>
         {route.page === 'home' && <Home me={me} />}
         {route.page === 'me' && <MePage me={me} />}
         {route.page === 'gifts' && <GiftsPage familyId={me.family.id} onSwitchFamily={switchFamily} />}
         {route.page === 'profile' && <ProfilePage me={me} onSaved={setMe} onFamiliesChanged={showFamily} />}
         {route.page === 'person' && <PersonPage key={route.id} id={route.id} />}
+        </Suspense>
       </main>
     </div>
   );

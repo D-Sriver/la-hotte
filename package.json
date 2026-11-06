@@ -15,7 +15,10 @@
     "deploy": "npm run build && wrangler pages deploy",
     "deploy:reminders": "wrangler deploy --config reminders/wrangler.toml",
     "setup:push": "node scripts/setup-push.mjs",
-    "test": "node --test --test-reporter=spec \"tests/**/*.test.js\""
+    "test": "node --test --test-reporter=spec \"tests/**/*.test.js\"",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@fontsource/onest": "5.3.1",
@@ -27,7 +30,13 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@eslint/js": "9.39.5",
     "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "9.39.5",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.13.0",
+    "prettier": "3.9.10",
     "vite": "^5.4.11",
     "wrangler": "^4.20.0"
   },
