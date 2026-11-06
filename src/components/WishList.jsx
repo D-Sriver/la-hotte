@@ -94,6 +94,8 @@ function MyAmount({ wish, busy, run }) {
 
 // Les boutons pour offrir le cadeau de quelqu'un d'autre, selon où il en est.
 function GiftActions({ wish, busy, run }) {
+  // Lancer une cagnotte engage (on achète, la famille est prévenue) : on le dit avant, dans la page.
+  const [confirmingGroup, setConfirmingGroup] = useState(false);
   const act = (action, celebrate) => (e) => {
     if (celebrate) burst(e.currentTarget);
     run(() => api.gift(wish.id, action));
@@ -109,12 +111,24 @@ function GiftActions({ wish, busy, run }) {
     </button>
   );
 
+  if (!wish.reserved && confirmingGroup) {
+    return (
+      <div className="confirm-group" role="group" aria-label="Lancer une cagnotte">
+        <p>
+          <strong>Offrir à plusieurs ?</strong> C’est toi qui achètes le cadeau, les autres te donnent leur part.
+          La famille sera prévenue.
+        </p>
+        <button className="button button-small button-go" disabled={busy} onClick={act('group', true)}>Oui, lancer la cagnotte</button>
+        <button className="button button-small button-quiet" disabled={busy} onClick={() => setConfirmingGroup(false)}>Non, retour</button>
+      </div>
+    );
+  }
   if (!wish.reserved) {
     return (
       <>
         <button className="button button-small button-go" disabled={busy} onClick={act('reserve', true)}>Je réserve</button>
-        <button className="button button-small button-quiet button-alt" disabled={busy} onClick={act('group', true)}>
-          <Icon name="family" size={16} />À plusieurs
+        <button className="button button-small button-quiet button-alt" disabled={busy} onClick={() => setConfirmingGroup(true)}>
+          <Icon name="family" size={16} />Offrir à plusieurs
         </button>
       </>
     );
@@ -243,8 +257,8 @@ function MoreMenu({ label, items, disabled }) {
 
   return (
     <div className="more" ref={root}>
-      <button className="icon-button" aria-label={label} aria-haspopup="menu" aria-expanded={open} disabled={disabled} onClick={() => setOpen(!open)}>
-        <Icon name="more" size={20} />
+      <button className="button button-small button-quiet more-toggle" aria-label={label} aria-haspopup="menu" aria-expanded={open} disabled={disabled} onClick={() => setOpen(!open)}>
+        <Icon name="more" size={18} />Gérer
       </button>
       {open && (
         <div className="more-menu" role="menu">
@@ -356,7 +370,7 @@ function WishRow({ wish, onChanged }) {
           <p className="badges">
             {wish.favorite && <span className="badge badge-favorite"><Icon name="star" size={13} />Coup de cœur</span>}
             {wish.secret && <span className="badge badge-secret"><Icon name="lock" size={13} />Idée secrète de {wish.added_by_name}</span>}
-            {wish.group_gift && <span className="badge badge-group"><Icon name="family" size={13} />À plusieurs</span>}
+            {wish.group_gift && <span className="badge badge-group"><Icon name="family" size={13} />Cagnotte</span>}
             {taken && <span className="badge badge-taken"><Icon name="check" size={13} />Réservé par {wish.reserved_by_name}</span>}
             {wish.reserved_by_me && !wish.group_gift && <span className="badge badge-taken"><Icon name="check" size={13} />C’est toi qui l’offres</span>}
             {wish.removed && <span className="badge badge-warn">Retirée de sa liste : à toi de voir</span>}

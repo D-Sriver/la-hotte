@@ -21,6 +21,21 @@ export function pendingInvite() {
   try { return localStorage.getItem(KEY); } catch { return null; }
 }
 
+// Invitation refusée (souvent par erreur) : on la garde pour pouvoir changer d'avis sans redemander le code.
+const DECLINED = 'la-hotte-declined';
+
+export function rememberDeclined(code, familyName) {
+  try { localStorage.setItem(DECLINED, JSON.stringify({ code, name: familyName })); } catch { /* stockage indisponible */ }
+}
+
+export function declinedInvite() {
+  try { return JSON.parse(localStorage.getItem(DECLINED)); } catch { return null; }
+}
+
+export function forgetDeclined() {
+  try { localStorage.removeItem(DECLINED); } catch { /* stockage indisponible */ }
+}
+
 export function clearInvite() {
   try { localStorage.removeItem(KEY); } catch { /* stockage indisponible */ }
 }

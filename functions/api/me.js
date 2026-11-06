@@ -27,8 +27,12 @@ export async function onRequestGet({ env, data }) {
 export async function onRequestPut({ request, env, data }) {
   const body = await readJson(request);
   if (!body) return fail(400, 'Données illisibles.');
-  const name = clean(body.name, 60);
-  if (!name) return fail(400, 'Ajoute ton prénom.');
+  const typed = clean(body.name, 60);
+  if (!typed) return fail(400, 'Ajoute ton prénom.');
+  // « gerard » ou « jean-pierre » tapés tout en minuscules : on met les majuscules (on ne touche pas au reste).
+  const name = typed === typed.toLowerCase()
+    ? typed.replace(/(^|[\s-])(\p{L})/gu, (_, sep, letter) => sep + letter.toUpperCase())
+    : typed;
 
   const me = await env.DB.prepare(
     `UPDATE users SET name = ?1, likes = ?2, dislikes = ?3, owns = ?4, sizes = ?5,

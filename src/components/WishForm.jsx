@@ -6,6 +6,14 @@ import PhotoFramer from './PhotoFramer.jsx';
 import { formatFrame, parseFrame } from '../photoFrame.js';
 
 const EMPTY = { title: '', url: '', price: '', note: '', favorite: false };
+
+// Ce qui a été tapé dans « Lien », rendu utilisable : « amazon.fr/truc » → https://amazon.fr/truc ; sinon null.
+export function asLink(text) {
+  const value = String(text || '').trim();
+  if (/^https?:\/\/\S+\.\S+/i.test(value)) return value;
+  if (/^[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(value)) return `https://${value}`;
+  return null;
+}
 const MAX_PHOTOS = 6;
 let nextKey = 0;
 
@@ -69,7 +77,7 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
   }
 
   // Ne remplit que les cases encore vides : on n'écrase jamais ce qui a été tapé.
-  async function fillFromLink(url = form.url) {
+  async function fillFromLink(url = asLink(form.url)) {
     setReading(true);
     setError('');
     setHint('');
@@ -100,8 +108,13 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
     e.preventDefault();
     setSaving(true);
     setError('');
+    // « amazon » n'est pas un lien : on ne bloque pas, on le garde dans la note.
+    const link = asLink(form.url);
+    const leftover = form.url.trim() && !link ? form.url.trim() : '';
     const payload = {
       ...form,
+      url: link || '',
+      note: leftover ? [form.note.trim(), `(${leftover})`].filter(Boolean).join(' ') : form.note,
       photos: photos.map((p) => (p.id ? { id: p.id, frame: formatFrame(p.frame) } : { data: p.data, frame: formatFrame(p.frame) })),
     };
     try {
@@ -116,7 +129,7 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
 
   const srcOf = (p) => (p.id ? api.photoUrl(wish.id, p.id) : p.data);
   const current = photos[selected];
-  const canRead = /^https?:\/\/\S+\.\S+/.test(form.url);
+  const canRead = !!asLink(form.url);
 
   return (
     <form className="form card card-pad" onSubmit={submit}>
@@ -129,15 +142,17 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
         <span className="field-label">Lien <span className="muted small">(facultatif)</span></span>
         <div className="input-with-button">
           <input
-            type="url"
+            type="text"
             inputMode="url"
-            placeholder="https://"
+            autoCapitalize="off"
+            autoCorrect="off"
+            placeholder="ex. amazon.fr/… (facultatif)"
             value={form.url}
             onChange={set('url')}
             onPaste={(e) => {
               // Coller un lien suffit : on lit la page tout de suite.
               const pasted = e.clipboardData.getData('text').trim();
-              if (/^https?:\/\/\S+\.\S+/.test(pasted) && !reading) setTimeout(() => fillFromLink(pasted), 0);
+              if (asLink(pasted) && !reading) setTimeout(() => fillFromLink(asLink(pasted)), 0);
             }}
           />
           <button type="button" className="button button-quiet button-small" disabled={!canRead || reading} onClick={() => fillFromLink()}>

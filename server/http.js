@@ -17,9 +17,11 @@ export async function readJson(request) {
 export const clean = (value, max = 2000) =>
   typeof value === 'string' ? value.trim().slice(0, max) : '';
 
+// Un lien, même tapé à la main : « amazon.fr/truc » devient https://amazon.fr/truc. Le reste est ignoré.
 export function cleanUrl(value) {
-  const text = clean(value, 2000);
+  let text = clean(value, 2000);
   if (!text) return null;
+  if (!/^[a-z]+:\/\//i.test(text) && /^[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(text)) text = `https://${text}`;
   try {
     const url = new URL(text);
     return url.protocol === 'http:' || url.protocol === 'https:' ? url.toString() : null;

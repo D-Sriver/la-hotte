@@ -3,7 +3,7 @@
   --bg: #eceef3;
   --tile: #ffffff;
   --ink: #141a2e;
-  --ink-soft: #5d6478;
+  --ink-soft: #4f566a;
   --line: #e3e6ee;
   --red: #e5383b;
   --red-deep: #b9232a;
@@ -32,7 +32,7 @@
     --bg: #0d1020;
     --tile: #181c30;
     --ink: #f2f3f8;
-    --ink-soft: #a3a9bd;
+    --ink-soft: #b9bed0;
     --line: #272c45;
     --green-soft: #133527;
     --cream: #2a2416;
@@ -737,7 +737,7 @@ a.tile:active { transform: scale(0.97); }
   font-variant-numeric: tabular-nums;
 }
 .muted { color: var(--ink-soft); }
-.small { font-size: 0.9rem; }
+.small { font-size: 0.95rem; }
 .error { color: var(--danger); font-weight: 600; }
 .success { color: var(--green); font-weight: 600; }
 
@@ -894,7 +894,7 @@ a.tile:active { transform: scale(0.97); }
 .tile .form { margin-top: 0.5rem; }
 .field { display: grid; gap: 0.35rem; }
 .field-label { font-weight: 700; font-size: 0.92rem; }
-.field-hint { color: var(--ink-soft); font-size: 0.85rem; }
+.field-hint { color: var(--ink-soft); font-size: 0.92rem; }
 .field-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
 .field-row > .field { flex: 1 1 8rem; }
 .field-row > .field-grow { flex: 3 1 12rem; }
@@ -1275,3 +1275,10 @@ a.wish-photo:not(.is-framed):active img { transform: scale(0.98); }
 .switch-row input.switch:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .switch-row input.switch:disabled { opacity: 0.6; }
 @media (prefers-reduced-motion: reduce) { .switch, .switch-row input.switch::after { transition: none; } }
+
+/* ---------- Gérard : confirmations dans la page, menus avec un mot ---------- */
+.confirm-group { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; padding: 0.75rem; border-radius: var(--r-inner); background: var(--tile); }
+.confirm-group p { flex: 1 1 100%; margin: 0; text-wrap: pretty; }
+.more-toggle { display: inline-flex; align-items: center; gap: 0.3rem; border: 1px solid rgb(128 128 140 / 0.4); }
+.declined-invite { display: grid; gap: 0.6rem; margin-bottom: 1rem; }
+.declined-invite p { margin: 0; }

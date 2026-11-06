@@ -9,7 +9,7 @@ import ProfilePage from './components/ProfilePage.jsx';
 import ProfileForm from './components/ProfileForm.jsx';
 import JoinForm from './components/JoinForm.jsx';
 import InviteScreen from './components/InviteScreen.jsx';
-import { clearInvite, pendingInvite } from './invite.js';
+import { clearInvite, declinedInvite, forgetDeclined, pendingInvite, rememberDeclined } from './invite.js';
 import Icon from './components/Icon.jsx';
 import LogoutButton from './components/LogoutButton.jsx';
 import LoginScreen from './components/LoginScreen.jsx';
@@ -94,6 +94,36 @@ function Nav({ current }) {
   );
 }
 
+// Invitation refusée par erreur : on propose de la reprendre, sans avoir à redemander le code.
+function DeclinedInvite({ onJoined }) {
+  const [declined, setDeclined] = useState(declinedInvite);
+  const [status, setStatus] = useState({ sending: false, error: '' });
+  if (!declined?.code) return null;
+
+  async function join() {
+    setStatus({ sending: true, error: '' });
+    try {
+      const { family } = await api.join(declined.code);
+      forgetDeclined();
+      onJoined(family);
+    } catch (err) {
+      forgetDeclined();
+      setStatus({ sending: false, error: err.message });
+      setDeclined(null);
+    }
+  }
+
+  return (
+    <div className="notice declined-invite">
+      <p>Tu as été invité dans « {declined.name} ». Finalement, tu la rejoins ?</p>
+      <button className="button button-go" disabled={status.sending} onClick={join}>
+        {status.sending ? 'Un instant…' : `Rejoindre « ${declined.name} »`}
+      </button>
+      {status.error && <p className="error small" role="alert">{status.error}</p>}
+    </div>
+  );
+}
+
 export default function App() {
   const route = useHashRoute();
   const [me, setMe] = useState(null);
@@ -148,7 +178,16 @@ export default function App() {
   if (error === 'login') return <LoginScreen onLoggedIn={loadMe} />;
   if (error) return <main className="page page-center"><p className="error" role="alert">{error}</p></main>;
   if (!me || invite === 'checking') return <main className="page page-center"><div className="spinner" role="status" aria-label="Chargement" /></main>;
-  if (invite) return <InviteScreen me={me} invite={invite} onJoined={closeInvite} onDeclined={() => closeInvite()} />;
+  if (invite) {
+    return (
+      <InviteScreen
+        me={me}
+        invite={invite}
+        onJoined={(family) => { forgetDeclined(); closeInvite(family); }}
+        onDeclined={() => { rememberDeclined(invite.code, invite.family.name); closeInvite(); }}
+      />
+    );
+  }
 
   if (!me.family) {
     return (
@@ -157,7 +196,8 @@ export default function App() {
           <img src="/icon.svg" alt="" width="56" height="56" />
           <h1 className="title">Bienvenue dans La Hotte</h1>
           <p className="lead">Les listes de cadeaux de ta famille, sans gâcher les surprises. Rejoins ta famille avec le lien ou le code reçu, ou crée-la et invite les autres.</p>
-          <JoinForm onJoined={showFamily} />
+          <DeclinedInvite onJoined={showFamily} />
+          <JoinForm onJoined={(family) => { forgetDeclined(); showFamily(family); }} />
           <LogoutButton email={me.email} emailLogin={me.email_login} quiet />
         </div>
       </main>

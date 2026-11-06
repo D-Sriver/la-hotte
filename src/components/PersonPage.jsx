@@ -39,7 +39,7 @@ export default function PersonPage({ id }) {
 
   const { person, wishes } = data;
   const filled = PROFILE_ROWS.filter(([key]) => person[key]);
-  const free = wishes.filter((w) => !w.reserved || w.reserved_by_me).length;
+  const free = wishes.filter((w) => !w.reserved).length;
   const birthdayIn = daysUntilBirthday(person.birthday);
 
   return (
@@ -49,7 +49,7 @@ export default function PersonPage({ id }) {
         <Avatar name={person.name} index={id} size="lg" />
         <div>
           <h1 className="title">{person.name}</h1>
-          <p className="muted">{free} idée{free > 1 ? 's' : ''} encore libre{free > 1 ? 's' : ''}</p>
+          <p className="muted">{free === 0 ? 'Tout est déjà pris' : `${free} cadeau${free > 1 ? 'x' : ''} encore à prendre`}</p>
           {birthdayIn !== null && birthdayIn <= 60 && (
             <p className="head-birthday">
               <Icon name="cake" size={15} />
