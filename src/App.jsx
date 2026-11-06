@@ -8,6 +8,8 @@ import GiftsPage from './components/GiftsPage.jsx';
 import ProfilePage from './components/ProfilePage.jsx';
 import ProfileForm from './components/ProfileForm.jsx';
 import JoinForm from './components/JoinForm.jsx';
+import InviteScreen from './components/InviteScreen.jsx';
+import { clearInvite, pendingInvite } from './invite.js';
 import Icon from './components/Icon.jsx';
 import LogoutButton from './components/LogoutButton.jsx';
 import LoginScreen from './components/LoginScreen.jsx';
@@ -96,6 +98,8 @@ export default function App() {
   const route = useHashRoute();
   const [me, setMe] = useState(null);
   const [error, setError] = useState('');
+  // Lien d'invitation en attente : on vérifie le code avant d'afficher quoi que ce soit.
+  const [invite, setInvite] = useState(() => (pendingInvite() ? 'checking' : null));
 
   const loadMe = useCallback(() => {
     setError('');
@@ -109,9 +113,33 @@ export default function App() {
     loadMe();
   }, [loadMe]);
 
+  // Une fois connecté : déjà membre, on bascule sur la famille ; sinon on pose la question.
+  useEffect(() => {
+    if (!me || invite !== 'checking') return;
+    const code = pendingInvite();
+    api.invitation(code)
+      .then(({ family, member }) => {
+        if (!member) return setInvite({ code, family });
+        clearInvite();
+        setInvite(null);
+        if (me.family?.id !== family.id) showFamily(family);
+      })
+      .catch(() => {
+        clearInvite();
+        setInvite(null);
+      });
+  }, [me, invite, showFamily]);
+
+  const closeInvite = useCallback((family) => {
+    clearInvite();
+    setInvite(null);
+    if (family) showFamily(family);
+  }, [showFamily]);
+
   if (error === 'login') return <LoginScreen onLoggedIn={loadMe} />;
   if (error) return <main className="page page-center"><p className="error" role="alert">{error}</p></main>;
-  if (!me) return <main className="page page-center"><div className="spinner" role="status" aria-label="Chargement" /></main>;
+  if (!me || invite === 'checking') return <main className="page page-center"><div className="spinner" role="status" aria-label="Chargement" /></main>;
+  if (invite) return <InviteScreen me={me} invite={invite} onJoined={closeInvite} onDeclined={() => closeInvite()} />;
 
   if (!me.family) {
     return (
@@ -119,7 +147,7 @@ export default function App() {
         <div className="onboarding-card">
           <img src="/icon.svg" alt="" width="56" height="56" />
           <h1 className="title">Bienvenue dans La Hotte</h1>
-          <p className="lead">Les listes de cadeaux de ta famille, sans gâcher les surprises. Rejoins ta famille avec son code, ou crée-la et partage le code.</p>
+          <p className="lead">Les listes de cadeaux de ta famille, sans gâcher les surprises. Rejoins ta famille avec le lien ou le code reçu, ou crée-la et invite les autres.</p>
           <JoinForm onJoined={showFamily} />
           <LogoutButton email={me.email} emailLogin={me.email_login} quiet />
         </div>

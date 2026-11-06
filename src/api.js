@@ -32,6 +32,7 @@ async function request(path, { method = 'GET', body } = {}) {
 
 export const api = {
   me: () => request('/me'),
+  invitation: (code) => request(`/join?code=${encodeURIComponent(code)}`),
   join: (code) => request('/join', { method: 'POST', body: { code } }),
   createFamily: (name) => request('/families', { method: 'POST', body: { name } }),
   renameFamily: (id, name) => request(`/families/${id}`, { method: 'PUT', body: { name } }),

@@ -1,7 +1,7 @@
-// Inviter quelqu'un dans une famille : copier le code, ou partager une invitation toute prête.
+// Inviter quelqu'un dans une famille : un lien qui contient le code (le code seul reste là pour le dicter).
+import { inviteLink } from './invite.js';
 
-const invitation = (family) =>
-  `Rejoins « ${family.name} » sur La Hotte avec le code ${family.code} : ${window.location.origin}`;
+const invitation = (family) => `Rejoins « ${family.name} » sur La Hotte : ${inviteLink(family.code)}`;
 
 export async function copyText(text) {
   await navigator.clipboard.writeText(text);

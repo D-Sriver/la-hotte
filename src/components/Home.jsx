@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { copyText, shareFamily } from '../share.js';
+import { inviteLink } from '../invite.js';
 import { api } from '../api.js';
 import { birthdayLine, christmasLine, daysUntilBirthday, deName, daysUntilChristmas, greetingsFor, nextOccasion, toneOf } from '../fun.js';
 import Gift3D from './Gift3D.jsx';
@@ -26,14 +27,14 @@ function InviteCard({ family, alone }) {
     <div className={`tile invite-card${alone ? ' invite-card-alone' : ''}`}>
       <p className="invite-title"><Icon name="plus" size={18} />{alone ? 'Invite ta famille' : 'Inviter'}</p>
       <p className="invite-code num" aria-label={`Code de « ${family.name} » : ${family.code}`}>{family.code}</p>
-      {alone && <p className="muted small">Envoie ce code : chacun se connecte avec son email et rejoint « {family.name} ».</p>}
+      {alone && <p className="muted small">Envoie le lien : chacun se connecte avec son email et rejoint « {family.name} ». Le code sert à le dicter.</p>}
       <div className="invite-actions">
         <button
           className="icon-button"
-          aria-label="Copier le code"
-          onClick={() => copyText(family.code).then(() => confirm('Code copié')).catch(() => confirm('Copie impossible'))}
+          aria-label="Copier le lien d’invitation"
+          onClick={() => copyText(inviteLink(family.code)).then(() => confirm('Lien copié')).catch(() => confirm('Copie impossible'))}
         >
-          <Icon name={done === 'Code copié' ? 'check' : 'copy'} size={18} />
+          <Icon name={done === 'Lien copié' ? 'check' : 'copy'} size={18} />
         </button>
         <button
           className="button button-small button-go"
