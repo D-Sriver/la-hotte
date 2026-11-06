@@ -785,6 +785,7 @@ a.tile:active { transform: scale(0.97); }
 .wish-title a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .wish-meta { margin-top: 0.1rem; color: var(--ink-soft); font-size: 0.88rem; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
 .price { margin-right: 0.45rem; color: var(--ink); font-weight: 700; }
+.section:has(form.card) .empty-inline { display: none; }
 .person-total { margin: 0; font-variant-numeric: tabular-nums; }
 .wish > .badge { justify-self: start; align-self: center; width: fit-content; }
 .badges { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.4rem; }
@@ -794,6 +795,7 @@ a.tile:active { transform: scale(0.97); }
 .badge-group { background: var(--green-soft); color: var(--green); }
 .badge-bought { background: var(--cream); color: #6b4a00; }
 .badge-taken { background: var(--green-soft); color: var(--green); }
+.badge-warn { background: #ffe0b2; color: #6b3a00; }
 .wish-taken { opacity: 0.6; }
 .wish-bought .wish-title { text-decoration: line-through; text-decoration-color: var(--ink-soft); }
 .wish-taken .wish-title { text-decoration: line-through; }

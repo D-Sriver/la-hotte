@@ -1,5 +1,6 @@
 import { json, fail, readJson, clean } from '../../../../server/http.js';
 import { wishInFamily } from '../../../../server/wishes.js';
+import { giftCircle, notifyLater, ownerName, recipients } from '../../../../server/notify.js';
 
 // Discussion secrète entre ceux qui offrent : propre à la famille affichée, jamais visible
 // par la personne gâtée.
@@ -23,7 +24,8 @@ export async function onRequestGet({ env, data, params }) {
   return json({ messages: results.map((m) => ({ ...m, mine: m.user_id === data.me.id })) });
 }
 
-export async function onRequestPost({ request, env, data, params }) {
+export async function onRequestPost(context) {
+  const { request, env, data, params } = context;
   const wish = await openThread(env, data, params);
   if (!wish) return fail(404, 'Discussion introuvable.');
   const body = clean((await readJson(request))?.body, 1000);
@@ -31,6 +33,17 @@ export async function onRequestPost({ request, env, data, params }) {
   await env.DB.prepare('INSERT INTO wish_messages (wish_id, family_id, user_id, body) VALUES (?1, ?2, ?3, ?4)')
     .bind(wish.id, data.family.id, data.me.id, body)
     .run();
+
+  const to = await recipients(env.DB, {
+    userIds: await giftCircle(env.DB, wish, data.family.id),
+    familyId: data.family.id, ownerId: wish.owner_id, senderId: data.me.id,
+  });
+  notifyLater(context, to, {
+    title: `💬 ${wish.title} (pour ${await ownerName(env.DB, wish)})`,
+    body: `${data.me.name} : ${body.slice(0, 140)}`,
+    url: `/#/p/${wish.owner_id}`,
+    tag: `chat-${wish.id}`,
+  });
   return json({ ok: true }, 201);
 }
 

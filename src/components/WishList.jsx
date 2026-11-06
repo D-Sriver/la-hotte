@@ -58,7 +58,11 @@ function GroupProgress({ wish, children }) {
 function MyAmount({ wish, busy, run }) {
   const initial = wish.my_amount == null ? '' : String(wish.my_amount).replace('.', ',');
   const [value, setValue] = useState(initial);
-  const suggested = wish.target ? Math.max(0, wish.target - (wish.collected - (wish.my_amount || 0))) : null;
+  // Suggestion : une part égale entre les participants, sans dépasser ce qui manque. Seul, on ne suggère rien.
+  const others = wish.collected - (wish.my_amount || 0);
+  const suggested = wish.target && wish.participants.length > 1
+    ? Math.min(Math.max(0, wish.target - others), wish.target / wish.participants.length)
+    : null;
   const changed = value !== initial;
   return (
     <form
@@ -124,6 +128,7 @@ function GiftActions({ wish, busy, run }) {
 
   if (wish.group_gift) {
     // Seul l'organisateur achète : lui seul coche « acheté » puis « offert ».
+    if (wish.removed && !wish.participating) return null;
     return wish.participating ? (
       <>
         {wish.reserved_by_me && givenButton}
@@ -141,9 +146,7 @@ function GiftActions({ wish, busy, run }) {
       <>
         {givenButton}
         {boughtButton}
-        <button className="button button-small button-done" disabled={busy} aria-pressed="true" onClick={act('reserve')}>
-          <Icon name="check" size={16} />C’est moi qui offre
-        </button>
+        <button className="button button-small button-leave" disabled={busy} onClick={act('reserve')}>Annuler</button>
       </>
     );
   }
@@ -349,12 +352,15 @@ function WishRow({ wish, onChanged }) {
           {wish.price && <span className="price">{wish.price}</span>}
           {[host, wish.note].filter(Boolean).join(', ')}
         </p>
-        {(wish.favorite || wish.secret || wish.reserved || wish.bought) && (
+        {(wish.favorite || wish.secret || wish.reserved || wish.bought || wish.removed) && (
           <p className="badges">
             {wish.favorite && <span className="badge badge-favorite"><Icon name="star" size={13} />Coup de cœur</span>}
             {wish.secret && <span className="badge badge-secret"><Icon name="lock" size={13} />Idée secrète de {wish.added_by_name}</span>}
             {wish.group_gift && <span className="badge badge-group"><Icon name="family" size={13} />À plusieurs</span>}
             {taken && <span className="badge badge-taken"><Icon name="check" size={13} />Réservé par {wish.reserved_by_name}</span>}
+            {wish.reserved_by_me && !wish.group_gift && <span className="badge badge-taken"><Icon name="check" size={13} />C’est toi qui l’offres</span>}
+            {wish.removed && <span className="badge badge-warn">Retirée de sa liste : à toi de voir</span>}
+            {!wish.removed && wish.edited_after_reservation && <span className="badge badge-warn">Modifiée depuis la réservation</span>}
             {wish.bought && <span className="badge badge-bought"><Icon name="bag" size={13} />Acheté</span>}
           </p>
         )}

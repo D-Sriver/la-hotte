@@ -14,7 +14,8 @@ export async function visibleWishes(db, ownerId, viewerId, familyId, { archived 
     const { results } = await db
       .prepare(
         `SELECT w.id, w.title, w.url, w.price, w.note, w.favorite, ${PHOTOS_JSON} AS photos, w.created_at, w.received_at
-         FROM wishes w WHERE w.owner_id = ?1 AND w.added_by = ?1 AND w.family_id IS NULL AND w.${receivedFilter}
+         FROM wishes w WHERE w.owner_id = ?1 AND w.added_by = ?1 AND w.family_id IS NULL AND w.removed_at IS NULL
+           AND w.${receivedFilter}
          ORDER BY ${archived ? 'w.received_at DESC' : 'w.favorite DESC, w.created_at DESC'}`,
       )
       .bind(ownerId)
@@ -27,7 +28,8 @@ export async function visibleWishes(db, ownerId, viewerId, familyId, { archived 
       `SELECT w.id, w.title, w.url, w.price, w.note, w.favorite, ${PHOTOS_JSON} AS photos, w.created_at,
               w.added_by, a.name AS added_by_name,
               w.reserved_by, CASE WHEN rm.user_id IS NULL THEN NULL ELSE r.name END AS reserved_by_name,
-              w.group_gift, w.bought,
+              w.group_gift, w.bought, w.removed_at, w.reserved_at,
+              CASE WHEN w.edited_at > w.reserved_at THEN 1 ELSE 0 END AS edited_after_reservation,
               (SELECT json_group_array(json_object(
                         'id', u.id,
                         'name', CASE WHEN EXISTS (SELECT 1 FROM memberships pm WHERE pm.family_id = ?2 AND pm.user_id = u.id)
@@ -41,9 +43,11 @@ export async function visibleWishes(db, ownerId, viewerId, familyId, { archived 
        LEFT JOIN users r ON r.id = w.reserved_by
        LEFT JOIN memberships rm ON rm.user_id = w.reserved_by AND rm.family_id = ?2
        WHERE w.owner_id = ?1 AND (w.family_id IS NULL OR w.family_id = ?2) AND w.received_at IS NULL
+         AND (w.removed_at IS NULL OR w.reserved_by = ?3
+           OR EXISTS (SELECT 1 FROM contributions c WHERE c.wish_id = w.id AND c.user_id = ?3))
        ORDER BY w.favorite DESC, w.created_at DESC`,
     )
-    .bind(ownerId, familyId)
+    .bind(ownerId, familyId, viewerId)
     .all();
 
   return results.map((w) => {
@@ -74,6 +78,9 @@ export async function visibleWishes(db, ownerId, viewerId, familyId, { archived 
       target: priceValue(w.price),
       bought: !!w.bought,
       message_count: w.message_count,
+      // Le propriétaire l'a retirée de sa liste, ou l'a changée, après la réservation.
+      removed: !!w.removed_at,
+      edited_after_reservation: !!w.edited_after_reservation && w.reserved_by !== null,
     };
   });
 }

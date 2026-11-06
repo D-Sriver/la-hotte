@@ -5,7 +5,7 @@ export async function onRequestGet({ env, data }) {
   const { results } = await env.DB.prepare(
     `SELECT u.id, u.name, substr(u.birthday, 6) AS birthday,
        (SELECT COUNT(*) FROM wishes w WHERE w.owner_id = u.id
-          AND (w.family_id IS NULL OR w.family_id = ?2) AND w.received_at IS NULL
+          AND (w.family_id IS NULL OR w.family_id = ?2) AND w.received_at IS NULL AND w.removed_at IS NULL
           AND (u.id != ?1 OR w.added_by = u.id)) AS wish_count
      FROM users u JOIN memberships m ON m.user_id = u.id AND m.family_id = ?2
      WHERE u.name IS NOT NULL

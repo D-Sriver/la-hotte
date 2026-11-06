@@ -113,3 +113,38 @@ test('invitation : on voit les prénoms des membres avant de rejoindre', async (
   assert.deepEqual(body.family.members.sort(), ['Alice', 'Bob', 'Carol']);
   assert.equal(body.member, false);
 });
+
+test('supprimer une envie déjà réservée : elle quitte sa liste, mais celui qui l’offre la garde', async () => {
+  const { onRequestDelete: remove, onRequestPut: change } = await import('../functions/api/wishes/[id].js');
+  const { onRequestPost: gift } = await import('../functions/api/wishes/[id]/reserve.js');
+  const free = s.wish(alice, 'Livre');
+
+  assert.equal((await call(remove, { db, me: alice, family: f1, params: { id: String(own) } })).status, 200);
+  assert.equal((await call(remove, { db, me: alice, family: f1, params: { id: String(free) } })).status, 200);
+  assert.equal(db.sqlite.prepare('SELECT 1 FROM wishes WHERE id = ?').get(free), undefined, 'libre : vraiment supprimée');
+
+  assert.equal((await visibleWishes(db, alice, alice, f1)).some((w) => w.id === own), false, 'Alice ne la voit plus');
+  const bobView = (await visibleWishes(db, alice, bob, f1)).find((w) => w.id === own);
+  assert.equal(bobView.removed, true, 'Bob la garde, avec l’avertissement');
+  assert.equal((await visibleWishes(db, alice, carol, f1)).some((w) => w.id === own), false, 'les autres ne la voient plus');
+  assert.equal((await call(change, { db, me: alice, family: f1, params: { id: String(own) }, body: { title: 'x' } })).status, 404);
+
+  // Bob annule : plus personne n'en a besoin, elle disparaît pour de bon.
+  await call(gift, { db, me: bob, family: f1, params: { id: String(own) }, body: { action: 'reserve' } });
+  assert.equal(db.sqlite.prepare('SELECT 1 FROM wishes WHERE id = ?').get(own), undefined);
+});
+
+test('modifier une envie après sa réservation prévient celui qui l’offre', async () => {
+  const { onRequestPut: change } = await import('../functions/api/wishes/[id].js');
+  db.sqlite.prepare("UPDATE wishes SET reserved_at = datetime('now', '-1 hour') WHERE id = ?").run(own);
+  assert.equal((await visibleWishes(db, alice, bob, f1)).find((w) => w.id === own).edited_after_reservation, false);
+  await call(change, { db, me: alice, family: f1, params: { id: String(own) }, body: { title: 'Vélo électrique', price: '300 €' } });
+  assert.equal((await visibleWishes(db, alice, bob, f1)).find((w) => w.id === own).edited_after_reservation, true);
+});
+
+test('notifications : jamais la personne gâtée, seulement la famille affichée, et pas ceux qui ont dit non', async () => {
+  const { recipients } = await import('../server/notify.js');
+  db.sqlite.prepare('UPDATE users SET notify_email = 0 WHERE id = ?').run(carol);
+  const to = await recipients(db, { userIds: [alice, bob, carol, dave, bob], familyId: f1, ownerId: alice, senderId: null });
+  assert.deepEqual(to, [bob]);
+});

@@ -41,7 +41,7 @@ export async function remindersFor(db, user, now) {
     if (!sent.has(key)) {
       // Ma propre liste est vide : la famille n'a rien pour se guider.
       const own = await db.prepare(
-        'SELECT COUNT(*) AS n FROM wishes WHERE owner_id = ?1 AND added_by = ?1 AND received_at IS NULL',
+        'SELECT COUNT(*) AS n FROM wishes WHERE owner_id = ?1 AND added_by = ?1 AND received_at IS NULL AND removed_at IS NULL',
       ).bind(user.id).first();
       if (!own.n) lines.push(`Noël dans ${xmas.days} jours et ta liste est vide : ajoute quelques envies pour aider ta famille.`);
 
@@ -52,7 +52,7 @@ export async function remindersFor(db, user, now) {
              AND (w.reserved_by = ?1 OR EXISTS (SELECT 1 FROM contributions c WHERE c.wish_id = w.id AND c.user_id = ?1))) AS by_me,
            EXISTS (SELECT 1 FROM wishes w WHERE w.owner_id = u.id AND w.received_at IS NULL
              AND (w.reserved_by IS NOT NULL OR EXISTS (SELECT 1 FROM contributions c WHERE c.wish_id = w.id))) AS by_anyone,
-           (SELECT COUNT(*) FROM wishes w WHERE w.owner_id = u.id AND w.added_by = u.id AND w.received_at IS NULL) AS own_wishes
+           (SELECT COUNT(*) FROM wishes w WHERE w.owner_id = u.id AND w.added_by = u.id AND w.received_at IS NULL AND w.removed_at IS NULL) AS own_wishes
          FROM users u WHERE u.id IN (SELECT value FROM json_each(?2))`,
       ).bind(user.id, JSON.stringify(people.map((p) => p.id))).all();
       const byId = new Map(status.map((s) => [s.id, s]));

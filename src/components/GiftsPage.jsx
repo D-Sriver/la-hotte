@@ -9,7 +9,7 @@ import { usePageIntro } from '../motion.js';
 const euros = (n) => `${n.toLocaleString('fr-FR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })} €`;
 
 // Tout ce que je prévois d'offrir, regroupé par personne.
-export default function GiftsPage() {
+export default function GiftsPage({ familyId, onSwitchFamily }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(null);
@@ -38,7 +38,7 @@ export default function GiftsPage() {
   const bought = gifts.filter((g) => g.bought).length;
   // Par personne : ce qui est prévu, puis ce qui a déjà été offert cette année, avec le total des deux.
   const byPerson = Object.values([...gifts, ...given].reduce((groups, g) => {
-    const person = (groups[g.owner_id] ||= { id: g.owner_id, name: g.owner_name, gifts: [], total: 0 });
+    const person = (groups[g.owner_id] ||= { id: g.owner_id, name: g.owner_name, families: g.families || [], gifts: [], total: 0 });
     person.gifts.push(g);
     person.total += g.my_share || 0;
     return groups;
@@ -72,7 +72,12 @@ export default function GiftsPage() {
       {byPerson.map((person) => (
         <section key={person.id} className="tile section">
           <div className="section-head">
-            <h2 className="section-title"><a href={`#/p/${person.id}`}>{person.name}</a><span className="count">{person.gifts.length}</span></h2>
+            <h2 className="section-title"><a href={`#/p/${person.id}`} onClick={(e) => {
+              // Sa page s'ouvre dans une famille qu'on partage : on y passe d'abord si besoin.
+              if (!person.families.length || person.families.includes(familyId)) return;
+              e.preventDefault();
+              onSwitchFamily(person.families[0], `#/p/${person.id}`);
+            }}>{person.name}</a><span className="count">{person.gifts.length}</span></h2>
             {person.total > 0 && <span className="price person-total">{euros(Math.round(person.total * 100) / 100)}</span>}
           </div>
           <ul className="wish-list">
@@ -87,6 +92,7 @@ export default function GiftsPage() {
                   <p className="wish-title">
                     {g.url ? <a href={g.url} target="_blank" rel="noopener noreferrer">{g.title}</a> : g.title}
                   </p>
+                  {g.removed && <p className="badges"><span className="badge badge-warn">Retirée de sa liste : à toi de voir</span></p>}
                   <p className="wish-meta">
                     {g.my_share !== null && <span className="price">{euros(g.my_share)}</span>}
                     {g.group_gift

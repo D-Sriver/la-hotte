@@ -130,6 +130,15 @@ export default function App() {
       });
   }, [me, invite, showFamily]);
 
+  // Changer de famille. La page d'une personne ne vaut que dans sa famille : on revient à l'accueil,
+  // ou on ouvre la page demandée (hash) une fois dans la bonne famille.
+  const switchFamily = useCallback((id, hash) => {
+    setFamily(id);
+    if (hash) window.location.hash = hash;
+    else if (route.page === 'person') window.location.hash = '#/';
+    showFamily({ id });
+  }, [route.page, showFamily]);
+
   const closeInvite = useCallback((family) => {
     clearInvite();
     setInvite(null);
@@ -181,7 +190,7 @@ export default function App() {
       <header className="appbar">
         <div className="appbar-start">
           <Logo />
-          <FamilySwitcher me={me} onSwitch={(id) => showFamily({ id })} />
+          <FamilySwitcher me={me} onSwitch={(id) => switchFamily(id)} />
         </div>
         <Nav current={route.page} />
       </header>
@@ -190,7 +199,7 @@ export default function App() {
       <main className="page" key={me.family.id}>
         {route.page === 'home' && <Home me={me} />}
         {route.page === 'me' && <MePage me={me} />}
-        {route.page === 'gifts' && <GiftsPage />}
+        {route.page === 'gifts' && <GiftsPage familyId={me.family.id} onSwitchFamily={switchFamily} />}
         {route.page === 'profile' && <ProfilePage me={me} onSaved={setMe} onFamiliesChanged={showFamily} />}
         {route.page === 'person' && <PersonPage key={route.id} id={route.id} />}
       </main>

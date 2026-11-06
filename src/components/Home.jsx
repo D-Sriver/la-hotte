@@ -27,7 +27,7 @@ function InviteCard({ family, alone }) {
     <div className={`tile invite-card${alone ? ' invite-card-alone' : ''}`}>
       <p className="invite-title"><Icon name="plus" size={18} />{alone ? 'Invite ta famille' : 'Inviter'}</p>
       <p className="invite-code num" aria-label={`Code de « ${family.name} » : ${family.code}`}>{family.code}</p>
-      {alone && <p className="muted small">Envoie le lien : chacun se connecte avec son email et rejoint « {family.name} ». Le code sert à le dicter.</p>}
+      {alone && <p className="muted small">Envoie le lien : chacun se connecte avec son email et rejoint « {family.name} ». Le code sert à le dicter.</p>}
       <div className="invite-actions">
         <button
           className="icon-button"
