@@ -375,14 +375,16 @@ function WishRow({ wish, onChanged }) {
       <div className="wish-actions">
         {!wish.mine && <GiftActions wish={wish} busy={busy} run={run} />}
         {!wish.mine && (
+          // Discussion entre ceux qui offrent : un vrai bouton avec un texte, pas une icône à deviner.
           <button
-            className={`icon-button chat-toggle${chatOpen ? ' chat-toggle-open' : ''}`}
+            className={`button button-small button-quiet chat-toggle${chatOpen ? ' chat-toggle-open' : ''}`}
             aria-expanded={chatOpen}
-            aria-label={`Discussion secrète (${messageCount} message${messageCount > 1 ? 's' : ''})`}
+            title="Discussion secrète entre ceux qui offrent : la personne gâtée ne la voit jamais"
             onClick={() => setChatOpen(!chatOpen)}
           >
-            <Icon name="chat" size={18} />
-            {messageCount > 0 && <span className="chat-count num">{messageCount}</span>}
+            <Icon name="chat" size={16} />
+            {chatOpen ? 'Fermer' : messageCount > 0 ? `${messageCount} message${messageCount > 1 ? 's' : ''}` : 'Discuter en secret'}
+            {!chatOpen && <Icon name="lock" size={13} />}
           </button>
         )}
         {(wish.can_edit || canDelete || wish.mine) && (
