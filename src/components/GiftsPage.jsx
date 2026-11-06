@@ -5,7 +5,7 @@ import Skeleton from './Skeleton.jsx';
 import CountUp from './CountUp.jsx';
 import { usePageIntro } from '../motion.js';
 
-const euros = (n) => `${n.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} €`;
+const euros = (n) => `${n.toLocaleString('fr-FR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })} €`;
 
 // Tout ce que je prévois d'offrir, regroupé par personne.
 export default function GiftsPage() {
@@ -59,7 +59,7 @@ export default function GiftsPage() {
 
       <div className="tile tile-mini tone-pink">
         <span className="mini-icon"><Icon name="family" size={22} /></span>
-        <span className="mini-label">Cadeau à plusieurs : seule ma part compte dans le budget.</span>
+        <span className="mini-label">Cadeau à plusieurs : seule ma part compte dans le budget (le montant que j’ai indiqué, sinon une part égale).</span>
       </div>
 
       {byPerson.length === 0 && (
@@ -77,16 +77,16 @@ export default function GiftsPage() {
           <ul className="wish-list">
             {person.gifts.map((g) => (
               <li key={g.id} className={`wish${g.bought ? ' wish-bought' : ''}`}>
-                {g.has_photo
-                  ? <span className="wish-thumb wish-photo"><img src={api.photoUrl(g.id)} alt="" loading="lazy" /></span>
-                  : <span className="wish-thumb"><Icon name="gift" size={20} /></span>}
+                {!!g.has_photo && <span className="wish-photo"><img src={api.photoUrl(g.id)} alt="" loading="lazy" /></span>}
                 <div className="wish-main">
                   <p className="wish-title">
                     {g.url ? <a href={g.url} target="_blank" rel="noopener noreferrer">{g.title}</a> : g.title}
                   </p>
                   <p className="wish-meta">
                     {g.my_share !== null && <span className="price">{euros(g.my_share)}</span>}
-                    {g.group_gift ? `ma part, à ${g.participant_count}` : g.price ? '' : 'prix non indiqué'}
+                    {g.group_gift
+                      ? g.my_amount_set ? `ma part, à ${g.participant_count}` : `part égale à ${g.participant_count}, montant à préciser`
+                      : g.price ? '' : 'prix non indiqué'}
                   </p>
                 </div>
                 <div className="wish-actions">

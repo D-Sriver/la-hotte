@@ -12,6 +12,9 @@
     "db:migrate:photo": "wrangler d1 execute la-hotte --remote --file=migrations/002_wish_photo.sql",
     "db:migrate:gifts": "wrangler d1 execute la-hotte --remote --file=migrations/003_group_bought_favorite.sql",
     "db:migrate:prices": "wrangler d1 execute la-hotte --remote --file=migrations/004_price_searches.sql",
+    "db:migrate:amounts": "wrangler d1 execute la-hotte --remote --file=migrations/005_contribution_amount.sql",
+    "db:migrate:families": "wrangler d1 execute la-hotte --remote --file=migrations/006_families.sql",
+    "db:reset:lists": "wrangler d1 execute la-hotte --remote --file=migrations/007_reset_lists.sql",
     "preview": "npm run build && wrangler pages dev",
     "deploy": "npm run build && wrangler pages deploy"
   },

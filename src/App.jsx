@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { api } from './api.js';
+import { api, setFamily } from './api.js';
 import { useHashRoute } from './useHashRoute.js';
 import Home from './components/Home.jsx';
 import PersonPage from './components/PersonPage.jsx';
@@ -26,6 +26,20 @@ function Logo() {
       <img src="/icon.svg" alt="" width="30" height="30" />
       <span>La Hotte</span>
     </a>
+  );
+}
+
+// Choix de la famille affichée (seulement si on en a plusieurs).
+function FamilySwitcher({ me, onSwitch }) {
+  if (me.families.length < 2) return null;
+  return (
+    <label className="family-switch">
+      <span className="sr-only">Famille affichée</span>
+      <Icon name="family" size={16} />
+      <select value={me.family.id} onChange={(e) => onSwitch(Number(e.target.value))}>
+        {me.families.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+      </select>
+    </label>
   );
 }
 
@@ -86,17 +100,23 @@ export default function App() {
   }, []);
   useEffect(loadMe, [loadMe]);
 
+  // Après avoir créé, rejoint ou choisi une famille : on l'affiche.
+  const showFamily = useCallback((family) => {
+    if (family?.id) setFamily(family.id);
+    loadMe();
+  }, [loadMe]);
+
   if (error) return <main className="page page-center"><p className="error" role="alert">{error}</p></main>;
   if (!me) return <main className="page page-center"><div className="spinner" role="status" aria-label="Chargement" /></main>;
 
-  if (!me.joined) {
+  if (!me.family) {
     return (
       <main className="onboarding">
         <div className="onboarding-card">
           <img src="/icon.svg" alt="" width="56" height="56" />
           <h1 className="title">Bienvenue dans La Hotte</h1>
-          <p className="lead">C’est l’espace cadeaux de la famille. Entre le code familial pour rejoindre les autres.</p>
-          <JoinForm onJoined={loadMe} />
+          <p className="lead">Les listes de cadeaux de ta famille, sans gâcher les surprises. Rejoins ta famille avec son code, ou crée-la et partage le code.</p>
+          <JoinForm onJoined={showFamily} />
           <LogoutButton email={me.email} quiet />
         </div>
       </main>
@@ -123,14 +143,18 @@ export default function App() {
   return (
     <div className="shell">
       <header className="appbar">
-        <Logo />
+        <div className="appbar-start">
+          <Logo />
+          <FamilySwitcher me={me} onSwitch={(id) => showFamily({ id })} />
+        </div>
         <Nav current={route.page} />
       </header>
-      <main className="page">
+      {/* Changer de famille recharge toutes les pages avec les bonnes personnes. */}
+      <main className="page" key={me.family.id}>
         {route.page === 'home' && <Home me={me} />}
         {route.page === 'me' && <MePage me={me} />}
         {route.page === 'gifts' && <GiftsPage />}
-        {route.page === 'profile' && <ProfilePage me={me} onSaved={setMe} />}
+        {route.page === 'profile' && <ProfilePage me={me} onSaved={setMe} onFamiliesChanged={showFamily} />}
         {route.page === 'person' && <PersonPage key={route.id} id={route.id} />}
       </main>
     </div>

@@ -189,6 +189,8 @@ a.tile:active { transform: scale(0.97); }
 }
 .hero-days .num { display: block; font-size: clamp(4.5rem, 16vw, 6.5rem); letter-spacing: -0.06em; line-height: 0.9; }
 .hero-sub { margin-top: 0.6rem; max-width: 18rem; opacity: 0.9; text-wrap: pretty; }
+/* Le texte s'arrête avant le paquet 3D au lieu de passer dessous. */
+.tile-hero .hero-sub { max-width: min(18rem, calc(100% - 9.5rem)); }
 
 .tile-stat { display: flex; flex-direction: column; justify-content: flex-end; min-height: 10rem; }
 .stat-num { font-family: var(--font-display); font-weight: 800; font-size: 3rem; line-height: 1; letter-spacing: -0.05em; }
@@ -244,69 +246,197 @@ a.tile:active { transform: scale(0.97); }
   --size: 112px;
   --tilt-x: 0deg;
   --tilt-y: 0deg;
+  --lift: 0px;
+  --paper: #1c9467;
+  --paper-dark: #12704e;
+  --ribbon: linear-gradient(90deg, #d9921a, #ffd56b 45%, #fff1b8 50%, #ffd56b 55%, #d9921a);
   position: absolute;
   z-index: 2;
   right: 1.5rem;
   bottom: 1.75rem;
   width: calc(var(--size) * 1.6);
-  height: calc(var(--size) * 1.7);
+  height: calc(var(--size) * 1.8);
   display: grid;
   place-items: center;
   perspective: 700px;
   touch-action: none;
   text-decoration: none;
   cursor: zoom-in;
+  -webkit-tap-highlight-color: transparent;
 }
 .gift3d:focus-visible { outline: 3px solid #fff; outline-offset: 4px; border-radius: 24px; }
-.gift3d-tilt {
-  transform-style: preserve-3d;
-  animation: gift-spin 14s linear infinite;
+/* Le couvercle se soulève au survol, seulement avec une vraie souris (sur mobile, :hover reste collé). */
+/* Au survol (ou quand on appuie sur mobile), le paquet tremble d'impatience. */
+@media (hover: hover) { .gift3d:hover .gift3d-float { animation: gift-shake 420ms ease-in-out infinite; } }
+.gift3d:focus-visible .gift3d-float { animation: gift-shake 420ms ease-in-out infinite; }
+@keyframes gift-shake {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  15% { transform: translate(-3px, -1px) rotate(-4deg); }
+  30% { transform: translate(3px, 1px) rotate(4deg); }
+  45% { transform: translate(-3px, 0) rotate(-3deg); }
+  60% { transform: translate(2px, -1px) rotate(3deg); }
+  75% { transform: translate(-1px, 1px) rotate(-1.5deg); }
 }
+
+/* Il flotte doucement ; son ombre respire avec lui. */
+.gift3d-float { transform-style: preserve-3d; animation: gift-float 3.2s ease-in-out infinite; }
+@keyframes gift-float { 50% { transform: translateY(-10px); } }
+.gift3d-tilt { transform-style: preserve-3d; animation: gift-spin 14s linear infinite; }
+.gift3d:active .gift3d-float { animation: gift-shake 300ms ease-in-out infinite; }
 .gift3d-spin { position: relative; width: var(--size); height: var(--size); transform-style: preserve-3d; }
 .gift3d-box, .gift3d-lid { position: absolute; inset: 0; transform-style: preserve-3d; }
+
+/* Papier à pois, ruban doré brillant, et un reflet de lumière sur chaque face. */
 .gift3d-face {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(90deg, transparent 42%, var(--gold) 42% 58%, transparent 58%),
-    linear-gradient(160deg, #2bb07f, #12704e);
   border-radius: 6px;
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1);
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 0.28), transparent 38%, transparent 70%, rgb(0 0 0 / 0.18)),
+    linear-gradient(90deg, transparent 41%, #d9921a 41%, #ffd56b 46%, #fff1b8 50%, #ffd56b 54%, #d9921a 59%, transparent 59%),
+    radial-gradient(circle at 25% 25%, rgb(255 255 255 / 0.22) 0 3.5px, transparent 4.5px) 0 0 / 22px 22px,
+    radial-gradient(circle at 75% 75%, rgb(246 185 59 / 0.35) 0 2.5px, transparent 3.5px) 0 0 / 22px 22px,
+    linear-gradient(160deg, var(--paper), var(--paper-dark));
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12), inset 0 -10px 18px rgb(0 0 0 / 0.12);
 }
 .gift3d-top, .gift3d-bottom {
   background:
-    linear-gradient(90deg, transparent 42%, var(--gold) 42% 58%, transparent 58%),
-    linear-gradient(0deg, transparent 42%, var(--gold) 42% 58%, transparent 58%),
-    #1c9467;
+    linear-gradient(135deg, rgb(255 255 255 / 0.3), transparent 45%),
+    linear-gradient(90deg, transparent 41%, #e4a52a 41%, #ffe08a 50%, #e4a52a 59%, transparent 59%),
+    linear-gradient(0deg, transparent 41%, #e4a52a 41%, #ffe08a 50%, #e4a52a 59%, transparent 59%),
+    radial-gradient(circle at 25% 25%, rgb(255 255 255 / 0.22) 0 3.5px, transparent 4.5px) 0 0 / 22px 22px,
+    var(--paper);
 }
-.gift3d-box .gift3d-front { transform: translateZ(calc(var(--size) / 2)); }
-.gift3d-box .gift3d-back { transform: rotateY(180deg) translateZ(calc(var(--size) / 2)); }
-.gift3d-box .gift3d-right { transform: rotateY(90deg) translateZ(calc(var(--size) / 2)); filter: brightness(0.82); }
-.gift3d-box .gift3d-left { transform: rotateY(-90deg) translateZ(calc(var(--size) / 2)); filter: brightness(0.82); }
-.gift3d-box .gift3d-top { transform: rotateX(90deg) translateZ(calc(var(--size) / 2)); }
-.gift3d-box .gift3d-bottom { transform: rotateX(-90deg) translateZ(calc(var(--size) / 2)); filter: brightness(0.6); }
-/* Le couvercle déborde un peu et flotte au-dessus. */
-.gift3d-lid { --lid: calc(var(--size) * 1.12); --lid-h: calc(var(--size) * 0.24); inset: auto; left: 50%; top: 0; width: 0; height: 0; margin-top: calc(var(--size) * -0.12); }
-.gift3d-lid .gift3d-face { inset: auto; width: var(--lid); height: var(--lid-h); left: calc(var(--lid) / -2); top: calc(var(--lid-h) / -2); filter: brightness(1.08); }
+/* Ombre du couvercle sur le haut des côtés de la boîte. */
+.gift3d-box .gift3d-face:not(.gift3d-top):not(.gift3d-bottom)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgb(0 0 0 / 0.34), rgb(0 0 0 / 0.08) 16%, transparent 26%);
+}
+.gift3d-lid .gift3d-face { box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.28), inset 0 -3px 0 rgb(0 0 0 / 0.18); }
+/* Chaque face n'est visible que d'un côté : l'extérieur montre le papier, l'intérieur le carton. */
+.gift3d-face { backface-visibility: hidden; transition: transform 520ms cubic-bezier(.15, .7, .3, 1), opacity 420ms ease-in 120ms; }
+.gift3d-box { --boom: 0px; --half: calc(var(--size) / 2 + var(--boom)); --in: calc(var(--size) / 2 - 1px + var(--boom)); }
+.gift3d-box .gift3d-front { transform: translateZ(var(--half)); }
+.gift3d-box .gift3d-back { transform: rotateY(180deg) translateZ(var(--half)); }
+.gift3d-box .gift3d-right { transform: rotateY(90deg) translateZ(var(--half)); filter: brightness(0.82); }
+.gift3d-box .gift3d-left { transform: rotateY(-90deg) translateZ(var(--half)); filter: brightness(0.82); }
+.gift3d-box .gift3d-bottom { transform: rotateX(-90deg) translateZ(var(--half)); filter: brightness(0.6); }
+/* Parois intérieures : même place, un pixel en retrait, tournées vers le dedans. */
+.gift3d-box .gift3d-inner.gift3d-front { transform: translateZ(var(--in)) rotateY(180deg); }
+.gift3d-box .gift3d-inner.gift3d-back { transform: rotateY(180deg) translateZ(var(--in)) rotateY(180deg); }
+.gift3d-box .gift3d-inner.gift3d-right { transform: rotateY(90deg) translateZ(var(--in)) rotateY(180deg); }
+.gift3d-box .gift3d-inner.gift3d-left { transform: rotateY(-90deg) translateZ(var(--in)) rotateY(180deg); }
+.gift3d-box .gift3d-inner.gift3d-bottom { transform: rotateX(-90deg) translateZ(var(--in)) rotateX(180deg); }
+
+/* Le couvercle déborde un peu, flotte au-dessus, et se soulève au survol (--lift). */
+.gift3d-lid {
+  --lid: calc(var(--size) * 1.08);
+  --lid-h: calc(var(--size) * 0.2);
+  inset: auto; left: 50%; top: 0; width: 0; height: 0;
+  /* Le couvercle recouvre le haut de la boîte (35 % de sa hauteur) : pas d'espace entre les deux. */
+  margin-top: calc(var(--lid-h) * -0.15);
+  /* Il bascule vers l'arrière en se soulevant, comme une boîte qu'on entrouvre. */
+  transform: translateY(var(--lift)) translateZ(calc(var(--lid) / -2)) rotateX(var(--lid-tilt, 0deg)) translateZ(calc(var(--lid) / 2));
+  transition: transform 450ms cubic-bezier(.3, 1.4, .5, 1);
+}
+.gift3d-lid .gift3d-face { inset: auto; width: var(--lid); height: var(--lid-h); left: calc(var(--lid) / -2); top: calc(var(--lid-h) / -2); filter: brightness(1.1); }
 .gift3d-lid .gift3d-front { transform: translateZ(calc(var(--lid) / 2)); }
 .gift3d-lid .gift3d-back { transform: rotateY(180deg) translateZ(calc(var(--lid) / 2)); }
-.gift3d-lid .gift3d-right { transform: rotateY(90deg) translateZ(calc(var(--lid) / 2)); filter: brightness(0.9); }
-.gift3d-lid .gift3d-left { transform: rotateY(-90deg) translateZ(calc(var(--lid) / 2)); filter: brightness(0.9); }
-.gift3d-lid .gift3d-top, .gift3d-lid .gift3d-bottom { height: var(--lid); top: calc(var(--lid) / -2); }
-.gift3d-lid .gift3d-top { transform: rotateX(90deg) translateZ(calc(var(--lid-h) / 2)); }
-.gift3d-lid .gift3d-bottom { transform: rotateX(-90deg) translateZ(calc(var(--lid-h) / 2)); filter: brightness(0.7); }
-.gift3d-bow { position: absolute; left: 50%; top: 0; transform-style: preserve-3d; margin-top: calc(var(--size) * -0.3); }
-.gift3d-bow span {
-  position: absolute;
-  left: -22px;
-  top: -18px;
-  width: 44px;
-  height: 30px;
-  border: 9px solid var(--gold);
-  border-radius: 50% 50% 12% 50%;
-  transform: rotateY(var(--a, 0deg)) rotate(-25deg) translateX(-14px);
+.gift3d-lid .gift3d-right { transform: rotateY(90deg) translateZ(calc(var(--lid) / 2)); filter: brightness(0.92); }
+.gift3d-lid .gift3d-left { transform: rotateY(-90deg) translateZ(calc(var(--lid) / 2)); filter: brightness(0.92); }
+.gift3d-lid .gift3d-top { height: var(--lid); top: calc(var(--lid) / -2); transform: rotateX(90deg) translateZ(calc(var(--lid-h) / 2)); }
+/* Dessous du couvercle : creux, on voit ses rebords et son plafond en carton. */
+.gift3d-lid .gift3d-inner.gift3d-front { transform: translateZ(calc(var(--lid) / 2 - 1px)) rotateY(180deg); }
+.gift3d-lid .gift3d-inner.gift3d-back { transform: rotateY(180deg) translateZ(calc(var(--lid) / 2 - 1px)) rotateY(180deg); }
+.gift3d-lid .gift3d-inner.gift3d-right { transform: rotateY(90deg) translateZ(calc(var(--lid) / 2 - 1px)) rotateY(180deg); }
+.gift3d-lid .gift3d-inner.gift3d-left { transform: rotateY(-90deg) translateZ(calc(var(--lid) / 2 - 1px)) rotateY(180deg); }
+.gift3d-lid .gift3d-inner.gift3d-top { transform: rotateX(90deg) translateZ(calc(var(--lid-h) / 2 - 1px)) rotateX(180deg); }
+
+/* L'intérieur : carton vert sombre, plus foncé vers le fond. */
+.gift3d .gift3d-inner {
+  background: linear-gradient(180deg, #0f5c40, #093a29);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.25);
+  filter: none;
 }
-.gift3d-bow span:last-child { --a: 90deg; }
+.gift3d .gift3d-inner::after { content: none; }
+.gift3d .gift3d-inner.gift3d-bottom { background: radial-gradient(circle at 50% 50%, #0c4a33, #062a1d); }
+.gift3d .gift3d-lid .gift3d-inner { background: linear-gradient(0deg, #0f5c40, #0a412d); }
+
+/* Nœud : deux boucles de ruban évidées en croix (visibles sous tous les angles),
+   un nœud central et deux pans qui retombent sur le couvercle. */
+.gift3d-bow { position: absolute; left: 0; top: calc(var(--lid-h) / -2); transform-style: preserve-3d; }
+.gift3d-loop {
+  --w: calc(var(--size) * 0.46);
+  --h: calc(var(--size) * 0.34);
+  --t: calc(var(--size) * 0.085);
+  position: absolute;
+  left: calc(var(--w) * -1);
+  top: calc(var(--h) * -0.9);
+  width: var(--w);
+  height: var(--h);
+  box-sizing: border-box;
+  border: var(--t) solid #f4bb3c;
+  border-radius: 55% 45% 45% 55% / 60% 60% 40% 40%;
+  box-shadow:
+    inset 0 2px 0 rgb(255 241 184 / 0.9),
+    inset 0 -2px 0 rgb(170 105 10 / 0.6),
+    0 1px 0 #c98712;
+  transform-origin: 100% 90%;
+}
+.gift3d-loop:nth-child(1) { transform: rotateY(-20deg) rotateZ(-28deg); }
+.gift3d-loop:nth-child(2) { transform: rotateY(160deg) rotateZ(-28deg); }
+/* Les pans du ruban retombent à plat sur le couvercle. */
+.gift3d-loop:nth-child(3), .gift3d-loop:nth-child(4) {
+  --w: calc(var(--size) * 0.1);
+  --h: calc(var(--size) * 0.36);
+  left: calc(var(--w) / -2);
+  top: 0;
+  border: 0;
+  border-radius: 2px 2px 0 0;
+  background: linear-gradient(90deg, #d9921a, #ffe08a 50%, #d9921a);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+  box-shadow: none;
+  transform-origin: 50% 0;
+}
+.gift3d-loop:nth-child(3) { transform: rotateY(25deg) rotateX(-78deg) rotateZ(18deg); }
+.gift3d-loop:nth-child(4) { transform: rotateY(205deg) rotateX(-78deg) rotateZ(18deg); }
+.gift3d-knot {
+  position: absolute;
+  --k: calc(var(--size) * 0.17);
+  left: calc(var(--k) / -2);
+  top: calc(var(--k) * -0.7);
+  width: var(--k);
+  height: var(--k);
+  border-radius: 40%;
+  background: radial-gradient(circle at 35% 30%, #fff4c2, #f2b632 45%, #b97a0c);
+  transform: rotateX(-18deg);
+}
+
+/* Étincelles qui scintillent autour du paquet. */
+.gift3d-sparkle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+  background: #fff;
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  opacity: 0;
+  animation: sparkle 2.6s ease-in-out infinite;
+}
+.gift3d-sparkle:nth-of-type(1) { top: 8%; left: 10%; }
+.gift3d-sparkle:nth-of-type(2) { top: 18%; right: 6%; width: 9px; height: 9px; animation-delay: 0.6s; }
+.gift3d-sparkle:nth-of-type(3) { top: 52%; left: 2%; width: 8px; height: 8px; animation-delay: 1.2s; background: #ffe08a; }
+.gift3d-sparkle:nth-of-type(4) { top: 46%; right: 0; animation-delay: 1.8s; background: #ffe08a; }
+.gift3d-sparkle:nth-of-type(5) { top: 0; left: 52%; width: 10px; height: 10px; animation-delay: 2.2s; }
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+  40% { opacity: 1; transform: scale(1) rotate(90deg); }
+  70% { opacity: 0; transform: scale(0.5) rotate(160deg); }
+}
+
 .gift3d-shadow {
   position: absolute;
   bottom: 4px;
@@ -317,7 +447,41 @@ a.tile:active { transform: scale(0.97); }
   border-radius: 50%;
   background: rgb(80 0 0 / 0.35);
   filter: blur(8px);
+  animation: gift-shadow 3.2s ease-in-out infinite;
 }
+@keyframes gift-shadow { 50% { transform: translateX(-50%) scale(0.82); opacity: 0.7; } }
+
+/* Au clic : le paquet se gonfle puis explose, et la page plonge dedans. */
+/* Les parois s'envolent dans toutes les directions, le couvercle part en l'air en tournant. */
+.gift3d.gift3d-opening { --lift: calc(var(--size) * -1.3); --lid-tilt: -150deg; }
+.gift3d-opening .gift3d-box { --boom: calc(var(--size) * 0.9); }
+.gift3d-opening .gift3d-lid { transition-duration: 520ms; transition-timing-function: cubic-bezier(.15, .7, .3, 1); }
+.gift3d-opening .gift3d-face, .gift3d-opening .gift3d-bow { opacity: 0; }
+.gift3d-bow { transition: opacity 420ms ease-in 120ms; }
+.gift3d-opening .gift3d-shadow { opacity: 0; transition: opacity 300ms ease; }
+/* Éclair de lumière au centre de l'explosion. */
+.gift3d::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--size) * 1.6);
+  height: calc(var(--size) * 1.6);
+  margin: calc(var(--size) * -0.8) 0 0 calc(var(--size) * -0.8);
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff8d6 0, rgb(255 213 107 / 0.7) 30%, transparent 65%);
+  opacity: 0;
+  transform: scale(0.2);
+  pointer-events: none;
+}
+.gift3d-opening::after { animation: gift-flash 520ms ease-out both; }
+@keyframes gift-flash {
+  30% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.4); }
+}
+.gift3d-opening .gift3d-float { animation: gift-pop 380ms cubic-bezier(.3, 1.6, .5, 1) both; }
+@keyframes gift-pop { 40% { transform: scale(1.12); } 100% { transform: scale(1.04); } }
+
 /* L'inclinaison suit le pointeur (--tilt-x/--tilt-y) pendant que le paquet tourne. */
 @keyframes gift-spin {
   from { transform: rotateX(calc(-18deg + var(--tilt-x))) rotateY(var(--tilt-y)); }
@@ -443,12 +607,9 @@ a.tile:active { transform: scale(0.97); }
 /* ---------- Liste d'envies ---------- */
 .wish-list { list-style: none; padding: 0; margin: 0 0 0.75rem; display: grid; gap: 8px; }
 .wish { display: flex; flex-wrap: wrap; align-items: center; gap: 0.85rem; padding: 0.75rem; border-radius: var(--r-inner); background: var(--bg); }
-.wish-thumb { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; border-radius: 12px; background: var(--red); color: #fff; }
-.wish:nth-child(4n+2) .wish-thumb { background: var(--green); }
-.wish:nth-child(4n+3) .wish-thumb { background: var(--gold); color: #2b1d00; }
-.wish:nth-child(4n) .wish-thumb { background: var(--night); }
-.wish-photo { overflow: hidden; outline: 1px solid rgb(0 0 0 / 0.08); outline-offset: -1px; }
-.wish-photo img { width: 100%; height: 100%; object-fit: cover; }
+/* Photo du cadeau : en grand, au-dessus du texte, sur fond blanc (les photos produit le sont souvent). */
+.wish-photo { flex: 1 1 100%; display: grid; place-items: center; height: 200px; padding: 0.5rem; border-radius: 12px; background: #fff; overflow: hidden; outline: 1px solid rgb(0 0 0 / 0.06); outline-offset: -1px; }
+.wish-photo img { max-width: 100%; max-height: 100%; object-fit: contain; }
 .wish-main { flex: 1 1 10rem; min-width: 0; }
 .wish-actions:empty { display: none; }
 .wish-title { font-weight: 600; overflow-wrap: anywhere; }
@@ -460,7 +621,7 @@ a.tile:active { transform: scale(0.97); }
 .badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.15rem 0.55rem; border-radius: 999px; font-size: 0.78rem; font-weight: 700; }
 .badge-secret { background: var(--pink); color: #3a0d22; }
 .badge-favorite { background: var(--gold); color: #2b1d00; }
-.badge-group { background: var(--tile); color: var(--ink); }
+.badge-group { background: var(--green-soft); color: var(--green); }
 .badge-bought { background: var(--cream); color: #6b4a00; }
 .badge-taken { background: var(--green-soft); color: var(--green); }
 .wish-taken { opacity: 0.6; }
@@ -468,6 +629,28 @@ a.tile:active { transform: scale(0.97); }
 .wish-taken .wish-title { text-decoration: line-through; }
 .wish-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 0.35rem; margin-left: auto; }
 .wish-actions .button { display: inline-flex; align-items: center; gap: 0.35rem; }
+.group-progress { flex: 1 1 100%; display: grid; gap: 0.55rem; padding: 0.8rem; border-radius: 14px; background: var(--cream); }
+.group-done { background: var(--green-soft); }
+.progress { position: relative; height: 14px; border-radius: 999px; background: rgb(20 26 46 / 0.08); overflow: hidden; }
+.progress span {
+  display: block; height: 100%; border-radius: inherit; transform-origin: left center;
+  background:
+    repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.22) 0 8px, transparent 8px 16px),
+    linear-gradient(90deg, var(--red), var(--gold) 55%, var(--green));
+  background-size: 200% 100%, 100% 100%;
+  transition: transform 600ms cubic-bezier(.2, .8, .3, 1);
+}
+.group-done .progress span { background: var(--green); }
+.progress-text { font-size: 0.9rem; color: var(--ink-soft); }
+.progress-text strong { color: var(--ink); font-size: 1.05rem; }
+.group-done .progress-text strong { color: var(--green); }
+.chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0; padding: 0; list-style: none; }
+.chip { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.6rem 0.2rem 0.2rem; border-radius: 999px; background: var(--tile); font-size: 0.85rem; box-shadow: 0 1px 2px rgb(20 26 46 / 0.06); }
+.chip strong { font-weight: 700; }
+.chip-dot { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-size: 0.72rem; font-weight: 800; }
+.my-amount { display: flex; align-items: center; gap: 0.4rem; padding-top: 0.55rem; border-top: 1px dashed rgb(20 26 46 / 0.15); font-size: 0.9rem; font-weight: 600; }
+.my-amount input { width: 5.5rem; min-height: 40px; padding: 0.3rem 0.6rem; border: 1.5px solid var(--line); border-radius: 10px; background: var(--tile); font-variant-numeric: tabular-nums; }
+.my-amount input:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 .wish-favorite { box-shadow: inset 0 0 0 2px var(--gold); }
 .wish-editing { list-style: none; }
 .input-with-button { display: flex; gap: 0.5rem; }
@@ -577,6 +760,9 @@ input:focus, textarea:focus { outline: none; border-color: var(--focus); backgro
 .button-small { min-height: 40px; padding: 0.4rem 1rem; font-size: 0.9rem; }
 .button-go { background: var(--green); color: #fff; }
 .button-bought { background: var(--gold); color: #2b1d00; }
+.button-buy { background: var(--cream); color: #6b4a00; box-shadow: inset 0 0 0 1.5px var(--gold); }
+.button-leave { background: transparent; color: var(--red-deep); }
+.button-leave:hover { background: rgb(229 56 59 / 0.08); }
 .button-done { background: var(--green-soft); color: var(--green); }
 .button-done .icon { animation: icon-in 260ms cubic-bezier(.2, .8, .3, 1) both; }
 @keyframes icon-in { from { opacity: 0; transform: scale(0.25); filter: blur(4px); } }
@@ -677,15 +863,107 @@ input:focus, textarea:focus { outline: none; border-color: var(--focus); backgro
 /* ---------- Transition « entonnoir » (voir zoom.js) ---------- */
 .zoom-layer { position: fixed; z-index: 200; pointer-events: none; will-change: left, top, width, height; }
 
+/* ---------- Familles ---------- */
+.tile-code { gap: 0.35rem; container-type: inline-size; }
+.tile-code .stat-label { margin-top: 0; opacity: 0.9; }
+/* Le code tient toujours sur une ligne : sa taille suit la largeur de la tuile. */
+.code-big { font-family: var(--font-display); font-weight: 800; font-size: min(2rem, 12.5cqi); letter-spacing: 0.04em; line-height: 1.1; white-space: nowrap; }
+.code-family { font-size: 0.82rem; opacity: 0.8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.code-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.3rem; }
+.code-actions .button { flex: 1 1 6.5rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; }
+.code-copy { background: rgb(255 255 255 / 0.18); color: #fff; }
+.code-share { background: #fff; color: var(--green); }
+.code-done { min-height: 1.1em; font-size: 0.82rem; font-weight: 700; }
+.appbar-start { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+.family-switch { position: relative; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0 0.3rem 0 0.65rem; border-radius: 999px; background: var(--tile); box-shadow: var(--tile-shadow); color: var(--ink); }
+.family-switch select { max-width: 11rem; min-height: 40px; padding: 0 1.6rem 0 0.2rem; border: 0; background: transparent; color: inherit; font: inherit; font-weight: 700; font-size: 0.9rem; text-overflow: ellipsis; cursor: pointer; }
+.family-switch:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.segmented { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--bg); }
+.segmented button { flex: 1; min-height: 40px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-soft); font: inherit; font-weight: 700; cursor: pointer; transition: background-color 200ms ease, color 200ms ease; }
+.segmented button[aria-selected='true'] { background: var(--ink); color: var(--tile); }
+.code-input { font-variant-numeric: tabular-nums; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; }
+.families { display: grid; gap: 10px; margin: 0 0 0.75rem; padding: 0; list-style: none; }
+.family { display: grid; gap: 0.6rem; padding: 0.9rem; border-radius: var(--r-inner); background: var(--bg); }
+.family-current { box-shadow: inset 0 0 0 2px var(--green); }
+.family-name { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 1.05rem; }
+.family-code { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; padding: 0.5rem 0.5rem 0.5rem 0.8rem; border-radius: 12px; background: var(--tile); }
+.family-code strong { font-size: 1.15rem; letter-spacing: 0.08em; }
+.family-code .button { margin-left: auto; display: inline-flex; align-items: center; gap: 0.35rem; }
+.family-actions, .family-rename { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.family-actions .button { display: inline-flex; align-items: center; gap: 0.35rem; }
+.family-rename input { flex: 1; min-width: 8rem; }
+@media (max-width: 40rem) {
+  .appbar-start { width: 100%; justify-content: space-between; }
+  .family-switch select { max-width: 9rem; }
+}
+
+/* ---------- Animations des actions ---------- */
+/* Halo vert quand une action réussit (réserver, participer, acheté, ma part). */
+.wish-flash { animation: wish-flash 700ms ease-out; }
+@keyframes wish-flash {
+  0% { box-shadow: 0 0 0 0 rgb(23 132 93 / 0.55); }
+  100% { box-shadow: 0 0 0 14px rgb(23 132 93 / 0); }
+}
+.wish-favorite.wish-flash { animation-name: wish-flash-favorite; }
+@keyframes wish-flash-favorite {
+  0% { box-shadow: inset 0 0 0 2px var(--gold), 0 0 0 0 rgb(23 132 93 / 0.55); }
+  100% { box-shadow: inset 0 0 0 2px var(--gold), 0 0 0 14px rgb(23 132 93 / 0); }
+}
+/* Les badges et les participants arrivent avec un petit rebond. */
+.badge, .chip { animation: pop-in 380ms cubic-bezier(.3, 1.6, .5, 1) both; }
+.chip:nth-child(2) { animation-delay: 60ms; }
+.chip:nth-child(3) { animation-delay: 120ms; }
+.chip:nth-child(n+4) { animation-delay: 180ms; }
+@keyframes pop-in { from { opacity: 0; transform: scale(0.6); } }
+/* La barre de la cagnotte se remplit à l'arrivée. */
+.progress span { animation: progress-in 900ms cubic-bezier(.2, .8, .3, 1) 150ms both; }
+@keyframes progress-in { from { transform: scaleX(0); } }
+.group-done { animation: done-glow 1.2s ease-out; }
+@keyframes done-glow { from { box-shadow: 0 0 0 4px rgb(23 132 93 / 0.35); } }
+/* Le formulaire glisse en s'ouvrant. */
+.form.card { animation: form-in 320ms cubic-bezier(.2, .8, .3, 1); transform-origin: top center; }
+@keyframes form-in { from { opacity: 0; transform: translateY(-8px) scale(0.98); } }
+/* Icônes qui changent d'état (acheté, c'est moi qui offre). */
+.button-bought .icon { animation: icon-in 260ms cubic-bezier(.2, .8, .3, 1) both; }
+/* La photo réagit au survol et au toucher. */
+.wish-photo img { transition: transform 300ms cubic-bezier(.2, .8, .3, 1); }
+a.wish-photo:hover img { transform: scale(1.04); }
+a.wish-photo:active img { transform: scale(0.98); }
+.wish-actions .button, .add-button, .photo-pick, .icon-button { transition: transform 120ms ease, background-color 200ms ease, color 200ms ease, box-shadow 200ms ease; }
+.add-button:active, .photo-pick:active, .chip:active { transform: scale(0.97); }
+
 /* ---------- Confettis (seulement quand on réserve) ---------- */
 .confetti { position: fixed; z-index: 100; width: 8px; height: 12px; margin: -6px 0 0 -4px; border-radius: 2px; pointer-events: none; animation: confetti 850ms cubic-bezier(.2, .7, .4, 1) forwards; }
 @keyframes confetti { to { transform: translate(var(--dx), calc(var(--dy) + 60px)) rotate(var(--r)); opacity: 0; } }
 
-@media (max-width: 30rem) {
-  .wish { flex-wrap: wrap; }
-  .wish-actions { width: 100%; justify-content: flex-end; }
+@media (max-width: 40rem) {
+  /* Téléphone : photo, texte, cagnotte et boutons empilés sur toute la largeur. */
+  .wish { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 0.6rem; padding: 0.75rem; }
+  .wish-photo { height: 180px; }
+  .wish-actions { display: flex; flex-wrap: nowrap; gap: 0.4rem; margin: 0; }
+  .wish-actions .button { flex: 1 1 0; justify-content: center; min-height: 44px; padding: 0.4rem 0.6rem; }
+  .wish-actions .icon-button { flex: 0 0 44px; }
+  .wish-actions .button-quiet { background: var(--tile); }
+  /* Seulement crayon / poubelle (sa propre liste) : en haut à droite plutôt qu'une ligne entière. */
+  .wish { position: relative; }
+  .wish:not(:has(.wish-actions .button)) .wish-main { padding-right: 5.5rem; }
+  .wish:not(:has(.wish-actions .button)):has(.wish-photo) .wish-main { padding-right: 0; }
+  .wish:not(:has(.wish-actions .button)):has(.wish-photo) .wish-actions { top: 0.85rem; right: 0.85rem; border-radius: 12px; background: rgb(255 255 255 / 0.9); }
+  .wish:not(:has(.wish-actions .button)) .wish-actions { position: absolute; top: 0.5rem; right: 0.5rem; grid-column: auto; }
+  .mini-num { font-size: clamp(1.6rem, 8vw, 2.4rem); white-space: nowrap; }
+  .wish-actions .button-leave { flex: 0 1 auto; }
+  .my-amount input { flex: 1; width: auto; max-width: 8rem; min-height: 44px; font-size: 1rem; }
+  .my-amount .button { min-height: 44px; }
+  .chips { gap: 0.3rem; }
 }
 @media (hover: none) { a.tile:hover { transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+@media (prefers-color-scheme: dark) {
+  .button-buy, .badge-bought { color: var(--gold); }
+  .progress { background: rgb(255 255 255 / 0.1); }
+  .button-leave { color: #ff8a8c; }
 }

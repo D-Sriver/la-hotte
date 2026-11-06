@@ -1,5 +1,6 @@
 import { getEmail } from '../../server/auth.js';
 import { fail } from '../../server/http.js';
+import { myFamilies } from '../../server/family.js';
 
 export async function onRequest(context) {
   const { request, env, data } = context;
@@ -16,11 +17,18 @@ export async function onRequest(context) {
     .run();
   data.me = await env.DB.prepare('SELECT * FROM users WHERE email = ?1').bind(email.toLowerCase()).first();
 
-  // Access laisse entrer n'importe quelle adresse : tant que le code familial n'est pas saisi,
-  // seules /api/me (pour savoir où on en est) et /api/join répondent.
+  // La famille affichée vient de l'en-tête x-family ; sinon la première de la personne.
+  data.families = await myFamilies(env.DB, data.me.id);
+  const wanted = Number(request.headers.get('x-family'));
+  data.family = data.families.find((f) => f.id === wanted) || data.families[0] || null;
+
+  // Access laisse entrer n'importe quelle adresse : tant qu'on n'a ni créé ni rejoint de famille,
+  // seules ces routes répondent.
   const path = new URL(request.url).pathname;
-  const allowedBeforeJoin = (path === '/api/me' && request.method === 'GET') || path === '/api/join';
-  if (!data.me.joined && !allowedBeforeJoin) return fail(403, 'Entre le code familial pour continuer.');
+  const allowedWithoutFamily = (path === '/api/me')
+    || path === '/api/join'
+    || (path === '/api/families' && request.method === 'POST');
+  if (!data.family && !allowedWithoutFamily) return fail(403, 'Crée ou rejoins une famille pour continuer.');
 
   try {
     return await context.next();

@@ -3,13 +3,15 @@ import { visibleWishes } from '../../server/wishes.js';
 
 const publicProfile = (u) => ({
   id: u.id, email: u.email, name: u.name, likes: u.likes, dislikes: u.dislikes,
-  owns: u.owns, sizes: u.sizes, budget_hint: u.budget_hint, joined: true,
+  owns: u.owns, sizes: u.sizes, budget_hint: u.budget_hint,
 });
 
 export async function onRequestGet({ env, data }) {
-  if (!data.me.joined) return json({ me: { joined: false } });
-  const wishes = await visibleWishes(env.DB, data.me.id, data.me.id);
-  return json({ me: publicProfile(data.me), wishes });
+  const families = data.families;
+  const me = { ...publicProfile(data.me), families, family: data.family };
+  if (!data.family) return json({ me, wishes: [] });
+  const wishes = await visibleWishes(env.DB, data.me.id, data.me.id, data.family.id);
+  return json({ me, wishes });
 }
 
 export async function onRequestPut({ request, env, data }) {
@@ -26,5 +28,5 @@ export async function onRequestPut({ request, env, data }) {
     .bind(name, clean(body.likes), clean(body.dislikes), clean(body.owns), clean(body.sizes, 300),
       clean(body.budget_hint, 60), data.me.id)
     .first();
-  return json({ me: publicProfile(me) });
+  return json({ me: { ...publicProfile(me), families: data.families, family: data.family } });
 }

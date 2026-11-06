@@ -1,14 +1,10 @@
 import { json, fail, readJson, clean } from '../../server/http.js';
-import { visibleWishes } from '../../server/wishes.js';
+import { visibleWishes, personInFamily } from '../../server/wishes.js';
 import { findIdeas } from '../../server/ai.js';
 
 export async function onRequestPost({ request, env, data }) {
   const body = await readJson(request);
-  const person = await env.DB.prepare(
-    'SELECT id, name, likes, dislikes, owns, sizes, budget_hint FROM users WHERE id = ?1 AND name IS NOT NULL',
-  )
-    .bind(Number(body?.person_id))
-    .first();
+  const person = await personInFamily(env.DB, Number(body?.person_id), data.family.id);
   if (!person) return fail(404, 'Personne introuvable.');
 
   const limit = Number(env.IDEAS_PER_DAY || 20);
@@ -22,7 +18,7 @@ export async function onRequestPost({ request, env, data }) {
 
   await env.DB.prepare('INSERT INTO idea_requests (user_id) VALUES (?1)').bind(data.me.id).run();
 
-  const wishes = await visibleWishes(env.DB, person.id, data.me.id);
+  const wishes = await visibleWishes(env.DB, person.id, data.me.id, data.family.id);
   try {
     const ideas = await findIdeas(env, {
       person,

@@ -2,10 +2,11 @@ import { useRef } from 'react';
 import Avatar from './Avatar.jsx';
 import ProfileForm from './ProfileForm.jsx';
 import LogoutButton from './LogoutButton.jsx';
+import FamiliesPanel from './FamiliesPanel.jsx';
 import { profileCompletion } from '../profile.js';
 import { gsap, useGSAP, usePageIntro, MOTION_OK } from '../motion.js';
 
-export default function ProfilePage({ me, onSaved }) {
+export default function ProfilePage({ me, onSaved, onFamiliesChanged }) {
   const { done, total } = profileCompletion(me);
   const scope = usePageIntro();
   const bar = useRef(null);
@@ -46,6 +47,8 @@ export default function ProfilePage({ me, onSaved }) {
         <p className="muted small">Plus c’est précis, meilleures seront les idées qu’on te trouvera.</p>
         <ProfileForm initial={me} onSaved={onSaved} />
       </section>
+
+      <FamiliesPanel me={me} onChanged={onFamiliesChanged} />
 
       <section className="tile section">
         <h2 className="section-title">Mon compte</h2>

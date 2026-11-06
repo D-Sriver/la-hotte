@@ -1,14 +1,16 @@
 /**
  * Règle de secret, au même endroit pour toute l'app :
  * - pour soi-même : uniquement ses propres envies, sans aucune info de réservation ;
- * - pour quelqu'un d'autre : tout, avec qui a réservé, qui participe et les idées secrètes.
+ * - pour quelqu'un d'autre, dans la famille affichée : ses envies, les idées secrètes de cette famille,
+ *   qui a réservé et qui participe. Les réservations se voient d'une famille à l'autre (pas de doublon),
+ *   mais le nom n'est donné qu'aux membres de la même famille.
  */
-export async function visibleWishes(db, ownerId, viewerId) {
+export async function visibleWishes(db, ownerId, viewerId, familyId) {
   if (ownerId === viewerId) {
     const { results } = await db
       .prepare(
         `SELECT id, title, url, price, note, favorite, photo IS NOT NULL AS has_photo, created_at
-         FROM wishes WHERE owner_id = ?1 AND added_by = ?1
+         FROM wishes WHERE owner_id = ?1 AND added_by = ?1 AND family_id IS NULL
          ORDER BY favorite DESC, created_at DESC`,
       )
       .bind(ownerId)
@@ -20,21 +22,29 @@ export async function visibleWishes(db, ownerId, viewerId) {
     .prepare(
       `SELECT w.id, w.title, w.url, w.price, w.note, w.favorite, w.photo IS NOT NULL AS has_photo, w.created_at,
               w.added_by, a.name AS added_by_name,
-              w.reserved_by, r.name AS reserved_by_name, w.group_gift, w.bought,
-              (SELECT json_group_array(json_object('id', u.id, 'name', u.name))
+              w.reserved_by, CASE WHEN rm.user_id IS NULL THEN NULL ELSE r.name END AS reserved_by_name,
+              w.group_gift, w.bought,
+              (SELECT json_group_array(json_object(
+                        'id', u.id,
+                        'name', CASE WHEN EXISTS (SELECT 1 FROM memberships pm WHERE pm.family_id = ?2 AND pm.user_id = u.id)
+                                     THEN u.name ELSE NULL END,
+                        'amount', c.amount))
                  FROM contributions c JOIN users u ON u.id = c.user_id
                  WHERE c.wish_id = w.id) AS participants
        FROM wishes w
        JOIN users a ON a.id = w.added_by
        LEFT JOIN users r ON r.id = w.reserved_by
-       WHERE w.owner_id = ?1
+       LEFT JOIN memberships rm ON rm.user_id = w.reserved_by AND rm.family_id = ?2
+       WHERE w.owner_id = ?1 AND (w.family_id IS NULL OR w.family_id = ?2)
        ORDER BY w.favorite DESC, w.created_at DESC`,
     )
-    .bind(ownerId)
+    .bind(ownerId, familyId)
     .all();
 
   return results.map((w) => {
-    const participants = JSON.parse(w.participants || '[]');
+    const participants = JSON.parse(w.participants || '[]')
+      .map((p) => ({ ...p, name: p.name || 'Autre famille' }));
+    const mine = participants.find((p) => p.id === viewerId);
     return {
       id: w.id,
       title: w.title,
@@ -50,10 +60,13 @@ export async function visibleWishes(db, ownerId, viewerId) {
       can_edit: w.added_by === viewerId,
       reserved: w.reserved_by !== null,
       reserved_by_me: w.reserved_by === viewerId,
-      reserved_by_name: w.reserved_by_name,
+      reserved_by_name: w.reserved_by_name || 'quelqu’un d’une autre famille',
       group_gift: !!w.group_gift,
       participants,
-      participating: participants.some((p) => p.id === viewerId),
+      participating: !!mine,
+      my_amount: mine?.amount ?? null,
+      collected: participants.reduce((sum, p) => sum + (p.amount || 0), 0),
+      target: priceValue(w.price),
       bought: !!w.bought,
     };
   });
@@ -63,4 +76,25 @@ export async function visibleWishes(db, ownerId, viewerId) {
 export function priceValue(text) {
   const match = String(text || '').replace(/\s/g, '').match(/\d+(?:[.,]\d+)?/);
   return match ? Number(match[0].replace(',', '.')) : null;
+}
+
+// La personne fait-elle partie de la famille affichée ? (sinon on ne montre ni elle ni sa liste)
+export async function personInFamily(db, personId, familyId) {
+  return db.prepare(
+    `SELECT u.id, u.name, u.likes, u.dislikes, u.owns, u.sizes, u.budget_hint
+     FROM users u JOIN memberships m ON m.user_id = u.id
+     WHERE u.id = ?1 AND m.family_id = ?2 AND u.name IS NOT NULL`,
+  )
+    .bind(personId, familyId)
+    .first();
+}
+
+// Peut-on agir sur ce vœu depuis la famille affichée ? Il faut voir la personne, et l'idée doit être de cette famille.
+export async function wishInFamily(db, wishId, familyId) {
+  return db.prepare(
+    `SELECT w.* FROM wishes w JOIN memberships m ON m.user_id = w.owner_id AND m.family_id = ?2
+     WHERE w.id = ?1 AND (w.family_id IS NULL OR w.family_id = ?2)`,
+  )
+    .bind(wishId, familyId)
+    .first();
 }

@@ -1,10 +1,12 @@
 import { json, fail, readJson } from '../../../../server/http.js';
+import { wishInFamily } from '../../../../server/wishes.js';
 
 /**
  * Tout ce qu'on peut faire sur le cadeau de quelqu'un d'autre :
  * - reserve : réserver seul, ou annuler sa réservation ;
  * - group   : lancer un cadeau à plusieurs (on en devient l'organisateur) ;
  * - join / leave : participer à un cadeau à plusieurs, ou s'en retirer ;
+ * - amount  : changer ce qu'on met dans un cadeau à plusieurs ;
  * - bought  : cocher / décocher « acheté ».
  */
 export async function onRequestPost({ request, env, data, params }) {
@@ -13,16 +15,21 @@ export async function onRequestPost({ request, env, data, params }) {
   const me = data.me.id;
   const db = env.DB;
 
-  const wish = await db.prepare('SELECT id, owner_id, reserved_by, group_gift, bought FROM wishes WHERE id = ?1')
-    .bind(Number(params.id))
-    .first();
+  const wish = await wishInFamily(db, Number(params.id), data.family.id);
   if (!wish) return fail(404, 'Idée introuvable.');
   if (wish.owner_id === me) return fail(403, 'Pas de réservation sur ta propre liste.');
 
   const participating = !!(await db.prepare('SELECT 1 FROM contributions WHERE wish_id = ?1 AND user_id = ?2')
     .bind(wish.id, me).first());
   const update = (sql, ...values) => db.prepare(`UPDATE wishes SET ${sql} WHERE id = ?1`).bind(wish.id, ...values);
-  const addMe = db.prepare('INSERT OR IGNORE INTO contributions (wish_id, user_id) VALUES (?1, ?2)').bind(wish.id, me);
+  // Montant facultatif, en euros, arrondi au centime.
+  const amount = Number.isFinite(Number(body.amount)) && Number(body.amount) > 0
+    ? Math.min(Math.round(Number(body.amount) * 100) / 100, 100000)
+    : null;
+  const addMe = db.prepare(
+    `INSERT INTO contributions (wish_id, user_id, amount) VALUES (?1, ?2, ?3)
+     ON CONFLICT(wish_id, user_id) DO UPDATE SET amount = COALESCE(excluded.amount, amount)`,
+  ).bind(wish.id, me, amount);
   const free = wish.reserved_by === null;
 
   switch (action) {
@@ -48,6 +55,12 @@ export async function onRequestPost({ request, env, data, params }) {
     case 'join': {
       if (!wish.group_gift) return fail(409, 'Ce cadeau n’est pas ouvert à plusieurs.');
       await addMe.run();
+      return json({ ok: true });
+    }
+    case 'amount': {
+      if (!participating) return fail(409, 'Tu ne participes pas à ce cadeau.');
+      await db.prepare('UPDATE contributions SET amount = ?3 WHERE wish_id = ?1 AND user_id = ?2')
+        .bind(wish.id, me, amount).run();
       return json({ ok: true });
     }
     case 'leave': {
