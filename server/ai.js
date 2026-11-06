@@ -23,7 +23,7 @@ Exactitude :
 
 Écris en français, simplement, sans formules publicitaires.
 Réponds UNIQUEMENT avec un tableau JSON de 5 idées, sans texte avant ni après :
-[{"title": "nom précis", "why": "une phrase concrète qui relie l'idée à un goût précis de la personne", "price": "≈ 35 €", "where": "type de boutique en France", "search": "requête courte en français pour le trouver en ligne"}]`;
+[{"title": "nom précis", "why": "une phrase concrète qui relie l'idée à un goût précis de la personne", "price": "≈ 35 €", "where": "type de boutique en France, en 2 à 5 mots", "search": "requête courte en français pour le trouver en ligne"}]`;
 
 const OCCASIONS = { christmas: 'pour Noël', birthday: 'pour son anniversaire' };
 
@@ -84,7 +84,7 @@ export function cleanIdea(idea) {
     title: idea.title.trim().slice(0, 200),
     why: String(idea.why || '').slice(0, 400),
     price: String(idea.price || '').slice(0, 40),
-    shop: String(idea.where || idea.shop || '').slice(0, 80),
+    shop: String(idea.where || idea.shop || '').slice(0, 120),
     search_url: `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(query)}`,
   };
 }
