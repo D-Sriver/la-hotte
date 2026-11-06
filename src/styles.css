@@ -898,6 +898,101 @@ input:focus, textarea:focus { outline: none; border-color: var(--focus); backgro
   .family-switch select { max-width: 9rem; }
 }
 
+/* ---------- Connexion par email ---------- */
+.login { min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); background: var(--bg); }
+.login-hero {
+  position: relative; overflow: hidden; display: grid; grid-template-rows: auto 1fr auto; padding: 2.5rem;
+  color: #fff; background: radial-gradient(circle at 70% 20%, #ff6b5e, transparent 55%), linear-gradient(160deg, #e5383b, #a4161a);
+}
+.login-brand { display: flex; align-items: center; gap: 0.6rem; font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; }
+.login-brand img { border-radius: 10px; box-shadow: 0 0 0 2px rgb(255 255 255 / 0.25); }
+.login-gift { position: relative; display: grid; place-items: center; }
+.login-gift .gift3d { --size: 150px; position: relative; right: auto; bottom: auto; cursor: default; }
+.login-tagline { position: relative; z-index: 1; font-family: var(--font-display); font-weight: 800; font-size: clamp(1.5rem, 3vw, 2.3rem); line-height: 1.15; letter-spacing: -0.02em; text-wrap: balance; }
+/* Neige qui tombe doucement derrière le paquet. */
+.login-snow {
+  position: absolute; inset: -100px 0 0; pointer-events: none; opacity: 0.55;
+  background-image:
+    radial-gradient(circle, #fff 0 1.5px, transparent 2.5px),
+    radial-gradient(circle, #fff 0 1px, transparent 2px),
+    radial-gradient(circle, rgb(255 255 255 / 0.7) 0 2px, transparent 3px);
+  background-size: 90px 90px, 60px 60px, 140px 140px;
+  background-position: 0 0, 30px 20px, 50px 70px;
+  animation: snow 14s linear infinite;
+}
+@keyframes snow { to { transform: translateY(100px); } }
+.login-panel { display: grid; align-content: center; justify-items: center; gap: 1.25rem; padding: 2.5rem 1.5rem; }
+.login-form { width: 100%; max-width: 24rem; gap: 1rem; animation: form-in 400ms cubic-bezier(.2, .8, .3, 1); }
+.login-form .title { font-size: clamp(1.8rem, 4vw, 2.4rem); }
+.login-submit { width: 100%; min-height: 52px; font-size: 1.05rem; }
+.login-steps { display: flex; gap: 0.5rem; width: 100%; max-width: 24rem; margin: 0; padding: 0; list-style: none; counter-reset: step; }
+.login-steps li { flex: 1; display: flex; align-items: center; gap: 0.45rem; padding-top: 0.6rem; border-top: 3px solid var(--line); color: var(--ink-soft); font-size: 0.85rem; font-weight: 700; counter-increment: step; }
+.login-steps li::before { content: counter(step); display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--line); color: var(--ink-soft); font-size: 0.75rem; }
+.login-steps .is-current { border-color: var(--red); color: var(--ink); }
+.login-steps .is-current::before { background: var(--red); color: #fff; }
+.login-steps .is-done { border-color: var(--green); }
+.login-steps .is-done::before { content: '✓'; background: var(--green); color: #fff; }
+.login-perks { display: grid; gap: 0.6rem; margin: 0.5rem 0 0; padding: 1rem; border-radius: var(--r-inner); background: var(--tile); list-style: none; }
+.login-perks li { display: flex; align-items: flex-start; gap: 0.6rem; color: var(--ink-soft); font-size: 0.9rem; }
+.login-perks .icon { flex-shrink: 0; margin-top: 2px; color: var(--red); }
+.login-links { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.link-button { padding: 0.4rem 0; border: 0; background: none; color: var(--ink); font: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.link-button:disabled { color: var(--ink-soft); text-decoration: none; cursor: default; }
+/* Les 6 cases du code. */
+.code-boxes { position: relative; display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.45rem; }
+.code-boxes-input { position: absolute; inset: 0; width: 100%; opacity: 0; font-size: 16px; caret-color: transparent; }
+.code-box { display: grid; place-items: center; aspect-ratio: 4 / 5; border-radius: 14px; background: var(--tile); box-shadow: inset 0 0 0 2px var(--line); font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; font-variant-numeric: tabular-nums; transition: box-shadow 150ms ease, transform 150ms ease; }
+.code-box-filled { box-shadow: inset 0 0 0 2px var(--ink-soft); animation: pop-in 220ms cubic-bezier(.3, 1.6, .5, 1); }
+.code-boxes:focus-within .code-box-active { box-shadow: inset 0 0 0 3px var(--red); transform: translateY(-2px); }
+@media (max-width: 40rem) {
+  .login { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .login-hero { grid-template-rows: auto auto auto; gap: 0.5rem; padding: 1.25rem 1.25rem 1.5rem; border-radius: 0 0 28px 28px; }
+  .login-gift .gift3d { --size: 84px; }
+  .login-tagline { font-size: 1.25rem; }
+  .login-panel { align-content: start; padding: 1.5rem 1rem 2.5rem; }
+}
+
+/* ---------- Discussion secrète ---------- */
+.chat { flex: 1 1 100%; grid-column: 1 / -1; display: grid; gap: 0.6rem; padding: 0.8rem; border-radius: 14px; background: var(--tile); animation: form-in 280ms cubic-bezier(.2, .8, .3, 1); }
+.chat-note { display: flex; align-items: center; gap: 0.35rem; color: var(--ink-soft); font-size: 0.8rem; font-weight: 600; }
+.chat-list { display: grid; gap: 0.45rem; max-height: 16rem; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+.chat-msg { justify-self: start; display: grid; gap: 0.15rem; max-width: 85%; padding: 0.5rem 0.75rem; border-radius: 14px 14px 14px 4px; background: var(--bg); }
+.chat-mine { justify-self: end; border-radius: 14px 14px 4px 14px; background: var(--green-soft); }
+.chat-author { font-size: 0.78rem; font-weight: 700; color: var(--ink-soft); }
+.chat-body { overflow-wrap: anywhere; white-space: pre-wrap; }
+.chat-meta { display: flex; gap: 0.6rem; font-size: 0.72rem; color: var(--ink-soft); }
+.chat-delete { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
+.chat-form { display: flex; gap: 0.4rem; }
+.chat-form input { flex: 1; min-width: 0; min-height: 40px; }
+.chat-toggle { position: relative; }
+.chat-toggle-open { background: var(--tile); color: var(--ink); }
+.chat-count { position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 999px; background: var(--red); color: #fff; font-size: 0.68rem; font-weight: 800; line-height: 18px; text-align: center; }
+
+/* ---------- Installer l'app ---------- */
+.install {
+  position: fixed; z-index: 50; left: 50%; bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px) + 1.25rem);
+  display: flex; align-items: center; gap: 0.7rem; width: min(30rem, calc(100% - 2rem)); padding: 0.7rem 0.6rem 0.7rem 0.8rem;
+  border-radius: 20px; background: var(--tile); box-shadow: 0 12px 32px -8px rgb(20 26 46 / 0.35);
+  transform: translateX(-50%); animation: install-in 500ms cubic-bezier(.2, .8, .3, 1) 1.5s both;
+}
+.install img { border-radius: 10px; flex-shrink: 0; }
+.install-text { flex: 1; display: grid; gap: 0.1rem; font-size: 0.85rem; }
+.install-text span { color: var(--ink-soft); }
+.install-text .icon { vertical-align: -2px; }
+.install .button { display: inline-flex; align-items: center; gap: 0.3rem; flex-shrink: 0; }
+@keyframes install-in { from { opacity: 0; transform: translate(-50%, 20px); } }
+@media (min-width: 40.01rem) { .install { bottom: 1.25rem; } }
+
+/* ---------- Archives et anniversaires ---------- */
+.archives summary { display: flex; align-items: center; cursor: pointer; list-style: none; }
+.archives summary::-webkit-details-marker { display: none; }
+.archives summary::after { content: '▾'; margin-left: auto; color: var(--ink-soft); transition: transform 200ms ease; }
+.archives[open] summary::after { transform: rotate(180deg); }
+.archive-list { display: grid; gap: 6px; margin: 0.75rem 0 0; padding: 0; list-style: none; }
+.archive-item { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; padding: 0.6rem 0.75rem; border-radius: 12px; background: var(--bg); }
+.archive-title { font-weight: 600; text-decoration: line-through; text-decoration-color: var(--green); }
+.person-birthday { display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.35rem; padding: 0.15rem 0.55rem; border-radius: 999px; background: rgb(255 255 255 / 0.85); color: #141a2e; font-size: 0.78rem; font-weight: 700; justify-self: start; align-self: start; }
+
 /* ---------- Animations des actions ---------- */
 /* Halo vert quand une action réussit (réserver, participer, acheté, ma part). */
 .wish-flash { animation: wish-flash 700ms ease-out; }
@@ -941,8 +1036,8 @@ a.wish-photo:active img { transform: scale(0.98); }
   /* Téléphone : photo, texte, cagnotte et boutons empilés sur toute la largeur. */
   .wish { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 0.6rem; padding: 0.75rem; }
   .wish-photo { height: 180px; }
-  .wish-actions { display: flex; flex-wrap: nowrap; gap: 0.4rem; margin: 0; }
-  .wish-actions .button { flex: 1 1 0; justify-content: center; min-height: 44px; padding: 0.4rem 0.6rem; }
+  .wish-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0; }
+  .wish-actions .button { flex: 1 1 7.5rem; justify-content: center; min-height: 44px; padding: 0.4rem 0.6rem; white-space: nowrap; }
   .wish-actions .icon-button { flex: 0 0 44px; }
   .wish-actions .button-quiet { background: var(--tile); }
   /* Seulement crayon / poubelle (sa propre liste) : en haut à droite plutôt qu'une ligne entière. */

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api } from '../api.js';
 import Icon from './Icon.jsx';
 import WishForm from './WishForm.jsx';
@@ -106,9 +106,17 @@ function GiftActions({ wish, busy, run }) {
       </>
     );
   }
+  // Une fois acheté : « Offert » le fait passer dans les archives.
+  const givenButton = wish.bought && (
+    <button className="button button-small button-go" disabled={busy} onClick={(e) => { burst(e.currentTarget); run(() => api.gift(wish.id, 'given'), null, true); }}>
+      <Icon name="gift" size={16} />Offert
+    </button>
+  );
+
   if (wish.group_gift) {
     return wish.participating ? (
       <>
+        {givenButton}
         {boughtButton}
         <button className="button button-small button-leave" disabled={busy} onClick={act('leave')}>Je me retire</button>
       </>
@@ -121,6 +129,7 @@ function GiftActions({ wish, busy, run }) {
   if (wish.reserved_by_me) {
     return (
       <>
+        {givenButton}
         {boughtButton}
         <button className="button button-small button-done" disabled={busy} aria-pressed="true" onClick={act('reserve')}>
           <Icon name="check" size={16} />C’est moi qui offre
@@ -129,6 +138,74 @@ function GiftActions({ wish, busy, run }) {
     );
   }
   return null;
+}
+
+const timeOf = (iso) => new Date(`${iso.replace(' ', 'T')}Z`).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+// Discussion secrète entre ceux qui offrent ce cadeau (jamais vue par la personne gâtée).
+function WishChat({ wish, onCount }) {
+  const [messages, setMessages] = useState(null);
+  const [text, setText] = useState('');
+  const [error, setError] = useState('');
+  const [sending, setSending] = useState(false);
+  const bottom = useRef(null);
+
+  const load = () => api.messages(wish.id)
+    .then((d) => {
+      setMessages(d.messages);
+      onCount(d.messages.length);
+      requestAnimationFrame(() => bottom.current?.scrollIntoView({ block: 'nearest' }));
+    })
+    .catch((e) => setError(e.message));
+  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function send(e) {
+    e.preventDefault();
+    if (!text.trim()) return;
+    setSending(true);
+    setError('');
+    try {
+      await api.sendMessage(wish.id, text);
+      setText('');
+      await load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div className="chat">
+      <p className="chat-note"><Icon name="lock" size={13} />Entre vous : la personne gâtée ne voit jamais cette discussion.</p>
+      {messages === null && !error && <p className="muted small">Chargement…</p>}
+      {messages?.length === 0 && <p className="muted small">Pas encore de message. Qui s’en occupe ? Quelle taille ? Lancez-vous.</p>}
+      {messages?.length > 0 && (
+        <ul className="chat-list">
+          {messages.map((m) => (
+            <li key={m.id} className={`chat-msg${m.mine ? ' chat-mine' : ''}`}>
+              {!m.mine && <span className="chat-author">{m.name}</span>}
+              <span className="chat-body">{m.body}</span>
+              <span className="chat-meta">
+                {timeOf(m.created_at)}
+                {m.mine && (
+                  <button type="button" className="chat-delete" onClick={() => api.deleteMessage(wish.id, m.id).then(load)} aria-label="Effacer ce message">
+                    Effacer
+                  </button>
+                )}
+              </span>
+            </li>
+          ))}
+          <li ref={bottom} aria-hidden="true" />
+        </ul>
+      )}
+      <form className="chat-form" onSubmit={send}>
+        <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Écrire aux autres…" maxLength={1000} aria-label="Message" />
+        <button className="button button-small button-go" disabled={sending || !text.trim()}>Envoyer</button>
+      </form>
+      {error && <p className="error small" role="alert">{error}</p>}
+    </div>
+  );
 }
 
 // Petit halo vert sur la carte pour confirmer qu'une action a marché.
@@ -160,12 +237,17 @@ function WishRow({ wish, onChanged }) {
   const [error, setError] = useState('');
   const row = useRef(null);
 
-  async function run(action, onSuccess) {
+  const [chatOpen, setChatOpen] = useState(false);
+  const [messageCount, setMessageCount] = useState(wish.message_count || 0);
+
+  // leaves : l'envie quitte la liste (reçue, offerte) : elle se replie avant de disparaître.
+  async function run(action, onSuccess, leaves) {
     setBusy(true);
     setError('');
     try {
       await action();
-      flash(row.current);
+      if (leaves) await collapse(row.current);
+      else flash(row.current);
       onSuccess?.();
       onChanged();
     } catch (err) {
@@ -237,8 +319,29 @@ function WishRow({ wish, onChanged }) {
           {wish.participating && <MyAmount key={wish.my_amount} wish={wish} busy={busy} run={run} />}
         </GroupProgress>
       )}
+      {chatOpen && <WishChat wish={wish} onCount={setMessageCount} />}
       <div className="wish-actions">
+        {wish.mine && (
+          <button
+            className="button button-small button-quiet"
+            disabled={busy}
+            onClick={(e) => { burst(e.currentTarget); run(() => api.setReceived(wish.id, true), null, true); }}
+          >
+            <Icon name="check" size={16} />Reçu, merci !
+          </button>
+        )}
         {!wish.mine && <GiftActions wish={wish} busy={busy} run={run} />}
+        {!wish.mine && (
+          <button
+            className={`icon-button chat-toggle${chatOpen ? ' chat-toggle-open' : ''}`}
+            aria-expanded={chatOpen}
+            aria-label={`Discussion secrète (${messageCount} message${messageCount > 1 ? 's' : ''})`}
+            onClick={() => setChatOpen(!chatOpen)}
+          >
+            <Icon name="chat" size={18} />
+            {messageCount > 0 && <span className="chat-count num">{messageCount}</span>}
+          </button>
+        )}
         {wish.can_edit && (
           <button className="icon-button" disabled={busy} aria-label={`Modifier « ${wish.title} »`} onClick={() => setEditing(true)}>
             <Icon name="pencil" size={18} />

@@ -12,6 +12,7 @@ export default function ProfileForm({ initial, submitLabel = 'Enregistrer', onSa
   const [form, setForm] = useState({
     name: initial.name || '', likes: initial.likes || '', owns: initial.owns || '',
     dislikes: initial.dislikes || '', sizes: initial.sizes || '', budget_hint: initial.budget_hint || '',
+    birthday: initial.birthday || '', notify_email: initial.notify_email !== false,
   });
   const [status, setStatus] = useState({ saving: false, message: '', error: '' });
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value });
@@ -47,6 +48,15 @@ export default function ProfileForm({ initial, submitLabel = 'Enregistrer', onSa
         <span className="field-label">Budget idéal</span>
         <span className="field-hint">Une indication pour la famille, ex. « 20 à 50 € ».</span>
         <input value={form.budget_hint} onChange={set('budget_hint')} maxLength={60} />
+      </label>
+      <label className="field">
+        <span className="field-label">Anniversaire</span>
+        <span className="field-hint">Pour que la famille y pense. Seuls le jour et le mois sont montrés.</span>
+        <input type="date" value={form.birthday} onChange={set('birthday')} max={new Date().toISOString().slice(0, 10)} />
+      </label>
+      <label className="check">
+        <input type="checkbox" checked={form.notify_email} onChange={(e) => setForm({ ...form, notify_email: e.target.checked })} />
+        Rappels par email (Noël, anniversaires, cagnottes)
       </label>
       <div className="form-actions">
         <button className="button" disabled={status.saving}>{status.saving ? 'Enregistrement…' : submitLabel}</button>

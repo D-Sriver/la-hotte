@@ -10,6 +10,8 @@ import ProfileForm from './components/ProfileForm.jsx';
 import JoinForm from './components/JoinForm.jsx';
 import Icon from './components/Icon.jsx';
 import LogoutButton from './components/LogoutButton.jsx';
+import LoginScreen from './components/LoginScreen.jsx';
+import InstallPrompt from './components/InstallPrompt.jsx';
 import { gsap, useGSAP } from './motion.js';
 import { zoomBackHome } from './zoom.js';
 
@@ -96,7 +98,8 @@ export default function App() {
   const [error, setError] = useState('');
 
   const loadMe = useCallback(() => {
-    api.me().then((data) => setMe(data.me)).catch((err) => setError(err.message));
+    setError('');
+    api.me().then((data) => setMe(data.me)).catch((err) => setError(err.needsLogin ? 'login' : err.message));
   }, []);
   useEffect(loadMe, [loadMe]);
 
@@ -106,6 +109,7 @@ export default function App() {
     loadMe();
   }, [loadMe]);
 
+  if (error === 'login') return <LoginScreen onLoggedIn={loadMe} />;
   if (error) return <main className="page page-center"><p className="error" role="alert">{error}</p></main>;
   if (!me) return <main className="page page-center"><div className="spinner" role="status" aria-label="Chargement" /></main>;
 
@@ -117,7 +121,7 @@ export default function App() {
           <h1 className="title">Bienvenue dans La Hotte</h1>
           <p className="lead">Les listes de cadeaux de ta famille, sans gâcher les surprises. Rejoins ta famille avec son code, ou crée-la et partage le code.</p>
           <JoinForm onJoined={showFamily} />
-          <LogoutButton email={me.email} quiet />
+          <LogoutButton email={me.email} emailLogin={me.email_login} quiet />
         </div>
       </main>
     );
@@ -134,7 +138,7 @@ export default function App() {
             et toi pour leur en trouver.
           </p>
           <ProfileForm initial={me} submitLabel="Créer mon profil" onSaved={setMe} />
-          <LogoutButton email={me.email} quiet />
+          <LogoutButton email={me.email} emailLogin={me.email_login} quiet />
         </div>
       </main>
     );
@@ -150,6 +154,7 @@ export default function App() {
         <Nav current={route.page} />
       </header>
       {/* Changer de famille recharge toutes les pages avec les bonnes personnes. */}
+      <InstallPrompt />
       <main className="page" key={me.family.id}>
         {route.page === 'home' && <Home me={me} />}
         {route.page === 'me' && <MePage me={me} />}

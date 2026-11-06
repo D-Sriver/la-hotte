@@ -8,6 +8,18 @@ import CountUp from './CountUp.jsx';
 import { zoomInto } from '../zoom.js';
 import { usePageIntro } from '../motion.js';
 
+// Dans combien de jours tombe un anniversaire (« MM-JJ »).
+function daysToBirthday(monthDay) {
+  if (!monthDay) return null;
+  const [month, day] = monthDay.split('-').map(Number);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  let next = new Date(today.getFullYear(), month - 1, day);
+  if (next < today) next = new Date(today.getFullYear() + 1, month - 1, day);
+  return Math.round((next - today) / 86_400_000);
+}
+const birthdayLabel = (days) => (days === 0 ? 'Anniversaire aujourd’hui !' : days === 1 ? 'Anniversaire demain' : `Anniversaire dans ${days} jours`);
+
 const countLabel = (n) => (n === 0 ? 'Liste vide' : n === 1 ? '1 idée' : `${n} idées`);
 
 // Le code de la famille, à copier ou à partager pour inviter quelqu'un.
@@ -108,6 +120,9 @@ export default function Home({ me }) {
           <span className="person-initial">{p.name.charAt(0).toUpperCase()}</span>
           <span className="person-name">{p.name}</span>
           <span className="person-meta">{countLabel(p.wish_count)}</span>
+          {daysToBirthday(p.birthday) !== null && daysToBirthday(p.birthday) <= 30 && (
+            <span className="person-birthday"><Icon name="cake" size={14} />{birthdayLabel(daysToBirthday(p.birthday))}</span>
+          )}
           <span className="tile-arrow"><Icon name="chevron" size={18} /></span>
         </a>
       ))}

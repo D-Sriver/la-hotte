@@ -19,7 +19,8 @@ const SPARKLES = 5;
 // Un paquet cadeau en vraie 3D CSS : il flotte et tourne seul, s'incline vers le pointeur,
 // tremble d'impatience au survol, et sert de porte d'entrée vers « Ma liste » :
 // au clic, il explose en confettis, puis on plonge dedans.
-export default function Gift3D() {
+// decorative : simple décor (écran de connexion), sans clic ni lien.
+export default function Gift3D({ decorative = false }) {
   const scene = useRef(null);
   const [opening, setOpening] = useState(false);
 
@@ -53,15 +54,17 @@ export default function Gift3D() {
     setTimeout(() => zoomInto(scene.current, '#/moi', { color: '#f6b93b' }), 480);
   };
 
+  const Tag = decorative ? 'div' : 'a';
+  const linkProps = decorative
+    ? { 'aria-hidden': true }
+    : { href: '#/moi', onClick: open, 'aria-label': 'Ouvrir ma liste' };
   return (
-    <a
-      href="#/moi"
-      className={`gift3d${opening ? ' gift3d-opening' : ''}`}
+    <Tag
+      className={`gift3d${opening ? ' gift3d-opening' : ''}${decorative ? ' gift3d-decorative' : ''}`}
       ref={scene}
       onPointerMove={tilt}
       onPointerLeave={reset}
-      onClick={open}
-      aria-label="Ouvrir ma liste"
+      {...linkProps}
     >
       <div className="gift3d-float">
         <div className="gift3d-tilt">
@@ -84,6 +87,6 @@ export default function Gift3D() {
       </div>
       {Array.from({ length: SPARKLES }, (_, i) => <span key={i} className="gift3d-sparkle" aria-hidden="true" />)}
       <div className="gift3d-shadow" />
-    </a>
+    </Tag>
   );
 }

@@ -5,13 +5,15 @@
  *   qui a réservé et qui participe. Les réservations se voient d'une famille à l'autre (pas de doublon),
  *   mais le nom n'est donné qu'aux membres de la même famille.
  */
-export async function visibleWishes(db, ownerId, viewerId, familyId) {
+export async function visibleWishes(db, ownerId, viewerId, familyId, { archived = false } = {}) {
+  // Les cadeaux reçus quittent les listes : on ne les voit plus que dans les archives de leur propriétaire.
+  const receivedFilter = archived ? 'received_at IS NOT NULL' : 'received_at IS NULL';
   if (ownerId === viewerId) {
     const { results } = await db
       .prepare(
-        `SELECT id, title, url, price, note, favorite, photo IS NOT NULL AS has_photo, created_at
-         FROM wishes WHERE owner_id = ?1 AND added_by = ?1 AND family_id IS NULL
-         ORDER BY favorite DESC, created_at DESC`,
+        `SELECT id, title, url, price, note, favorite, photo IS NOT NULL AS has_photo, created_at, received_at
+         FROM wishes WHERE owner_id = ?1 AND added_by = ?1 AND family_id IS NULL AND ${receivedFilter}
+         ORDER BY ${archived ? 'received_at DESC' : 'favorite DESC, created_at DESC'}`,
       )
       .bind(ownerId)
       .all();
@@ -30,12 +32,13 @@ export async function visibleWishes(db, ownerId, viewerId, familyId) {
                                      THEN u.name ELSE NULL END,
                         'amount', c.amount))
                  FROM contributions c JOIN users u ON u.id = c.user_id
-                 WHERE c.wish_id = w.id) AS participants
+                 WHERE c.wish_id = w.id) AS participants,
+              (SELECT COUNT(*) FROM wish_messages wm WHERE wm.wish_id = w.id AND wm.family_id = ?2) AS message_count
        FROM wishes w
        JOIN users a ON a.id = w.added_by
        LEFT JOIN users r ON r.id = w.reserved_by
        LEFT JOIN memberships rm ON rm.user_id = w.reserved_by AND rm.family_id = ?2
-       WHERE w.owner_id = ?1 AND (w.family_id IS NULL OR w.family_id = ?2)
+       WHERE w.owner_id = ?1 AND (w.family_id IS NULL OR w.family_id = ?2) AND w.received_at IS NULL
        ORDER BY w.favorite DESC, w.created_at DESC`,
     )
     .bind(ownerId, familyId)
@@ -68,6 +71,7 @@ export async function visibleWishes(db, ownerId, viewerId, familyId) {
       collected: participants.reduce((sum, p) => sum + (p.amount || 0), 0),
       target: priceValue(w.price),
       bought: !!w.bought,
+      message_count: w.message_count,
     };
   });
 }
@@ -81,7 +85,7 @@ export function priceValue(text) {
 // La personne fait-elle partie de la famille affichée ? (sinon on ne montre ni elle ni sa liste)
 export async function personInFamily(db, personId, familyId) {
   return db.prepare(
-    `SELECT u.id, u.name, u.likes, u.dislikes, u.owns, u.sizes, u.budget_hint
+    `SELECT u.id, u.name, u.likes, u.dislikes, u.owns, u.sizes, u.budget_hint, substr(u.birthday, 6) AS birthday
      FROM users u JOIN memberships m ON m.user_id = u.id
      WHERE u.id = ?1 AND m.family_id = ?2 AND u.name IS NOT NULL`,
   )

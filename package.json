@@ -14,9 +14,11 @@
     "db:migrate:prices": "wrangler d1 execute la-hotte --remote --file=migrations/004_price_searches.sql",
     "db:migrate:amounts": "wrangler d1 execute la-hotte --remote --file=migrations/005_contribution_amount.sql",
     "db:migrate:families": "wrangler d1 execute la-hotte --remote --file=migrations/006_families.sql",
+    "db:migrate:more": "wrangler d1 execute la-hotte --remote --file=migrations/008_more.sql",
     "db:reset:lists": "wrangler d1 execute la-hotte --remote --file=migrations/007_reset_lists.sql",
     "preview": "npm run build && wrangler pages dev",
-    "deploy": "npm run build && wrangler pages deploy"
+    "deploy": "npm run build && wrangler pages deploy",
+    "deploy:reminders": "wrangler deploy --config reminders/wrangler.toml"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

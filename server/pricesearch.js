@@ -6,12 +6,15 @@ const normalize = (text) => String(text || '').toLowerCase().normalize('NFD').re
 // « www.fnac.com » → « fnac », pour reconnaître la boutique dans les résultats (« Fnac.com », « Fnac »).
 const shopName = (host) => normalize(host.replace(/^www\./, '').split('.').slice(0, -1).join(''));
 
-async function underMonthlyLimit(env) {
+// Plafond global (palier gratuit SerpApi) et plafond par famille (pour partager équitablement).
+async function underMonthlyLimit(env, familyId) {
   const limit = Number(env.PRICE_SEARCHES_PER_MONTH) || 200;
+  const familyLimit = Number(env.FAMILY_PRICE_SEARCHES_PER_MONTH) || 40;
   const row = await env.DB.prepare(
-    "SELECT COUNT(*) AS n FROM price_searches WHERE created_at >= datetime('now', 'start of month')",
-  ).first();
-  return row.n < limit;
+    `SELECT COUNT(*) AS n, SUM(family_id = ?1) AS family_n
+     FROM price_searches WHERE created_at >= datetime('now', 'start of month')`,
+  ).bind(familyId ?? null).first();
+  return row.n < limit && (row.family_n || 0) < familyLimit;
 }
 
 const formatEuros = (value) =>
@@ -29,10 +32,10 @@ export function pickPrice(results, host) {
   return { price: `≈ ${formatEuros(median.extracted_price)}`, source: median.source, exact: false, thumbnail: median.thumbnail };
 }
 
-export async function searchPrice(env, title, pageUrl) {
+export async function searchPrice(env, title, pageUrl, familyId) {
   if (!env.SERPAPI_KEY || !title || title.length < 4) return null;
-  if (!(await underMonthlyLimit(env))) return null;
-  await env.DB.prepare('INSERT INTO price_searches DEFAULT VALUES').run();
+  if (!(await underMonthlyLimit(env, familyId))) return null;
+  await env.DB.prepare('INSERT INTO price_searches (family_id) VALUES (?1)').bind(familyId ?? null).run();
 
   const params = new URLSearchParams({
     engine: 'google_shopping', q: title, gl: 'fr', hl: 'fr', google_domain: 'google.fr', api_key: env.SERPAPI_KEY,

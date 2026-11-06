@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS users (
   owns        TEXT DEFAULT '',      -- ce qu'il/elle a déjà (évite les doublons)
   sizes       TEXT DEFAULT '',      -- tailles, pointures...
   budget_hint TEXT DEFAULT '',      -- ex. "20-50 €"
+  birthday    TEXT,                 -- AAAA-MM-JJ (l'année ne sert pas)
+  notify_email INTEGER NOT NULL DEFAULT 1, -- rappels par email
   joined      INTEGER NOT NULL DEFAULT 0, -- ancien code familial unique, plus utilisé
   join_failures INTEGER NOT NULL DEFAULT 0, -- mauvais codes, pour bloquer le devinage
   join_failed_at TEXT,                  -- dernier mauvais code (blocage levé au bout d'une heure)
@@ -52,6 +54,7 @@ CREATE TABLE IF NOT EXISTS wishes (
   reserved_at TEXT,
   group_gift  INTEGER NOT NULL DEFAULT 0, -- cadeau à plusieurs : les participants sont dans contributions
   bought      INTEGER NOT NULL DEFAULT 0, -- acheté (jamais montré au propriétaire)
+  received_at TEXT,                 -- reçu : sort des listes, va dans les archives
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_wishes_owner ON wishes(owner_id);
@@ -69,6 +72,7 @@ CREATE TABLE IF NOT EXISTS contributions (
 CREATE TABLE IF NOT EXISTS idea_requests (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  family_id  INTEGER,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_idea_requests_user ON idea_requests(user_id, created_at);
@@ -76,5 +80,36 @@ CREATE INDEX IF NOT EXISTS idx_idea_requests_user ON idea_requests(user_id, crea
 -- Compteur des recherches de prix SerpApi (palier gratuit : on s'arrête bien avant la limite).
 CREATE TABLE IF NOT EXISTS price_searches (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  family_id  INTEGER,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Discussion secrète entre ceux qui offrent, par cadeau et par famille.
+CREATE TABLE IF NOT EXISTS wish_messages (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  wish_id    INTEGER NOT NULL REFERENCES wishes(id) ON DELETE CASCADE,
+  family_id  INTEGER NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  body       TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_wish_messages ON wish_messages(wish_id, family_id, created_at);
+
+-- Connexion par code envoyé par email (AUTH_MODE = "email").
+CREATE TABLE IF NOT EXISTS login_codes (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  email      TEXT NOT NULL,
+  code_hash  TEXT NOT NULL,
+  attempts   INTEGER NOT NULL DEFAULT 0,
+  expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_login_codes_email ON login_codes(email, created_at);
+
+-- Rappels déjà envoyés.
+CREATE TABLE IF NOT EXISTS reminders_sent (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  key     TEXT NOT NULL,
+  sent_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, key)
 );

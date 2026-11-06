@@ -52,7 +52,7 @@ export default function ProfilePage({ me, onSaved, onFamiliesChanged }) {
 
       <section className="tile section">
         <h2 className="section-title">Mon compte</h2>
-        <LogoutButton email={me.email} />
+        <LogoutButton email={me.email} emailLogin={me.email_login} />
       </section>
     </div>
   );

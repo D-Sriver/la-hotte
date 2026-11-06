@@ -11,8 +11,12 @@ import { usePageIntro } from '../motion.js';
 
 export default function MePage({ me }) {
   const [wishes, setWishes] = useState(null);
+  const [archived, setArchived] = useState([]);
   const load = useCallback(() => {
-    api.me().then((d) => setWishes(d.wishes));
+    api.me().then((d) => {
+      setWishes(d.wishes);
+      setArchived(d.archived || []);
+    });
   }, []);
   useEffect(load, [load]);
 
@@ -48,6 +52,25 @@ export default function MePage({ me }) {
           : <Skeleton rows={2} />}
         <AddWishForm ownerId={me.id} onAdded={load} />
       </section>
+
+      {archived.length > 0 && (
+        <details className="tile section archives">
+          <summary className="section-title">
+            Cadeaux reçus<span className="count">{archived.length}</span>
+          </summary>
+          <p className="muted small">Ce que tu as marqué « Reçu ». La famille ne les voit plus dans ta liste.</p>
+          <ul className="archive-list">
+            {archived.map((w) => (
+              <li key={w.id} className="archive-item">
+                <span className="archive-title">{w.title}</span>
+                <button className="button button-small button-quiet" onClick={() => api.setReceived(w.id, false).then(load)}>
+                  Remettre dans ma liste
+                </button>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
 
       <IdeasPanel person={{ ...me, is_me: true }} onAdded={load} />
     </div>

@@ -7,7 +7,8 @@ import { wishInFamily } from '../../../../server/wishes.js';
  * - group   : lancer un cadeau à plusieurs (on en devient l'organisateur) ;
  * - join / leave : participer à un cadeau à plusieurs, ou s'en retirer ;
  * - amount  : changer ce qu'on met dans un cadeau à plusieurs ;
- * - bought  : cocher / décocher « acheté ».
+ * - bought  : cocher / décocher « acheté » ;
+ * - given   : « offert » : le cadeau quitte les listes (archives).
  */
 export async function onRequestPost({ request, env, data, params }) {
   const body = (await readJson(request)) || {};
@@ -76,6 +77,11 @@ export async function onRequestPost({ request, env, data, params }) {
     case 'bought': {
       if (wish.reserved_by !== me && !participating) return fail(403, 'Réserve d’abord ce cadeau.');
       await update('bought = ?2', wish.bought ? 0 : 1).run();
+      return json({ ok: true });
+    }
+    case 'given': {
+      if (wish.reserved_by !== me && !participating) return fail(403, 'Réserve d’abord ce cadeau.');
+      await update("received_at = datetime('now'), bought = 1").run();
       return json({ ok: true });
     }
     default:

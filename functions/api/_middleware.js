@@ -1,16 +1,19 @@
-import { getEmail } from '../../server/auth.js';
-import { fail } from '../../server/http.js';
+import { getEmail, usesEmailLogin } from '../../server/auth.js';
+import { fail, json } from '../../server/http.js';
 import { myFamilies } from '../../server/family.js';
 
 export async function onRequest(context) {
   const { request, env, data } = context;
+  // La connexion elle-même (envoi et vérification du code) ne demande pas d'être connecté.
+  if (new URL(request.url).pathname.startsWith('/api/auth/')) return context.next();
   let email;
   try {
     email = await getEmail(request, env);
   } catch {
     return fail(401, 'Session expirée. Recharge la page pour te reconnecter.');
   }
-  if (!email) return fail(401, 'Connexion requise.');
+  // `login` dit au site d'afficher l'écran de connexion par email.
+  if (!email) return json({ error: 'Connexion requise.', login: usesEmailLogin(env) }, 401);
 
   await env.DB.prepare('INSERT INTO users (email) VALUES (?1) ON CONFLICT(email) DO NOTHING')
     .bind(email.toLowerCase())

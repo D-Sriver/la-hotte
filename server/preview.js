@@ -217,11 +217,11 @@ async function readPage(pageUrl, env) {
   return { title: (title || fallback.title).slice(0, 200), price, image, blocked: false };
 }
 
-export async function previewLink(pageUrl, env = {}) {
+export async function previewLink(pageUrl, env = {}, familyId = null) {
   const found = await readPage(pageUrl, env);
   if (found.price) return found;
   // Pas de prix sur la page (ou page bloquée) : on tente une recherche croisée.
-  const match = await searchPrice(env, found.title, pageUrl).catch(() => null);
+  const match = await searchPrice(env, found.title, pageUrl, familyId).catch(() => null);
   if (!match) return found;
   const image = found.image || (match.thumbnail ? await fetchImage(match.thumbnail, pageUrl).catch(() => null) : null);
   return { ...found, price: match.price, image, price_source: match.source, price_exact: match.exact };

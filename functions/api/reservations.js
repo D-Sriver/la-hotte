@@ -9,7 +9,7 @@ export async function onRequestGet({ env, data }) {
             (SELECT COUNT(*) FROM contributions c WHERE c.wish_id = w.id) AS participant_count,
             (SELECT amount FROM contributions c WHERE c.wish_id = w.id AND c.user_id = ?1) AS my_amount
      FROM wishes w JOIN users o ON o.id = w.owner_id
-     WHERE w.owner_id != ?1 AND (
+     WHERE w.owner_id != ?1 AND w.received_at IS NULL AND (
        (w.reserved_by = ?1 AND w.group_gift = 0)
        OR (w.group_gift = 1 AND EXISTS (SELECT 1 FROM contributions c WHERE c.wish_id = w.id AND c.user_id = ?1))
      )

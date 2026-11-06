@@ -21,7 +21,12 @@ async function request(path, { method = 'GET', body } = {}) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`);
+  if (!res.ok) {
+    const error = new Error(data.error || `Erreur ${res.status}`);
+    // 401 + login : il faut afficher l'écran de connexion par email.
+    error.needsLogin = res.status === 401 && data.login === true;
+    throw error;
+  }
   return data;
 }
 
@@ -40,6 +45,13 @@ export const api = {
   // action : reserve, group, join, leave, amount ou bought (amount en euros, pour join et amount)
   gift: (id, action, amount) => request(`/wishes/${id}/reserve`, { method: 'POST', body: { action, amount } }),
   reservations: () => request('/reservations'),
+  messages: (id) => request(`/wishes/${id}/messages`),
+  sendMessage: (id, body) => request(`/wishes/${id}/messages`, { method: 'POST', body: { body } }),
+  deleteMessage: (id, messageId) => request(`/wishes/${id}/messages?message=${messageId}`, { method: 'DELETE' }),
+  setReceived: (id, received) => request(`/wishes/${id}/received`, { method: 'POST', body: { received } }),
+  loginStart: (email) => request('/auth/start', { method: 'POST', body: { email } }),
+  loginVerify: (email, code) => request('/auth/verify', { method: 'POST', body: { email, code } }),
+  logout: () => request('/auth/logout', { method: 'POST' }),
   preview: (url) => request('/preview', { method: 'POST', body: { url } }),
   photoUrl: (id) => `/api/wishes/${id}/photo${devAs ? `?as=${encodeURIComponent(devAs)}` : ''}`,
   findIdeas: (query) => request('/ideas', { method: 'POST', body: query }),
