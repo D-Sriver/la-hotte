@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
+import { prefetchHome } from './api.js';
 // Polices hébergées sur le site (pas d'appel à Google) : latin, et latin étendu pour « œ » (cœur…).
 import '@fontsource/unbounded/latin-700.css';
 import '@fontsource/unbounded/latin-ext-700.css';
@@ -28,6 +29,9 @@ requestAnimationFrame(() =>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
 }
+
+// Sur l'accueil, les données partent avant le rendu (un aller-retour de gagné sur le premier écran).
+if (['', '#', '#/'].includes(window.location.hash)) prefetchHome();
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

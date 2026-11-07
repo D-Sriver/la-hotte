@@ -61,22 +61,41 @@ async function stream(path, options, onEvent) {
   if (buffer.trim()) onEvent(JSON.parse(buffer));
 }
 
+// Premier écran : on lance les requêtes de l'accueil tout de suite, en parallèle, avant même le rendu React.
+// Chaque réponse ne sert qu'une fois (au premier appel) ; ensuite on redemande normalement.
+const early = {};
+export function prefetchHome() {
+  for (const [key, path] of [
+    ['me', '/me'],
+    ['people', '/people'],
+    ['reservations', '/reservations'],
+  ]) {
+    early[key] = request(path);
+    early[key].catch(() => {}); // l'erreur sera traitée par celui qui la reprend
+  }
+}
+const once = (key, path) => () => {
+  const pending = early[key];
+  delete early[key];
+  return pending || request(path);
+};
+
 export const api = {
-  me: () => request('/me'),
+  me: once('me', '/me'),
   invitation: (code) => request(`/join?code=${encodeURIComponent(code)}`),
   join: (code) => request('/join', { method: 'POST', body: { code } }),
   createFamily: (name) => request('/families', { method: 'POST', body: { name } }),
   renameFamily: (id, name) => request(`/families/${id}`, { method: 'PUT', body: { name } }),
   leaveFamily: (id) => request(`/families/${id}`, { method: 'DELETE' }),
   saveMe: (profile) => request('/me', { method: 'PUT', body: profile }),
-  people: () => request('/people'),
+  people: once('people', '/people'),
   person: (id) => request(`/people/${id}`),
   addWish: (wish) => request('/wishes', { method: 'POST', body: wish }),
   updateWish: (id, wish) => request(`/wishes/${id}`, { method: 'PUT', body: wish }),
   deleteWish: (id) => request(`/wishes/${id}`, { method: 'DELETE' }),
   // action : reserve, group, join, leave, amount ou bought (amount en euros, pour join et amount)
   gift: (id, action, amount) => request(`/wishes/${id}/reserve`, { method: 'POST', body: { action, amount } }),
-  reservations: () => request('/reservations'),
+  reservations: once('reservations', '/reservations'),
   messages: (id) => request(`/wishes/${id}/messages`),
   sendMessage: (id, body) => request(`/wishes/${id}/messages`, { method: 'POST', body: { body } }),
   deleteMessage: (id, messageId) => request(`/wishes/${id}/messages?message=${messageId}`, { method: 'DELETE' }),

@@ -408,7 +408,6 @@ a.tile:active {
   position: relative;
   margin-top: 0.2rem;
   font-weight: 600;
-  opacity: 0.85;
   font-variant-numeric: tabular-nums;
 }
 .tone-red {
@@ -3908,4 +3907,17 @@ html {
   .wish-actions .chat-toggle {
     flex: 1 1 auto;
   }
+}
+
+/* Écran de démarrage, dans index.html : visible dès que ce CSS arrive, remplacé par React. */
+.boot {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.8rem;
+  min-height: 100dvh;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-xl);
 }

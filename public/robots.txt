@@ -1,0 +1,3 @@
+# Site privé (Cloudflare Access) : rien à indexer, mais un fichier valide.
+User-agent: *
+Disallow:
