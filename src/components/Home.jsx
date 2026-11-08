@@ -20,7 +20,7 @@ import { zoomInto } from '../zoom.js';
 import { usePageIntro, useStagger } from '../motion.js';
 
 const birthdayLabel = (days) =>
-  days === 0 ? 'Anniv. aujourd’hui !' : days === 1 ? 'Anniv. demain' : `Anniv. dans ${days} j`;
+  days === 0 ? 'Anniv. aujourd’hui' : days === 1 ? 'Anniv. demain' : `Anniv. dans ${days} j`;
 
 const countLabel = (n) => (n === 0 ? 'Liste vide' : n === 1 ? '1 envie' : `${n} envies`);
 

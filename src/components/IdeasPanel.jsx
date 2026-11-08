@@ -162,7 +162,16 @@ export default function IdeasPanel({ person, onAdded }) {
       )}
       {state.remaining !== null && <p className="muted small">Recherches restantes aujourd’hui : {state.remaining}</p>}
       {state.ideas.length > 0 && !state.loading && (
-        <p className="muted small">👍 et 👎 aident l’IA à mieux viser la prochaine fois.</p>
+        <p className="muted small">
+          <span className="inline-icon">
+            <Icon name="thumbUp" size={15} />
+          </span>{' '}
+          et{' '}
+          <span className="inline-icon">
+            <Icon name="thumbDown" size={15} />
+          </span>{' '}
+          aident l’IA à mieux viser la prochaine fois
+        </p>
       )}
 
       {older.length > 0 && (
@@ -220,7 +229,7 @@ function IdeaCard({ idea, forMe, saving, onKeep, onRate }) {
               ) : forMe ? (
                 'Ajouter à ma liste'
               ) : (
-                'Je garde !'
+                'Je la garde'
               )}
             </button>
           </span>

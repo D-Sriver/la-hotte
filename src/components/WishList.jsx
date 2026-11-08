@@ -39,7 +39,7 @@ function GroupProgress({ wish, children }) {
           </div>
           <p className="progress-text num">
             <strong>{euros(wish.collected)}</strong> sur {euros(wish.target)}
-            {missing > 0 ? `, il manque ${euros(missing)}` : ', c’est bouclé 🎉'}
+            {missing > 0 ? `, il manque ${euros(missing)}` : ', c’est bouclé'}
           </p>
         </>
       ) : (
@@ -599,7 +599,7 @@ function WishRow({ wish, onChanged }) {
             items={[
               wish.can_edit && { label: 'Modifier', icon: 'pencil', onSelect: () => setEditing(true) },
               wish.mine && {
-                label: 'Reçu, merci !',
+                label: 'Reçu, merci',
                 icon: 'check',
                 onSelect: () =>
                   run(

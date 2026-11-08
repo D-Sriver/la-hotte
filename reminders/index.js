@@ -121,7 +121,7 @@ export async function remindersFor(db, user, now) {
     if (!BIRTHDAY_DAYS.includes(birthday.days) || sent.has(key)) continue;
     lines.push(
       birthday.days === 1
-        ? `C’est l’anniversaire de ${person.name} demain !`
+        ? `L’anniversaire de ${person.name}, c’est demain.`
         : `Anniversaire de ${person.name} dans ${birthday.days} jours.`,
     );
     keys.push(key);
@@ -184,7 +184,7 @@ export default {
           subject: lines[0],
           text: `${lines.join('\n')}\n\n${env.APP_URL}\n\nPlus de rappels : décoche « Rappels » dans ton profil.`,
           html: emailLayout({
-            title: `Salut ${user.name} !`,
+            title: `Tes rappels, ${user.name}`,
             paragraphs: [...lines, 'Tu ne veux plus de rappels ? Décoche « Rappels » dans ton profil.'],
             button: { label: 'Ouvrir La Hotte', url: env.APP_URL },
           }),

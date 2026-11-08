@@ -84,7 +84,7 @@ export function occasionFor(person, now = new Date()) {
 export const deName = (name) => (/^[aeiouyhàâäéèêëîïôöùûü]/i.test(name) ? `d’${name}` : `de ${name}`);
 
 export function birthdayLine(days, isMe) {
-  if (days === 0) return isMe ? 'Joyeux anniversaire !' : 'C’est aujourd’hui. Vite, vite !';
+  if (days === 0) return isMe ? 'Joyeux anniversaire.' : 'C’est aujourd’hui. Il est encore temps.';
   if (days === 1) return 'C’est demain. Respire.';
   if (days <= 7) return isMe ? 'Ta liste est prête ?' : 'Il est temps de réserver quelque chose.';
   return isMe ? 'Pense à remplir ta liste.' : 'Largement le temps… c’est ce qu’on dit à chaque fois.';

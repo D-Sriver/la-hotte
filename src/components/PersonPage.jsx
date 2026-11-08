@@ -83,7 +83,7 @@ export default function PersonPage({ id }) {
             <p className="head-birthday">
               <Icon name="cake" size={15} />
               {birthdayIn === 0
-                ? 'Anniversaire aujourd’hui !'
+                ? 'Anniversaire aujourd’hui'
                 : birthdayIn === 1
                   ? 'Anniversaire demain'
                   : `Anniversaire dans ${birthdayIn} jours`}

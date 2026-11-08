@@ -14,7 +14,6 @@ function Faces({ names }) {
     <span key={`in-${f}`} className={`gift3d-face gift3d-inner gift3d-${f}`} />,
   ]);
 }
-const SPARKLES = 5;
 
 // Un paquet cadeau en vraie 3D CSS : il flotte et tourne seul, s'incline vers le pointeur,
 // tremble d'impatience au survol, et sert de porte d'entrée vers « Ma liste » :
@@ -85,9 +84,6 @@ export default function Gift3D({ decorative = false }) {
           </div>
         </div>
       </div>
-      {Array.from({ length: SPARKLES }, (_, i) => (
-        <span key={i} className="gift3d-sparkle" aria-hidden="true" />
-      ))}
       <div className="gift3d-shadow" />
     </Tag>
   );

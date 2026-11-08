@@ -13,7 +13,7 @@ export async function onRequestPost({ env, data }) {
 
   const message = {
     title: 'La Hotte 🎁',
-    body: `Ça marche, ${data.me.name || 'toi'} ! Tu recevras ici les rappels, les cagnottes et les messages.`,
+    body: `Ça marche, ${data.me.name || 'toi'}. Tu recevras ici les rappels, les cagnottes et les messages.`,
     url: '/#/',
   };
   let sent = 0;

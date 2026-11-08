@@ -290,9 +290,7 @@ a.tile:active {
   justify-content: space-between;
   min-height: 21rem;
   color: #fff;
-  background:
-    radial-gradient(120% 90% at 85% 15%, #ff6b5f 0%, transparent 55%),
-    linear-gradient(160deg, var(--red) 0%, var(--red-deep) 100%);
+  background: var(--red);
 }
 /* Le texte ne doit jamais intercepter le clic sur le paquet. */
 .hero-text {
@@ -790,11 +788,11 @@ a.tile:active {
   padding: 1.1rem 1.25rem;
 }
 .page-head-gold {
-  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  background: var(--gold);
   color: var(--gold-ink);
 }
 .page-head-green {
-  background: linear-gradient(135deg, #22a676, var(--green));
+  background: var(--green);
   color: #fff;
 }
 .page-head-main {
@@ -1214,7 +1212,6 @@ a.tile:active {
 /* Il flotte doucement ; son ombre respire avec lui. */
 .gift3d-float {
   transform-style: preserve-3d;
-  animation: gift-float 3.2s ease-in-out infinite;
 }
 @keyframes gift-float {
   50% {
@@ -1223,7 +1220,8 @@ a.tile:active {
 }
 .gift3d-tilt {
   transform-style: preserve-3d;
-  animation: gift-spin 14s linear infinite;
+  transform: rotateX(calc(-18deg + var(--tilt-x))) rotateY(calc(var(--tilt-y) - 32deg));
+  transition: transform 320ms cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 .gift3d:active .gift3d-float {
   animation: gift-shake 300ms ease-in-out infinite;
@@ -1557,7 +1555,6 @@ a.tile:active {
   border-radius: 50%;
   background: rgb(80 0 0 / 0.35);
   filter: blur(8px);
-  animation: gift-shadow 3.2s ease-in-out infinite;
 }
 @keyframes gift-shadow {
   50% {
@@ -1813,10 +1810,10 @@ a.tile:active {
   align-items: center;
   gap: 0.5rem;
   margin: 0 0 0.9rem;
-  font-family: var(--font-display);
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: 600;
   font-size: var(--fs-lg);
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   text-wrap: balance;
 }
 .section-head .section-title {
@@ -2671,9 +2668,7 @@ textarea:focus {
 /* ---------- Ma liste ---------- */
 .tile-me-hero {
   color: var(--gold-ink);
-  background:
-    radial-gradient(110% 90% at 90% 10%, var(--gold-shine) 0%, transparent 55%),
-    linear-gradient(160deg, var(--gold), #ee9d1c);
+  background: var(--gold);
 }
 .tile-me-hero .hero-days {
   display: flex;
@@ -2739,8 +2734,7 @@ textarea:focus {
   display: grid;
   gap: 1.5rem;
   color: #fff;
-  background:
-    radial-gradient(110% 90% at 90% 0%, #3cc48f 0%, transparent 55%), linear-gradient(160deg, var(--green), #0e5c40);
+  background: var(--green);
 }
 .tile-profile-hero .muted {
   color: rgb(255 255 255 / 0.8);
@@ -3080,8 +3074,7 @@ textarea:focus {
   grid-template-rows: auto 1fr auto;
   padding: 2.5rem;
   color: #fff;
-  background:
-    radial-gradient(circle at 70% 20%, #ff6b5e, transparent 55%), linear-gradient(160deg, var(--red), #a4161a);
+  background: var(--red);
 }
 .login-brand {
   display: flex;
@@ -3134,7 +3127,6 @@ textarea:focus {
     0 0,
     30px 20px,
     50px 70px;
-  animation: snow 14s linear infinite;
 }
 @keyframes snow {
   to {
@@ -3928,10 +3920,16 @@ html {
   color: #fff;
 }
 /* Le titre reçoit le focus à chaque changement de page (lecteurs d'écran) : pas de contour à la souris. */
-h1[tabindex='-1']:focus:not(:focus-visible) {
+h1[tabindex='-1']:focus {
   outline: none;
 }
 /* « Annuler » / « Je me retire » plus compacts : ils restent sur la ligne des autres actions. */
 .wish-actions .button-leave {
   padding-inline: 0.6rem;
+}
+
+/* Aide des idées : les pouces en icônes, alignés sur le texte. */
+.inline-icon {
+  display: inline-flex;
+  vertical-align: -3px;
 }

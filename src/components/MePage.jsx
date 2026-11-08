@@ -51,7 +51,7 @@ export default function MePage({ me }) {
         {wishes ? (
           <WishList
             wishes={wishes}
-            emptyText="Liste vide. Ajoute une envie, sinon ce sera la surprise totale !"
+            emptyText="Liste vide. Ajoute une envie, sinon ce sera la surprise totale."
             onChanged={load}
           />
         ) : (
