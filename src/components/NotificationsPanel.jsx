@@ -144,7 +144,7 @@ export default function NotificationsPanel({ me, onChanged }) {
               act(async () => {
                 await enablePush(status.public_key);
                 setSubscribed(true);
-              }, 'C’est activé ! Tu peux m’envoyer un test.')
+              }, 'C’est activé. Tu peux m’envoyer un test.')
             }
           >
             <Icon name="bell" size={18} />

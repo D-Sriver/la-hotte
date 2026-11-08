@@ -599,8 +599,8 @@ a.tile:active {
   left: 50%;
   bottom: 0.5rem;
   display: flex;
-  gap: 5px;
-  padding: 4px 7px;
+  gap: 4px;
+  padding: 4px 8px;
   border-radius: var(--r-pill);
   background: rgb(20 26 46 / 0.45);
   transform: translateX(-50%);
@@ -2085,7 +2085,7 @@ a.tile:active {
   height: 22px;
   border-radius: 50%;
   font-size: var(--fs-xs);
-  font-weight: 800;
+  font-weight: 600;
 }
 .my-amount {
   display: flex;
