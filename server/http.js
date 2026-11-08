@@ -47,3 +47,18 @@ export function cleanFrame(value) {
   const clamp = (n, min, max) => Math.round(Math.min(max, Math.max(min, n)) * 10) / 10;
   return `${clamp(x, 0, 100)},${clamp(y, 0, 100)},${clamp(zoom, 1, 3)}`;
 }
+
+/**
+ * Protection contre les requêtes envoyées par un autre site (CSRF) : une écriture doit venir de La Hotte
+ * (en-tête Origin, ou Sec-Fetch-Site) et, si elle a un corps, être en JSON. Un formulaire piégé ailleurs
+ * ne peut envoyer ni l'un ni l'autre. Renvoie un message d'erreur, ou null si la requête est acceptable.
+ */
+export function crossSiteProblem(request) {
+  if (['GET', 'HEAD', 'OPTIONS'].includes(request.method)) return null;
+  const origin = request.headers.get('origin');
+  if (origin && origin !== new URL(request.url).origin) return 'Requête refusée : elle ne vient pas de La Hotte.';
+  if (request.headers.get('sec-fetch-site') === 'cross-site') return 'Requête refusée : elle ne vient pas de La Hotte.';
+  const type = request.headers.get('content-type');
+  if (type && !type.toLowerCase().startsWith('application/json')) return 'Requête refusée : format inattendu.';
+  return null;
+}

@@ -1,9 +1,12 @@
 import { getEmail, usesEmailLogin } from '../../server/auth.js';
-import { fail, json } from '../../server/http.js';
+import { crossSiteProblem, fail, json } from '../../server/http.js';
 import { myFamilies } from '../../server/family.js';
 
 export async function onRequest(context) {
   const { request, env, data } = context;
+  // Avant tout, connexion comprise : une écriture doit venir de La Hotte.
+  const crossSite = crossSiteProblem(request);
+  if (crossSite) return fail(403, crossSite);
   // La connexion elle-même (envoi et vérification du code) ne demande pas d'être connecté.
   if (new URL(request.url).pathname.startsWith('/api/auth/')) return context.next();
   let email;

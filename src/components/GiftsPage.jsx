@@ -5,12 +5,14 @@ import Skeleton from './Skeleton.jsx';
 import PageHead from './PageHead.jsx';
 import { frameStyle, parseFrame } from '../photoFrame.js';
 import { usePageIntro } from '../motion.js';
+import { usePageTitle } from '../usePageTitle.js';
 
 const euros = (n) =>
   `${n.toLocaleString('fr-FR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })} €`;
 
 // Tout ce que je prévois d'offrir, regroupé par personne.
 export default function GiftsPage({ familyId, onSwitchFamily }) {
+  usePageTitle('Ce que j’offre');
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(null);

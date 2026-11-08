@@ -9,6 +9,7 @@ import IdeasPanel from './IdeasPanel.jsx';
 import { usePageIntro } from '../motion.js';
 import { daysUntilBirthday, toneOf } from '../fun.js';
 import { zoomBackHome } from '../zoom.js';
+import { usePageTitle } from '../usePageTitle.js';
 
 const PROFILE_ROWS = [
   ['likes', 'Aime'],
@@ -22,6 +23,7 @@ export default function PersonPage({ id }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
 
+  usePageTitle(data?.person?.name);
   const load = useCallback(() => {
     api
       .person(id)

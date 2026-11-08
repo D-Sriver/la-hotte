@@ -8,8 +8,10 @@ import Skeleton from './Skeleton.jsx';
 import { profileCompletion } from '../profile.js';
 import PageHead from './PageHead.jsx';
 import { usePageIntro } from '../motion.js';
+import { usePageTitle } from '../usePageTitle.js';
 
 export default function MePage({ me }) {
+  usePageTitle('Ma liste');
   const [wishes, setWishes] = useState(null);
   const [archived, setArchived] = useState([]);
   const load = useCallback(() => {

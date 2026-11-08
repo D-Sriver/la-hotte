@@ -7,6 +7,7 @@ import { shareFamily } from '../share.js';
 function FamilyRow({ family, current, onChanged }) {
   const [copied, setCopied] = useState(false);
   const [renaming, setRenaming] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const [name, setName] = useState(family.name);
   const [error, setError] = useState('');
 
@@ -73,17 +74,27 @@ function FamilyRow({ family, current, onChanged }) {
           <Icon name="pencil" size={16} />
           Renommer
         </button>
-        <button
-          type="button"
-          className="button button-small button-leave"
-          onClick={() =>
-            window.confirm(`Quitter « ${family.name} » ? Tu ne verras plus ses membres.`) &&
-            act(() => api.leaveFamily(family.id))
-          }
-        >
+        <button type="button" className="button button-small button-leave" onClick={() => setLeaving(true)}>
           Quitter
         </button>
       </div>
+      {leaving && (
+        <div className="confirm-group" role="group" aria-label="Confirmer le départ">
+          <p>
+            <strong>Quitter « {family.name} » ?</strong> Tu ne verras plus ses membres.
+          </p>
+          <button
+            type="button"
+            className="button button-small button-danger"
+            onClick={() => act(() => api.leaveFamily(family.id))}
+          >
+            Oui, quitter
+          </button>
+          <button type="button" className="button button-small button-quiet" onClick={() => setLeaving(false)}>
+            Non, rester
+          </button>
+        </div>
+      )}
       {error && (
         <p className="error small" role="alert">
           {error}

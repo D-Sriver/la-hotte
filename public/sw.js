@@ -1,6 +1,46 @@
 // Service worker de La Hotte : affiche les notifications et ouvre l'app au toucher.
-self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+// Hors connexion : une page « Pas de connexion » plutôt que l'erreur du navigateur.
+const CACHE = 'la-hotte-v2';
+const OFFLINE = '/offline'; // Pages sert offline.html à cette adresse (sans redirection)
+const OFFLINE_ASSETS = [OFFLINE, '/icon.svg'];
+
+// Mise en cache sans jamais bloquer l'installation (connexion expirée, réseau instable…).
+async function cacheOfflinePage() {
+  const cache = await caches.open(CACHE);
+  await Promise.all(
+    OFFLINE_ASSETS.map(async (url) => {
+      try {
+        const response = await fetch(url, { credentials: 'same-origin', cache: 'no-store' });
+        if (response.ok && !response.redirected) await cache.put(url, response);
+      } catch {
+        /* on réessaiera à la prochaine installation */
+      }
+    }),
+  );
+}
+
+self.addEventListener('install', (event) => event.waitUntil(cacheOfflinePage().then(() => self.skipWaiting())));
+self.addEventListener('activate', (event) =>
+  event.waitUntil(
+    (async () => {
+      for (const key of await caches.keys()) if (key !== CACHE) await caches.delete(key);
+      await self.clients.claim();
+    })(),
+  ),
+);
+
+// Seules les navigations passent par ici : l'API et les fichiers vont directement au réseau.
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  if (request.mode === 'navigate') {
+    event.respondWith(fetch(request).catch(async () => (await caches.match(OFFLINE)) || Response.error()));
+  } else if (
+    OFFLINE_ASSETS.includes(new URL(request.url).pathname) &&
+    new URL(request.url).origin === self.location.origin
+  ) {
+    event.respondWith(fetch(request).catch(async () => (await caches.match(request)) || Response.error()));
+  }
+});
 
 self.addEventListener('push', (event) => {
   let message = {};

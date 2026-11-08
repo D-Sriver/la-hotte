@@ -6,8 +6,10 @@ import FamiliesPanel from './FamiliesPanel.jsx';
 import NotificationsPanel from './NotificationsPanel.jsx';
 import { profileCompletion } from '../profile.js';
 import { gsap, useGSAP, usePageIntro, MOTION_OK } from '../motion.js';
+import { usePageTitle } from '../usePageTitle.js';
 
 export default function ProfilePage({ me, onSaved, onFamiliesChanged }) {
+  usePageTitle('Profil');
   const { done, total } = profileCompletion(me);
   const scope = usePageIntro();
   const bar = useRef(null);

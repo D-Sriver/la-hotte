@@ -3921,3 +3921,17 @@ html {
   font-weight: 800;
   font-size: var(--fs-xl);
 }
+
+/* Bouton de suppression confirmée : rouge profond, texte blanc (6:1). */
+.button-danger {
+  background: var(--red-deep);
+  color: #fff;
+}
+/* Le titre reçoit le focus à chaque changement de page (lecteurs d'écran) : pas de contour à la souris. */
+h1[tabindex='-1']:focus:not(:focus-visible) {
+  outline: none;
+}
+/* « Annuler » / « Je me retire » plus compacts : ils restent sur la ligne des autres actions. */
+.wish-actions .button-leave {
+  padding-inline: 0.6rem;
+}

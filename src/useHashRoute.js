@@ -7,6 +7,8 @@ const parse = () => {
   if (page === 'cadeaux') return { page: 'gifts' };
   if (page === 'profil') return { page: 'profile' };
   if (page === 'p' && Number(id)) return { page: 'person', id: Number(id) };
+  // Adresse inconnue : on affiche l'accueil, et l'adresse le dit aussi.
+  if (hash) window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#/`);
   return { page: 'home' };
 };
 

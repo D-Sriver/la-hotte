@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { copyText, shareFamily } from '../share.js';
 import { inviteLink } from '../invite.js';
 import { api } from '../api.js';
+import { usePageTitle } from '../usePageTitle.js';
 import {
   birthdayLine,
   christmasLine,
@@ -29,7 +30,7 @@ const euros = (n) =>
 // Dernière carte de la grille : inviter quelqu'un, là où apparaissent les personnes.
 function InviteCard({ family, alone }) {
   const [done, setDone] = useState('');
-  const confirm = (message) => {
+  const showDone = (message) => {
     setDone(message);
     setTimeout(() => setDone(''), 2000);
   };
@@ -55,15 +56,15 @@ function InviteCard({ family, alone }) {
           aria-label="Copier le lien d’invitation"
           onClick={() =>
             copyText(inviteLink(family.code))
-              .then(() => confirm('Lien copié'))
-              .catch(() => confirm('Copie impossible'))
+              .then(() => showDone('Lien copié'))
+              .catch(() => showDone('Copie impossible'))
           }
         >
           <Icon name={done === 'Lien copié' ? 'check' : 'copy'} size={18} />
         </button>
         <button
           className="button button-small button-go"
-          onClick={() => shareFamily(family).then((r) => r === 'copied' && confirm('Invitation copiée'))}
+          onClick={() => shareFamily(family).then((r) => r === 'copied' && showDone('Invitation copiée'))}
         >
           <Icon name="share" size={16} />
           Partager
@@ -139,6 +140,7 @@ function GivingSummary({ gifts, suggestion }) {
 }
 
 export default function Home({ me }) {
+  usePageTitle('Famille');
   const [people, setPeople] = useState(null);
   const [gifts, setGifts] = useState(null);
   const [error, setError] = useState('');

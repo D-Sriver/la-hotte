@@ -317,46 +317,76 @@ function WishChat({ wish, onCount }) {
 
 // Menu « ⋯ » pour les actions rares (modifier, reçu, supprimer) : moins de boutons à l'écran,
 // et pas de suppression ou d'archivage d'un toucher maladroit.
+// Menu « Gérer » au comportement d'un vrai menu : le focus entre dedans à l'ouverture,
+// flèches / Début / Fin pour se déplacer, Échap ou Tab pour sortir (le focus revient au bouton).
 function MoreMenu({ label, items, disabled }) {
   const [open, setOpen] = useState(false);
   const root = useRef(null);
+  const toggle = useRef(null);
   const entries = items.filter(Boolean);
 
   useEffect(() => {
     if (!open) return undefined;
-    const close = (e) => {
-      if (e.type === 'keydown' ? e.key === 'Escape' : !root.current?.contains(e.target)) setOpen(false);
+    root.current?.querySelector('[role=menuitem]')?.focus();
+    const closeOutside = (e) => {
+      if (!root.current?.contains(e.target)) setOpen(false);
     };
-    document.addEventListener('pointerdown', close);
-    document.addEventListener('keydown', close);
-    return () => {
-      document.removeEventListener('pointerdown', close);
-      document.removeEventListener('keydown', close);
-    };
+    document.addEventListener('pointerdown', closeOutside);
+    return () => document.removeEventListener('pointerdown', closeOutside);
   }, [open]);
+
+  function close(refocus = true) {
+    setOpen(false);
+    if (refocus) toggle.current?.focus();
+  }
+
+  function onMenuKey(e) {
+    const options = [...root.current.querySelectorAll('[role=menuitem]')];
+    const index = options.indexOf(document.activeElement);
+    const go = (i) => {
+      e.preventDefault();
+      options[(i + options.length) % options.length]?.focus();
+    };
+    if (e.key === 'ArrowDown') go(index + 1);
+    else if (e.key === 'ArrowUp') go(index - 1);
+    else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(options.length - 1);
+    else if (e.key === 'Escape') {
+      e.preventDefault();
+      close();
+    } else if (e.key === 'Tab') close(false);
+  }
 
   return (
     <div className="more" ref={root}>
       <button
+        ref={toggle}
         className="button button-small button-quiet more-toggle"
         aria-label={label}
         aria-haspopup="menu"
         aria-expanded={open}
         disabled={disabled}
         onClick={() => setOpen(!open)}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowDown' && !open) {
+            e.preventDefault();
+            setOpen(true);
+          }
+        }}
       >
         <Icon name="more" size={18} />
         Gérer
       </button>
       {open && (
-        <div className="more-menu" role="menu">
+        <div className="more-menu" role="menu" aria-label={label} onKeyDown={onMenuKey}>
           {entries.map((item) => (
             <button
               key={item.label}
               role="menuitem"
+              tabIndex={-1}
               className={`more-item${item.danger ? ' more-item-danger' : ''}`}
               onClick={() => {
-                setOpen(false);
+                close(false);
                 item.onSelect();
               }}
             >
@@ -394,6 +424,7 @@ function collapse(element) {
 function WishRow({ wish, onChanged }) {
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [error, setError] = useState('');
   const row = useRef(null);
 
@@ -418,7 +449,7 @@ function WishRow({ wish, onChanged }) {
   }
 
   async function remove() {
-    if (!window.confirm(`Supprimer « ${wish.title} » ?`)) return;
+    setConfirmingDelete(false);
     setBusy(true);
     try {
       await api.deleteWish(wish.id);
@@ -524,6 +555,24 @@ function WishRow({ wish, onChanged }) {
         </GroupProgress>
       )}
       {chatOpen && <WishChat wish={wish} onCount={setMessageCount} />}
+      {confirmingDelete && (
+        <div className="confirm-group" role="group" aria-label="Confirmer la suppression">
+          <p>
+            <strong>Supprimer « {wish.title} » ?</strong>
+            {wish.mine ? ' Si quelqu’un l’a déjà réservée, il la garde de son côté.' : ''}
+          </p>
+          <button className="button button-small button-danger" disabled={busy} onClick={remove}>
+            Oui, supprimer
+          </button>
+          <button
+            className="button button-small button-quiet"
+            disabled={busy}
+            onClick={() => setConfirmingDelete(false)}
+          >
+            Non, garder
+          </button>
+        </div>
+      )}
       <div className="wish-actions">
         {!wish.mine && <GiftActions wish={wish} busy={busy} run={run} />}
         {!wish.mine && (
@@ -559,7 +608,12 @@ function WishRow({ wish, onChanged }) {
                     true,
                   ),
               },
-              canDelete && { label: 'Supprimer', icon: 'trash', danger: true, onSelect: remove },
+              canDelete && {
+                label: 'Supprimer',
+                icon: 'trash',
+                danger: true,
+                onSelect: () => setConfirmingDelete(true),
+              },
             ]}
           />
         )}
