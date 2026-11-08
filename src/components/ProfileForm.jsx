@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { api } from '../api.js';
+import Icon from './Icon.jsx';
 
 const FIELDS = [
   {
@@ -29,6 +30,17 @@ const fromProfile = (initial) => ({
 });
 
 // quick : premier passage, juste le prénom et les goûts ; le reste se complète plus tard dans Profil.
+// Une rubrique remplie prend le ruban doré : on voit d'un coup d'œil ce que la famille sait déjà.
+const filledClass = (value) => `field${String(value || '').trim() ? ' field-filled' : ''}`;
+const FieldLabel = ({ children }) => (
+  <span className="field-label">
+    {children}
+    <span className="field-done" aria-hidden="true">
+      <Icon name="check" size={14} />
+    </span>
+  </span>
+);
+
 export default function ProfileForm({ initial, submitLabel = 'Enregistrer', quick = false, onSaved }) {
   const [saved, setSaved] = useState(() => fromProfile(initial));
   const [form, setForm] = useState(saved);
@@ -53,13 +65,13 @@ export default function ProfileForm({ initial, submitLabel = 'Enregistrer', quic
 
   return (
     <form className="form" onSubmit={submit}>
-      <label className="field">
-        <span className="field-label">Prénom</span>
+      <label className={filledClass(form.name)}>
+        <FieldLabel>Prénom</FieldLabel>
         <input value={form.name} onChange={set('name')} required maxLength={60} autoComplete="given-name" />
       </label>
       {(quick ? FIELDS.slice(0, 1) : FIELDS).map((f) => (
-        <label className="field" key={f.key}>
-          <span className="field-label">{f.label}</span>
+        <label className={filledClass(form[f.key])} key={f.key}>
+          <FieldLabel>{f.label}</FieldLabel>
           <span className="field-hint">{f.hint}</span>
           {f.rows > 1 ? (
             <textarea rows={f.rows} value={form[f.key]} onChange={set(f.key)} />
@@ -72,13 +84,13 @@ export default function ProfileForm({ initial, submitLabel = 'Enregistrer', quic
         <p className="field-hint">Tailles, budget, anniversaire… tu pourras compléter quand tu veux dans « Profil ».</p>
       ) : (
         <>
-          <label className="field">
-            <span className="field-label">Budget idéal</span>
+          <label className={filledClass(form.budget_hint)}>
+            <FieldLabel>Budget idéal</FieldLabel>
             <span className="field-hint">Une indication pour la famille, ex. « 20 à 50 € ».</span>
             <input value={form.budget_hint} onChange={set('budget_hint')} maxLength={60} />
           </label>
-          <label className="field">
-            <span className="field-label">Anniversaire</span>
+          <label className={filledClass(form.birthday)}>
+            <FieldLabel>Anniversaire</FieldLabel>
             <span className="field-hint">Pour que la famille y pense. Seuls le jour et le mois sont montrés.</span>
             <input
               type="date"
