@@ -7,6 +7,11 @@ binding = "DB"
 database_name = "la-hotte"
 database_id = "874fe530-e678-4ab7-be0d-fa3d2d6c77d7"   # donné par `wrangler d1 create la-hotte`
 
+# Sauvegardes nocturnes (écrites par le Worker des rappels) : le tableau de bord affiche la dernière.
+[[kv_namespaces]]
+binding = "BACKUPS"
+id = "b95046d8443046fc92131272233900cb"
+
 [ai]
 binding = "AI"
 

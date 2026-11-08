@@ -1,10 +1,13 @@
 import { useRef } from 'react';
 import Avatar from './Avatar.jsx';
+import Icon from './Icon.jsx';
 import ProfileForm from './ProfileForm.jsx';
 import LogoutButton from './LogoutButton.jsx';
 import FamiliesPanel from './FamiliesPanel.jsx';
 import NotificationsPanel from './NotificationsPanel.jsx';
 import CalendarPanel from './CalendarPanel.jsx';
+import AccountData from './AccountData.jsx';
+import DevicePanel from './DevicePanel.jsx';
 import { profileCompletion } from '../profile.js';
 import { gsap, useGSAP, usePageIntro, MOTION_OK } from '../motion.js';
 import { usePageTitle } from '../usePageTitle.js';
@@ -68,11 +71,20 @@ export default function ProfilePage({ me, onSaved, onFamiliesChanged }) {
       <div className="profile-side">
         <NotificationsPanel me={me} onChanged={(notify) => onSaved({ ...me, notify })} />
 
+        <DevicePanel />
+
         <CalendarPanel token={me.calendar_token} onChanged={(calendar_token) => onSaved({ ...me, calendar_token })} />
 
         <section className="tile section">
           <h2 className="section-title">Mon compte</h2>
+          {me.is_admin && (
+            <a className="button button-quiet admin-link" href="#/admin">
+              <Icon name="chart" size={18} />
+              Tableau de bord
+            </a>
+          )}
           <LogoutButton email={me.email} emailLogin={me.email_login} />
+          <AccountData me={me} />
         </section>
       </div>
     </div>

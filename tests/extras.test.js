@@ -273,3 +273,51 @@ test('agenda : les anniversaires de ses familles, en iCalendar, lien révocable'
   const gone = await publicList({ env: { DB: db }, params: { path: ['agenda', `${token}.ics`] } });
   assert.equal(gone.status, 404);
 });
+
+test('budget : privé, seulement pour quelqu’un de ses familles, visible dans Ce que j’offre', async () => {
+  const { onRequestPut: budget } = await import('../functions/api/budgets.js');
+  const stranger = s.user('Zed');
+  const put = (body) => call(budget, { db, me: bob, family: f1, body, url: 'https://test/api/budgets' });
+  assert.equal((await put({ person_id: stranger, amount: 50 })).status, 404);
+  assert.equal((await put({ person_id: bob, amount: 50 })).status, 400);
+  assert.equal((await put({ person_id: alice, amount: '49,5' })).body.amount, 49.5);
+  s.wish(alice, 'Vélo', { reservedBy: bob, price: '30 €' });
+  assert.deepEqual((await call(reservations, { db, me: bob, family: f1 })).body.budgets, { [alice]: 49.5 });
+  assert.deepEqual((await call(reservations, { db, me: carol, family: f1 })).body.budgets, {});
+  assert.equal((await put({ person_id: alice, amount: null })).body.amount, null);
+});
+
+test('supprimer son compte : réservations libérées, cagnotte transmise, export sans secrets', async () => {
+  const { deleteAccount, exportMyData } = await import('../server/account.js');
+  const velo = s.wish(alice, 'Vélo', { reservedBy: bob });
+  const pot = s.wish(alice, 'Console', { reservedBy: bob, group: true });
+  s.contribute(pot, bob, 20);
+  s.contribute(pot, carol, 30);
+  s.wish(bob, 'Livre'); // sa propre liste
+  s.wish(bob, 'Surprise de Carol', { addedBy: carol, family: f1, reservedBy: alice });
+
+  const data = await exportMyData(db, bob);
+  assert.deepEqual(
+    data.my_wishes.map((w) => w.title),
+    ['Livre'],
+  );
+  assert.ok(!JSON.stringify(data).includes('Surprise de Carol')); // ce qui lui est caché ne sort pas
+  assert.equal(data.gifts_i_give.length, 2);
+
+  await deleteAccount(db, bob);
+  const row = (id) => db.sqlite.prepare('SELECT reserved_by, group_gift FROM wishes WHERE id = ?').get(id);
+  assert.equal(row(velo).reserved_by, null);
+  assert.deepEqual({ ...row(pot) }, { reserved_by: carol, group_gift: 1 });
+  assert.equal(db.sqlite.prepare('SELECT COUNT(*) AS n FROM users WHERE id = ?').get(bob).n, 0);
+});
+
+test('tableau de bord : administrateur seulement, des chiffres sans secrets', async () => {
+  const { onRequestGet: admin } = await import('../functions/api/admin.js');
+  s.wish(alice, 'Vélo', { reservedBy: bob });
+  assert.equal((await call(admin, { db, me: { id: bob, is_admin: 0 }, family: f1 })).status, 403);
+  const { body } = await call(admin, { db, me: { id: alice, is_admin: 1 }, family: f1 });
+  assert.equal(body.people.total, 3);
+  assert.equal(body.wishes.reserved, 1);
+  assert.deepEqual(body.families[0], { name: 'Un', members: 3, wishes: 1 });
+  assert.ok(!JSON.stringify(body).includes('Vélo')); // aucun titre de cadeau
+});

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { copyText, shareFamily } from '../share.js';
 import { inviteLink } from '../invite.js';
 import { api } from '../api.js';
@@ -16,6 +16,9 @@ import {
 import Gift3D from './Gift3D.jsx';
 import Icon from './Icon.jsx';
 import CountUp from './CountUp.jsx';
+
+// Le QR code arrive à part (bibliothèque de tracé), seulement quand on l'ouvre.
+const QrDialog = lazy(() => import('./QrDialog.jsx'));
 import { zoomInto } from '../zoom.js';
 import { usePageIntro, useStagger } from '../motion.js';
 
@@ -30,6 +33,7 @@ const euros = (n) =>
 // Dernière carte de la grille : inviter quelqu'un, là où apparaissent les personnes.
 function InviteCard({ family, alone }) {
   const [done, setDone] = useState('');
+  const [qr, setQr] = useState(false);
   const showDone = (message) => {
     setDone(message);
     setTimeout(() => setDone(''), 2000);
@@ -62,6 +66,9 @@ function InviteCard({ family, alone }) {
         >
           <Icon name={done === 'Lien copié' ? 'check' : 'copy'} size={18} />
         </button>
+        <button className="icon-button" aria-label="Montrer le QR code de l’invitation" onClick={() => setQr(true)}>
+          <Icon name="qr" size={18} />
+        </button>
         <button
           className="button button-small button-go"
           onClick={() => shareFamily(family).then((r) => r === 'copied' && showDone('Invitation copiée'))}
@@ -73,6 +80,11 @@ function InviteCard({ family, alone }) {
       <span className="invite-done" role="status">
         {done}
       </span>
+      {qr && (
+        <Suspense fallback={null}>
+          <QrDialog family={family} link={inviteLink(family.code)} onClose={() => setQr(false)} />
+        </Suspense>
+      )}
     </div>
   );
 }

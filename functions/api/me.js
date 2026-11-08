@@ -20,6 +20,7 @@ const publicProfile = (u) => ({
   },
   share_token: u.share_token || null,
   calendar_token: u.calendar_token || null,
+  is_admin: !!u.is_admin,
 });
 
 // AAAA-MM-JJ valide, sinon rien.

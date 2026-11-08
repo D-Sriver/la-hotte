@@ -23,6 +23,79 @@ function PriceWatch({ watch }) {
   );
 }
 
+// Mon budget pour cette personne (personne d'autre ne le voit) : une jauge, et ce qui reste.
+function PersonBudget({ person, budget, onChange }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(budget ? String(budget) : '');
+  const [error, setError] = useState('');
+  const spent = Math.round(person.total * 100) / 100;
+
+  async function save(e) {
+    e.preventDefault();
+    setError('');
+    try {
+      const { amount } = await api.setBudget(person.id, value.trim() || null);
+      onChange(amount);
+      setEditing(false);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  if (editing)
+    return (
+      <form className="budget-form" onSubmit={save}>
+        <label htmlFor={`budget-${person.id}`}>Mon budget pour {person.name}</label>
+        <input
+          id={`budget-${person.id}`}
+          inputMode="decimal"
+          pattern="[0-9]+([.,][0-9]{1,2})?"
+          placeholder="50"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          autoFocus
+        />
+        <span aria-hidden="true">€</span>
+        <button className="button button-small">OK</button>
+        <button type="button" className="button button-small button-quiet" onClick={() => setEditing(false)}>
+          Annuler
+        </button>
+        {error && (
+          <span className="error small" role="alert">
+            {error}
+          </span>
+        )}
+      </form>
+    );
+
+  if (!budget)
+    return (
+      <button className="budget-add" onClick={() => setEditing(true)}>
+        <Icon name="wallet" size={15} />
+        Fixer un budget
+      </button>
+    );
+
+  const over = spent > budget;
+  const left = Math.round((budget - spent) * 100) / 100;
+  return (
+    <div className={`budget${over ? ' budget-over' : ''}`}>
+      <div className="budget-bar" aria-hidden="true">
+        <span style={{ width: `${Math.min(100, (spent / budget) * 100)}%` }} />
+      </div>
+      <p className="budget-text">
+        <span className="num">
+          {euros(spent)} sur {euros(budget)}
+        </span>
+        <span>{over ? `dépassé de ${euros(-left)}` : `reste ${euros(left)}`}</span>
+        <button className="link-button" onClick={() => setEditing(true)}>
+          Modifier
+        </button>
+      </p>
+    </div>
+  );
+}
+
 // Tout ce que je prévois d'offrir, regroupé par personne.
 export default function GiftsPage({ familyId, onSwitchFamily }) {
   usePageTitle('Ce que j’offre');
@@ -125,10 +198,15 @@ export default function GiftsPage({ familyId, onSwitchFamily }) {
               </a>
               <span className="count">{person.gifts.length}</span>
             </h2>
-            {person.total > 0 && (
+            {person.total > 0 && !data.budgets?.[person.id] && (
               <span className="price person-total">{euros(Math.round(person.total * 100) / 100)}</span>
             )}
           </div>
+          <PersonBudget
+            person={person}
+            budget={data.budgets?.[person.id] ?? null}
+            onChange={(amount) => setData((d) => ({ ...d, budgets: { ...d.budgets, [person.id]: amount } }))}
+          />
           <ul className="wish-list">
             {person.gifts.map((g) => (
               <li key={g.id} className={`wish${g.bought || g.received ? ' wish-bought' : ''}`}>

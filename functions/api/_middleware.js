@@ -23,6 +23,15 @@ export async function onRequest(context) {
     .bind(email.toLowerCase())
     .run();
   data.me = await env.DB.prepare('SELECT * FROM users WHERE email = ?1').bind(email.toLowerCase()).first();
+  // Dernière visite, notée au plus une fois par heure (membres actifs du tableau de bord).
+  if (!data.me.last_seen_at || Date.parse(`${data.me.last_seen_at.replace(' ', 'T')}Z`) < Date.now() - 3_600_000) {
+    context.waitUntil?.(
+      env.DB.prepare("UPDATE users SET last_seen_at = datetime('now') WHERE id = ?1")
+        .bind(data.me.id)
+        .run()
+        .catch(() => {}),
+    );
+  }
 
   // La famille affichée vient de l'en-tête x-family ; sinon la première de la personne.
   data.families = await myFamilies(env.DB, data.me.id);

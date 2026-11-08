@@ -4054,3 +4054,245 @@ h1[tabindex='-1']:focus {
 .calendar-note {
   margin-top: 0.6rem;
 }
+
+/* Budget par personne, dans « Ce que j'offre » : une jauge fine, verte, qui passe au rouge si on dépasse. */
+.budget {
+  margin: -0.25rem 0 0.75rem;
+}
+.budget-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--bg);
+  overflow: hidden;
+}
+.budget-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--green);
+}
+.budget-over .budget-bar span {
+  background: var(--red);
+}
+.budget-text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  margin-top: 0.4rem;
+  color: var(--ink-soft);
+  font-size: var(--fs-sm);
+}
+.budget-text .num {
+  color: var(--ink);
+  font-weight: 600;
+}
+.budget-over .budget-text span:nth-child(2) {
+  color: var(--red-deep);
+  font-weight: 600;
+}
+.budget-text .link-button {
+  margin-left: auto;
+  font-size: inherit;
+}
+.budget-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: -0.25rem 0 0.75rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+}
+.budget-add:hover {
+  color: var(--ink);
+}
+.budget-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.5rem;
+  margin: -0.25rem 0 0.75rem;
+  font-size: var(--fs-sm);
+}
+.budget-form label {
+  flex: 1 1 100%;
+  color: var(--ink-soft);
+}
+.budget-form input {
+  width: 6rem;
+}
+@media (prefers-color-scheme: dark) {
+  .budget-over .budget-text span:nth-child(2) {
+    color: var(--danger);
+  }
+}
+
+/* QR code d'invitation : grand, sur fond blanc (les téléphones le lisent mieux), dans une fenêtre centrée. */
+.qr-dialog {
+  width: min(24rem, calc(100vw - 2rem));
+  padding: 1.5rem;
+  border: 0;
+  border-radius: var(--r-tile);
+  background: var(--tile);
+  color: var(--ink);
+  text-align: center;
+}
+.qr-dialog::backdrop {
+  background: rgb(13 16 32 / 0.6);
+}
+.qr-dialog .muted {
+  margin: 0.5rem 0 1rem;
+}
+.qr {
+  display: block;
+  width: 100%;
+  max-width: 16rem;
+  margin: 0 auto;
+  border-radius: var(--r-sm);
+}
+.qr-code-text {
+  margin: 0.75rem 0 1.25rem;
+  color: var(--ink-soft);
+}
+.qr-code-text strong {
+  color: var(--ink);
+  letter-spacing: 0.06em;
+}
+
+/* Mes données : télécharger, supprimer (rangé sous la déconnexion, la suppression reste discrète). */
+.account-data {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  justify-items: start;
+}
+.account-delete {
+  color: var(--red-deep);
+}
+.account-confirm {
+  display: grid;
+  gap: 0.5rem;
+  justify-self: stretch;
+}
+.account-confirm label {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+@media (prefers-color-scheme: dark) {
+  .account-delete {
+    color: var(--danger);
+  }
+}
+
+.lock-screen .avatar {
+  margin: 0 auto;
+}
+.lock-actions {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+/* Tableau de bord de l'administrateur. */
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 0.5rem;
+  margin: 0.75rem 0 1rem;
+}
+.admin-stat {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.75rem;
+  border-radius: var(--r-sm);
+  background: var(--bg);
+}
+.admin-stat-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-xl);
+  font-variant-numeric: tabular-nums;
+}
+.admin-stat-label {
+  color: var(--ink-soft);
+  font-size: var(--fs-sm);
+}
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+.admin-table th {
+  color: var(--ink-soft);
+  font-weight: 500;
+  text-align: left;
+}
+.admin-table th,
+.admin-table td {
+  padding: 0.45rem 0.25rem;
+  border-bottom: 1px solid var(--line);
+}
+.admin-table th:not(:first-child),
+.admin-table td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.quota {
+  margin-top: 0.75rem;
+}
+.quota-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+  font-size: var(--fs-sm);
+}
+.quota-high .budget-bar span {
+  background: var(--red);
+}
+.admin-note {
+  margin-top: 0.6rem;
+}
+.admin-errors {
+  display: grid;
+  gap: 6px;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.admin-errors li {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: var(--r-sm);
+  background: var(--bg);
+}
+.admin-error-msg {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--fs-sm);
+  overflow-wrap: anywhere;
+}
+.admin-link {
+  margin-bottom: 0.5rem;
+}
+/* Tableau de bord sur grand écran : la famille à gauche, quotas et erreurs à droite. */
+@media (min-width: 52rem) {
+  .admin-page > .section:nth-of-type(1) {
+    grid-column: 1;
+    grid-row: span 2;
+  }
+  .admin-page > .section:nth-of-type(n + 2) {
+    grid-column: 2;
+  }
+}
+.admin-link,
+.account-data a.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}

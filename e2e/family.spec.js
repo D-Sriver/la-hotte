@@ -139,3 +139,65 @@ test('hors connexion : Bob rouvre « Ce que j’offre » sans réseau et voit la
   await expect(page.getByText('Vélo rouge').first()).toBeVisible();
   await context.setOffline(false);
 });
+
+test('budget : Bob fixe 500 € pour Alice et voit ce qui reste', async ({ page }) => {
+  await open(page, 'bob', 'cadeaux');
+  await page.getByRole('button', { name: 'Fixer un budget' }).first().click();
+  await page.getByLabel(/Mon budget pour Alice/).fill('500');
+  await page.getByRole('button', { name: 'OK' }).click();
+  await expect(page.getByText(/sur 500 €/)).toBeVisible();
+  await expect(page.getByText(/reste/)).toBeVisible();
+});
+
+test('QR code : Alice montre l’invitation en grand', async ({ page }) => {
+  await open(page, 'alice');
+  await page.getByRole('button', { name: 'Montrer le QR code de l’invitation' }).click();
+  const dialog = page.getByRole('dialog', { name: /Rejoindre « Famille Test »/ });
+  await expect(dialog.getByRole('img', { name: 'QR code de l’invitation' })).toBeVisible();
+  await dialog.getByRole('button', { name: 'Fermer' }).click();
+  await expect(dialog).toBeHidden();
+});
+
+test('appareil partagé : « C’est bien toi ? » avant de montrer quoi que ce soit', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('la-hotte-shared-device', '1'));
+  await open(page, 'bob', 'cadeaux');
+  await expect(page.getByRole('heading', { name: /C’est bien toi, Bob/ })).toBeVisible();
+  await expect(page.getByText('Vélo rouge')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Oui, c’est moi' }).click();
+  await expect(page.getByText('Vélo rouge').first()).toBeVisible();
+});
+
+test('supprimer son compte : la réservation d’Ève redevient libre', async ({ page, request }) => {
+  const eve = 'eve@e2e.test';
+  const headers = { 'x-dev-email': eve };
+  await request.fetch('/api/me', { method: 'PUT', headers, data: { name: 'Ève' } });
+  const { families } = await (
+    await request.fetch('/api/families', { headers: { 'x-dev-email': people.alice } })
+  ).json();
+  const family = families[0];
+  await request.fetch('/api/join', { method: 'POST', headers, data: { code: family.code } });
+  const { id } = await (
+    await request.fetch('/api/wishes', {
+      method: 'POST',
+      headers: { 'x-dev-email': people.alice },
+      data: { title: 'Écharpe' },
+    })
+  ).json();
+  await request.fetch(`/api/wishes/${id}/reserve`, {
+    method: 'POST',
+    headers: { ...headers, 'x-family': String(family.id) },
+    data: { action: 'reserve' },
+  });
+
+  await page.goto(`/?as=${eve}#/profil`);
+  await page.getByRole('button', { name: 'Supprimer mon compte' }).click();
+  await page.getByLabel(/pour confirmer/).fill('Ève');
+  await page.getByRole('button', { name: 'Supprimer définitivement' }).click();
+  await page.waitForURL(/logout|\/$/);
+
+  const carol = await page.context().newPage();
+  await open(carol, 'carol', `p/${ids.alice}`);
+  await expect(
+    carol.locator('.wish', { hasText: 'Écharpe' }).getByRole('button', { name: 'Je réserve' }),
+  ).toBeVisible();
+});

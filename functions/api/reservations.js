@@ -62,6 +62,11 @@ export async function onRequestGet({ env, data }) {
         w.reserved_by === data.me.id && w.url && !w.bought && !w.received_at && w.watched ? watchState(w) : null,
     };
   });
+  // Mes budgets par personne (privés).
+  const { results: budgetRows } = await env.DB.prepare('SELECT person_id, amount FROM gift_budgets WHERE user_id = ?1')
+    .bind(data.me.id)
+    .all();
+  const budgets = Object.fromEntries(budgetRows.map((b) => [b.person_id, b.amount]));
   const sum = (list) => Math.round(list.reduce((total, g) => total + (g.my_share || 0), 0) * 100) / 100;
   const planned = gifts.filter((g) => !g.received);
   return json({
@@ -70,5 +75,6 @@ export async function onRequestGet({ env, data }) {
     total: sum(planned),
     year_total: sum(gifts),
     unpriced: planned.filter((g) => g.my_share === null).length,
+    budgets,
   });
 }

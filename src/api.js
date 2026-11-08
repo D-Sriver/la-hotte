@@ -130,6 +130,10 @@ export const api = {
   // { reminders, messages, groups } : seuls les choix envoyés changent.
   setNotify: (choices) => request('/me/notifications', { method: 'PUT', body: choices }),
   thank: (id) => request(`/wishes/${id}/thanks`, { method: 'POST' }),
+  setBudget: (personId, amount) => request('/budgets', { method: 'PUT', body: { person_id: personId, amount } }),
+  deleteAccount: (confirm) => request('/me/data', { method: 'DELETE', body: { confirm } }),
+  dataUrl: () => `/api/me/data${devAs ? `?as=${encodeURIComponent(devAs)}` : ''}`,
+  admin: () => request('/admin'),
   calendar: (enabled) => request('/me/calendar', { method: 'POST', body: { enabled } }),
   shareList: (enabled) => request('/me/share', { method: 'POST', body: { enabled } }),
   reportError: (report) => request('/errors', { method: 'POST', body: report }),

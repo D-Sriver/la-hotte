@@ -12,7 +12,16 @@ const storage = () => {
   }
 };
 
-export const canKeep = (path, method) => method === 'GET' && READABLE.test(path);
+// Sur un appareil partagé, rien n'est gardé (voir sharedDevice.js).
+const sharedDevice = () => {
+  try {
+    return window.localStorage.getItem('la-hotte-shared-device') === '1';
+  } catch {
+    return false;
+  }
+};
+
+export const canKeep = (path, method) => method === 'GET' && READABLE.test(path) && !sharedDevice();
 
 export function keep(familyId, path, data) {
   const store = storage();

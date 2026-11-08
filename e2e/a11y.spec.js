@@ -3,6 +3,7 @@
 // mais attrape les contrastes, noms manquants, rôles ARIA incorrects et pièges au clavier.
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { execFileSync } from 'node:child_process';
 
 // Adresses propres à chaque lancement : un worker relancé après un échec repart d'une famille neuve.
 const run = Date.now().toString(36);
@@ -116,4 +117,32 @@ test('au clavier seul : réserver, puis annuler depuis « Gérer »', async ({ p
   await expect(cancel).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(casque.getByRole('button', { name: 'Je réserve' })).toBeVisible();
+});
+
+test('QR code d’invitation et tableau de bord de l’administrateur', async ({ page }) => {
+  await open(page, 'zoe');
+  await page.getByRole('button', { name: 'Montrer le QR code de l’invitation' }).click();
+  await page.getByRole('dialog').waitFor();
+  await audit(page, 'QR code');
+
+  // Zoé devient administratrice dans la base locale des tests.
+  execFileSync(
+    'npx',
+    [
+      'wrangler',
+      'd1',
+      'execute',
+      'la-hotte',
+      '--local',
+      '--persist-to',
+      '.wrangler/e2e',
+      '--command',
+      `UPDATE users SET is_admin = 1 WHERE email = '${people.zoe}'`,
+    ],
+    { stdio: 'ignore' },
+  );
+  await open(page, 'zoe', 'admin');
+  await expect(page.getByRole('heading', { name: 'Tableau de bord' })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'Famille A11y' })).toBeVisible();
+  await audit(page, 'tableau de bord');
 });

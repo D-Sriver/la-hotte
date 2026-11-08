@@ -6,6 +6,7 @@ const parse = () => {
   if (page === 'moi') return { page: 'me' };
   if (page === 'cadeaux') return { page: 'gifts' };
   if (page === 'profil') return { page: 'profile' };
+  if (page === 'admin') return { page: 'admin' };
   if (page === 'p' && Number(id)) return { page: 'person', id: Number(id) };
   // Adresse inconnue : on affiche l'accueil, et l'adresse le dit aussi.
   if (hash) window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#/`);

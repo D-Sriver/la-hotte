@@ -115,6 +115,13 @@ const PATHS = {
       <circle cx="8.5" cy="8.5" r="1.2" fill="currentColor" stroke="none" />
     </>
   ),
+  chart: <path d="M5 19.5V11M10 19.5V5M15 19.5v-6M20 19.5V8M3.5 19.5h17" />,
+  qr: (
+    <>
+      <path d="M4.5 4.5h5v5h-5zM14.5 4.5h5v5h-5zM4.5 14.5h5v5h-5z" />
+      <path d="M14.5 14.5h2v2h-2zM17.5 17.5h2v2h-2zM14.5 19.5v-1M19.5 14.5h-1" />
+    </>
+  ),
   eye: (
     <>
       <path d="M3 12s3.3-6 9-6 9 6 9 6-3.3 6-9 6-9-6-9-6Z" />

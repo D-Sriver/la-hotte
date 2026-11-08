@@ -19,7 +19,7 @@ const KINDS = [
   },
 ];
 
-function Switch({ checked, label, hint, disabled, onChange }) {
+export function Switch({ checked, label, hint, disabled, onChange }) {
   return (
     <label className="switch-row">
       <span className="switch-text">

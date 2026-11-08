@@ -12,6 +12,8 @@ import LogoutButton from './components/LogoutButton.jsx';
 import LoginScreen from './components/LoginScreen.jsx';
 import InstallPrompt from './components/InstallPrompt.jsx';
 import OfflineBanner from './components/OfflineBanner.jsx';
+import LockScreen from './components/LockScreen.jsx';
+import { useDeviceLock } from './sharedDevice.js';
 import { gsap, useGSAP } from './motion.js';
 import { zoomBackHome } from './zoom.js';
 
@@ -23,6 +25,8 @@ const PAGES = {
   gifts: () => import('./components/GiftsPage.jsx'),
   profile: () => import('./components/ProfilePage.jsx'),
 };
+// Le tableau de bord n'est préchargé pour personne : seul l'administrateur l'ouvre.
+const AdminPage = lazy(() => import('./components/AdminPage.jsx'));
 const PersonPage = lazy(PAGES.person);
 const MePage = lazy(PAGES.me);
 const GiftsPage = lazy(PAGES.gifts);
@@ -74,7 +78,13 @@ function Nav({ current }) {
     () => {
       const move = () => {
         const tab = nav.current.querySelector('[aria-current="page"]');
-        if (!tab) return;
+        // Page hors des onglets (tableau de bord) : la pastille disparaît au lieu de rester sous un onglet.
+        if (!tab) {
+          gsap.set(pill.current, { autoAlpha: 0 });
+          placed.current = false;
+          return;
+        }
+        gsap.set(pill.current, { autoAlpha: 1 });
         const target = { x: tab.offsetLeft, y: tab.offsetTop, width: tab.offsetWidth, height: tab.offsetHeight };
         const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (!placed.current || reduce) gsap.set(pill.current, target);
@@ -149,6 +159,7 @@ function DeclinedInvite({ onJoined }) {
 
 export default function App() {
   const route = useHashRoute();
+  const lock = useDeviceLock();
   const [me, setMe] = useState(null);
   const [error, setError] = useState('');
   // Lien d'invitation en attente : on vérifie le code avant d'afficher quoi que ce soit.
@@ -231,6 +242,8 @@ export default function App() {
         <div className="spinner" role="status" aria-label="Chargement" />
       </main>
     );
+  // Appareil partagé : « C'est bien toi ? » avant de montrer quoi que ce soit.
+  if (me.name && lock.locked) return <LockScreen me={me} onUnlock={lock.unlock} />;
   if (invite) {
     return (
       <InviteScreen
@@ -314,6 +327,7 @@ export default function App() {
           {route.page === 'gifts' && <GiftsPage familyId={me.family.id} onSwitchFamily={switchFamily} />}
           {route.page === 'profile' && <ProfilePage me={me} onSaved={setMe} onFamiliesChanged={showFamily} />}
           {route.page === 'person' && <PersonPage key={route.id} id={route.id} />}
+          {route.page === 'admin' && <AdminPage />}
         </Suspense>
       </main>
     </div>
