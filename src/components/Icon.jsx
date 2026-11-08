@@ -109,6 +109,18 @@ const PATHS = {
       <path d="M20 20l-4.5-4.5" />
     </>
   ),
+  tag: (
+    <>
+      <path d="M4.5 12.4V5.5a1 1 0 0 1 1-1h6.9a1 1 0 0 1 .7.3l6.6 6.6a1 1 0 0 1 0 1.4l-6.9 6.9a1 1 0 0 1-1.4 0l-6.6-6.6a1 1 0 0 1-.3-.7Z" />
+      <circle cx="8.5" cy="8.5" r="1.2" fill="currentColor" stroke="none" />
+    </>
+  ),
+  eye: (
+    <>
+      <path d="M3 12s3.3-6 9-6 9 6 9 6-3.3 6-9 6-9-6-9-6Z" />
+      <circle cx="12" cy="12" r="2.5" />
+    </>
+  ),
 };
 
 export default function Icon({ name, size = 22 }) {

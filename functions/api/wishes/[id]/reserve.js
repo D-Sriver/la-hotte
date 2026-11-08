@@ -49,7 +49,11 @@ export async function onRequestPost(context) {
       if (wish.reserved_by === me && !wish.group_gift) {
         // Déjà retirée par son propriétaire : plus personne n'en a besoin.
         if (wish.removed_at) await db.prepare('DELETE FROM wishes WHERE id = ?1').bind(wish.id).run();
-        else await update('reserved_by = NULL, reserved_at = NULL, bought = 0').run();
+        else
+          await db.batch([
+            update('reserved_by = NULL, reserved_at = NULL, bought = 0'),
+            db.prepare('DELETE FROM price_watch WHERE wish_id = ?1').bind(wish.id),
+          ]);
         return json({ ok: true });
       }
       return fail(409, 'Déjà réservé par quelqu’un d’autre.');
@@ -115,7 +119,11 @@ export async function onRequestPost(context) {
         .bind(wish.id)
         .first();
       if (!next && wish.removed_at) await db.prepare('DELETE FROM wishes WHERE id = ?1').bind(wish.id).run();
-      else if (!next) await update('reserved_by = NULL, reserved_at = NULL, group_gift = 0, bought = 0').run();
+      else if (!next)
+        await db.batch([
+          update('reserved_by = NULL, reserved_at = NULL, group_gift = 0, bought = 0'),
+          db.prepare('DELETE FROM price_watch WHERE wish_id = ?1').bind(wish.id),
+        ]);
       // L'organisateur s'en va : le plus ancien participant reprend le flambeau.
       else if (wish.reserved_by === me) await update('reserved_by = ?2', next.user_id).run();
       return json({ ok: true });

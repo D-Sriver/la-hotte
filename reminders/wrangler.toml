@@ -7,12 +7,18 @@ compatibility_date = "2025-06-01"
 workers_dev = false # pas d'adresse web : ce Worker ne fait que tourner chaque matin
 
 [triggers]
-crons = ["0 8 * * *"] # 8 h UTC, soit 9 h ou 10 h à Paris
+# 3 h UTC : sauvegarde de la base. 7 h : suivi des prix. 8 h (9 h ou 10 h à Paris) : rappels.
+crons = ["0 3 * * *", "0 7 * * *", "0 8 * * *"]
 
 [[d1_databases]]
 binding = "DB"
 database_name = "la-hotte"
 database_id = "874fe530-e678-4ab7-be0d-fa3d2d6c77d7"
+
+# Sauvegardes nocturnes de la base (30 jours). Voir server/backup.js.
+[[kv_namespaces]]
+binding = "BACKUPS"
+id = "b95046d8443046fc92131272233900cb"
 
 [vars]
 APP_URL = "https://la-hotte.pages.dev"

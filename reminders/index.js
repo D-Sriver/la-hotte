@@ -1,6 +1,10 @@
 import { sendEmail, emailLayout } from '../server/email.js';
 import { notifyUser, pushConfigured } from '../server/push.js';
 import { priceValue } from '../server/wishes.js';
+import { backupDatabase } from '../server/backup.js';
+import { watchPrices } from '../server/pricewatch.js';
+import { unfinishedGifts } from '../server/christmas.js';
+import { pruneErrors } from '../server/errors.js';
 
 // Rappels envoyés à J-30, J-14, J-7 et J-3 avant Noël, et à J-7 et J-1 avant un anniversaire :
 // en notification sur le téléphone, ou par email si l'envoi d'emails est configuré.
@@ -113,6 +117,21 @@ export async function remindersFor(db, user, now) {
     }
   }
 
+  // Le 26 décembre : ce qui a été réservé mais pas marqué « Offert ». Marqué, il rejoint le récap de Noël
+  // de la personne ; sinon il reste réservé pour la prochaine occasion (anniversaire…).
+  if (now.getUTCMonth() === 11 && now.getUTCDate() === 26) {
+    const key = `after-xmas-${now.getUTCFullYear()}`;
+    const left = sent.has(key) ? { count: 0 } : await unfinishedGifts(db, user.id);
+    if (left.count) {
+      lines.push(
+        left.count > 1
+          ? `Noël est passé : marque « Offert » les ${left.count} cadeaux que tu as donnés (Ce que j’offre). Les autres restent réservés pour la prochaine occasion.`
+          : 'Noël est passé : si tu as donné ton cadeau réservé, marque-le « Offert » (Ce que j’offre). Sinon, il reste réservé pour la prochaine occasion.',
+      );
+      keys.push(key);
+    }
+  }
+
   for (const person of people) {
     if (!person.birthday) continue;
     const [, month, day] = person.birthday.split('-').map(Number);
@@ -131,8 +150,41 @@ export async function remindersFor(db, user, now) {
 }
 
 export default {
+  // Trois tâches, chacune à son heure (voir wrangler.toml) : chacune garde ses propres limites de requêtes.
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(this.run(env, new Date(event.scheduledTime)));
+    const now = new Date(event.scheduledTime);
+    const task =
+      event.cron === '0 3 * * *'
+        ? this.nightly(env, now)
+        : event.cron === '0 7 * * *'
+          ? watchPrices(env).then((r) => console.log(`Prix relus : ${r.checked}, baisses : ${r.alerts}`))
+          : this.run(env, now);
+    ctx.waitUntil(task);
+  },
+
+  // La nuit : sauvegarde de la base et ménage du journal d'erreurs.
+  async nightly(env, now) {
+    const saved = await backupDatabase(env, now);
+    if (saved) console.log(`Sauvegarde ${saved.key} : ${saved.rows} lignes, ${saved.bytes} octets`);
+    await pruneErrors(env.DB);
+  },
+
+  // Les erreurs des dernières 24 h, signalées à l'administrateur (ADMIN_EMAIL), une notification au plus par jour.
+  async errorDigest(env) {
+    if (!env.ADMIN_EMAIL || !pushConfigured(env)) return;
+    const admin = await env.DB.prepare('SELECT id FROM users WHERE email = ?1')
+      .bind(env.ADMIN_EMAIL.toLowerCase())
+      .first();
+    const row = await env.DB.prepare(
+      "SELECT COUNT(*) AS n, COUNT(DISTINCT message) AS kinds FROM error_log WHERE created_at >= datetime('now', '-1 day')",
+    ).first();
+    if (!admin || !row.n) return;
+    await notifyUser(env, admin.id, {
+      title: 'La Hotte : erreurs',
+      body: `${row.n} erreur${row.n > 1 ? 's' : ''} (${row.kinds} différente${row.kinds > 1 ? 's' : ''}) ces dernières 24 h. Détail : npm run errors.`,
+      url: '/#/',
+      tag: 'erreurs',
+    });
   },
 
   async run(env, now) {
@@ -162,7 +214,7 @@ export default {
           let delivered = 0;
           for (const [i, line] of lines.slice(0, 3).entries()) {
             delivered += await notifyUser(env, user.id, {
-              title: 'La Hotte 🎁',
+              title: 'La Hotte',
               body: line,
               url: '/#/',
               tag: `rappel-${i}`,
@@ -200,6 +252,7 @@ export default {
       }
     }
     console.log(`Rappels envoyés : ${sentCount}`);
+    await this.errorDigest(env).catch((err) => console.warn('erreurs', err.message));
     return sentCount;
   },
 };

@@ -7,7 +7,7 @@ import { notifyUser, pushConfigured } from './push.js';
  * ce type de notification (Profil → Notifications). L'envoi part après la réponse (waitUntil) : il ne ralentit jamais l'action.
  */
 // kind : 'messages' (discussions) ou 'groups' (cagnottes), selon ce que chacun a choisi de recevoir.
-const KIND_COLUMN = { messages: 'notify_messages', groups: 'notify_groups' };
+const KIND_COLUMN = { messages: 'notify_messages', groups: 'notify_groups', prices: 'notify_prices' };
 
 export async function recipients(db, { userIds, familyId, ownerId, senderId, kind }) {
   const column = KIND_COLUMN[kind];

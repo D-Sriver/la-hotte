@@ -77,6 +77,31 @@ function InviteCard({ family, alone }) {
   );
 }
 
+// Du 26 décembre au 31 janvier : le secret est levé, chacun voit qui lui a offert quoi.
+function ChristmasRecap({ recap }) {
+  return (
+    <section className="tile tile-wide section christmas-recap">
+      <h2 className="section-title">
+        Ton Noël {recap.year}
+        <span className="count">{recap.gifts.length}</span>
+      </h2>
+      <p className="muted small">Le secret est levé : voilà qui se cachait derrière tes cadeaux.</p>
+      <ul className="recap-list">
+        {recap.gifts.map((g) => (
+          <li key={g.id}>
+            <Icon name="gift" size={16} />
+            <span className="recap-title">{g.title}</span>
+            <span className="recap-from">
+              {g.from ? `de ${g.from}` : ''}
+              {g.secret ? ', hors de ta liste' : ''}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 // « Ce que j'offre » en résumé : combien, quel budget, et les prochains à acheter.
 function GivingSummary({ gifts, suggestion }) {
   const list = useStagger(gifts?.length || 0);
@@ -148,6 +173,7 @@ export default function Home({ me }) {
   const scope = usePageIntro(people !== null || error !== '');
 
   const [myWishes, setMyWishes] = useState(null);
+  const [christmas, setChristmas] = useState(null);
 
   useEffect(() => {
     api
@@ -155,6 +181,7 @@ export default function Home({ me }) {
       .then((d) => {
         setPeople(d.people.filter((p) => !p.is_me));
         setMyWishes(d.people.find((p) => p.is_me)?.wish_count ?? null);
+        setChristmas(d.christmas || null);
       })
       .catch((e) => setError(e.message));
     api
@@ -211,6 +238,8 @@ export default function Home({ me }) {
         </div>
         <Gift3D />
       </section>
+
+      {christmas?.gifts.length > 0 && <ChristmasRecap recap={christmas} />}
 
       <h1 className="bento-title">Qui on gâte&nbsp;?</h1>
 

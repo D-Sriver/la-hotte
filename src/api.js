@@ -109,6 +109,8 @@ export const api = {
   pushTest: () => request('/push/test', { method: 'POST' }),
   // { reminders, messages, groups } : seuls les choix envoyés changent.
   setNotify: (choices) => request('/me/notifications', { method: 'PUT', body: choices }),
+  shareList: (enabled) => request('/me/share', { method: 'POST', body: { enabled } }),
+  reportError: (report) => request('/errors', { method: 'POST', body: report }),
   preview: (url) => request('/preview', { method: 'POST', body: { url } }),
   photoUrl: (wishId, photoId) =>
     `/api/wishes/${wishId}/photo?p=${photoId}${devAs ? `&as=${encodeURIComponent(devAs)}` : ''}`,

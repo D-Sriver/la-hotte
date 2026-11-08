@@ -10,6 +10,18 @@ import { usePageTitle } from '../usePageTitle.js';
 const euros = (n) =>
   `${n.toLocaleString('fr-FR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })} €`;
 
+// Prix relu chaque matin sur la page du produit (cadeaux réservés pas encore achetés).
+function PriceWatch({ watch }) {
+  if (!watch.tracked) return <p className="price-watch muted small">Prix non suivi : la boutique ne le donne pas</p>;
+  if (!watch.drop) return null;
+  return (
+    <p className="price-watch price-drop">
+      <Icon name="tag" size={14} />
+      Prix en baisse : <strong className="num">{euros(watch.last)}</strong> au lieu de {euros(watch.first)}
+    </p>
+  );
+}
+
 // Tout ce que je prévois d'offrir, regroupé par personne.
 export default function GiftsPage({ familyId, onSwitchFamily }) {
   usePageTitle('Ce que j’offre');
@@ -25,10 +37,10 @@ export default function GiftsPage({ familyId, onSwitchFamily }) {
   useEffect(load, [load]);
   const scope = usePageIntro(data !== null || error !== '');
 
-  async function toggleBought(id) {
+  async function act(id, action) {
     setBusy(id);
     try {
-      await api.gift(id, 'bought');
+      await api.gift(id, action);
       load();
     } catch (err) {
       setError(err.message);
@@ -154,6 +166,7 @@ export default function GiftsPage({ familyId, onSwitchFamily }) {
                         ? ''
                         : 'prix non indiqué'}
                   </p>
+                  {g.price_watch && <PriceWatch watch={g.price_watch} />}
                 </div>
                 {g.received ? (
                   <span className="badge badge-taken">
@@ -171,11 +184,22 @@ export default function GiftsPage({ familyId, onSwitchFamily }) {
                       className={`button button-small button-quiet${g.bought ? ' button-bought' : ''}`}
                       disabled={busy === g.id}
                       aria-pressed={g.bought}
-                      onClick={() => toggleBought(g.id)}
+                      onClick={() => act(g.id, 'bought')}
                     >
                       <Icon name={g.bought ? 'check' : 'bag'} size={16} />
                       {g.bought ? 'Acheté' : 'Marquer acheté'}
                     </button>
+                    {/* Une fois donné : il rejoint les archives (et le récap de Noël de la personne). */}
+                    {g.bought && (
+                      <button
+                        className="button button-small button-quiet"
+                        disabled={busy === g.id}
+                        onClick={() => act(g.id, 'given')}
+                      >
+                        <Icon name="gift" size={16} />
+                        Offert
+                      </button>
+                    )}
                   </div>
                 )}
               </li>

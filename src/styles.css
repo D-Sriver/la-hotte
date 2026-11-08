@@ -966,6 +966,36 @@ a.tile:active {
 .giving-list .icon {
   color: var(--ink-soft);
 }
+
+/* Récap de Noël : la liste des cadeaux reçus, chacun avec qui l'a offert (ruban doré sur l'icône). */
+.recap-list {
+  display: grid;
+  gap: 6px;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.recap-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 0.5rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: var(--r-sm);
+  background: var(--bg);
+}
+.recap-list .icon {
+  grid-row: span 2;
+  align-self: center;
+  color: var(--gold-mark);
+}
+.recap-title {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.recap-from {
+  color: var(--ink-soft);
+  font-size: var(--fs-sm);
+}
 .giving-list .is-bought .icon {
   color: var(--green);
 }
@@ -1923,6 +1953,18 @@ a.tile:active {
   font-size: var(--fs-sm);
   overflow-wrap: anywhere;
   font-variant-numeric: tabular-nums;
+}
+/* Suivi des prix : une baisse se voit en vert, le reste reste discret. */
+.price-watch {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.2rem;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+.price-drop {
+  color: var(--green-ink);
 }
 .price {
   margin-right: 0.45rem;
@@ -3884,4 +3926,40 @@ h1[tabindex='-1']:focus {
 }
 .mark-neutral {
   color: var(--ink-soft);
+}
+
+/* Écran affiché si une page plante (ErrorBoundary). */
+.crash {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.75rem;
+  min-height: 100dvh;
+  padding: 1.5rem;
+  text-align: center;
+}
+.crash-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-h2);
+}
+
+/* Lien de partage hors de la famille. */
+.share-link {
+  margin: 0.75rem 0 0;
+  padding: 0.55rem 0.7rem;
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  color: var(--ink-soft);
+  font-size: var(--fs-sm);
+  overflow-wrap: anywhere;
+}
+.share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.share-panel > .button {
+  margin-top: 0.75rem;
 }

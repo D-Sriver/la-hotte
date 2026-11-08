@@ -12,7 +12,13 @@ const publicProfile = (u) => ({
   sizes: u.sizes,
   budget_hint: u.budget_hint,
   birthday: u.birthday,
-  notify: { reminders: !!u.notify_email, messages: !!u.notify_messages, groups: !!u.notify_groups },
+  notify: {
+    reminders: !!u.notify_email,
+    messages: !!u.notify_messages,
+    groups: !!u.notify_groups,
+    prices: !!u.notify_prices,
+  },
+  share_token: u.share_token || null,
 });
 
 // AAAA-MM-JJ valide, sinon rien.

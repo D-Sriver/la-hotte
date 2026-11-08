@@ -205,11 +205,18 @@ test('notifications : jamais la personne gâtée, seulement la famille affichée
 test('préférences de notification : chaque interrupteur ne change que le sien', async () => {
   const { onRequestPut: prefs } = await import('../functions/api/me/notifications.js');
   const put = (body) => call(prefs, { db, me: bob, family: f1, body });
-  assert.deepEqual((await put({ messages: false })).body, { reminders: true, messages: false, groups: true });
+  assert.deepEqual((await put({ messages: false })).body, {
+    reminders: true,
+    messages: false,
+    groups: true,
+    prices: true,
+  });
   assert.deepEqual((await put({ reminders: false, groups: false })).body, {
     reminders: false,
     messages: false,
     groups: false,
+    prices: true,
   });
+  assert.equal((await put({ prices: false })).body.prices, false);
   assert.equal((await put({ messages: 'oui' })).status, 400);
 });

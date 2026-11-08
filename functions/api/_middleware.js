@@ -1,6 +1,7 @@
 import { getEmail, usesEmailLogin } from '../../server/auth.js';
 import { crossSiteProblem, fail, json } from '../../server/http.js';
 import { myFamilies } from '../../server/family.js';
+import { logError } from '../../server/errors.js';
 
 export async function onRequest(context) {
   const { request, env, data } = context;
@@ -32,13 +33,26 @@ export async function onRequest(context) {
   // seules ces routes répondent.
   const path = new URL(request.url).pathname;
   const allowedWithoutFamily =
-    path === '/api/me' || path === '/api/join' || (path === '/api/families' && request.method === 'POST');
+    path === '/api/me' ||
+    path === '/api/join' ||
+    path === '/api/errors' ||
+    (path === '/api/families' && request.method === 'POST');
   if (!data.family && !allowedWithoutFamily) return fail(403, 'Crée ou rejoins une famille pour continuer.');
 
   try {
     return await context.next();
   } catch (err) {
     console.error(err);
+    // Gardée dans le journal (npm run errors), sans ralentir la réponse.
+    context.waitUntil?.(
+      logError(env.DB, {
+        source: 'server',
+        userId: data.me.id,
+        message: err?.message || String(err),
+        detail: `${request.method} ${path}\n${err?.stack || ''}`,
+        userAgent: request.headers.get('user-agent') || '',
+      }).catch(() => {}),
+    );
     return fail(500, 'Erreur serveur. Réessaie dans un instant.');
   }
 }

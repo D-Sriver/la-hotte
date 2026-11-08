@@ -1,6 +1,12 @@
 import { json } from '../../server/http.js';
 import { priceValue } from '../../server/wishes.js';
 
+// « tracked » : le prix est relu chaque matin ; « drop » : il a baissé depuis la première lecture.
+function watchState(w) {
+  const drop = w.first_price && w.last_price && w.last_price < w.first_price - 0.005;
+  return { tracked: w.last_price !== null, first: w.first_price, last: w.last_price, drop: !!drop };
+}
+
 // Tout ce que je prévois d'offrir, seul ou à plusieurs, avec ma part du budget ;
 // plus ce que j'ai déjà offert cette année (reçu), pour le bilan de l'année par personne.
 export async function onRequestGet({ env, data }) {
@@ -12,8 +18,9 @@ export async function onRequestGet({ env, data }) {
              WHERE m1.user_id = o.id) AS families,
             (SELECT COUNT(*) FROM contributions c WHERE c.wish_id = w.id) AS participant_count,
             (SELECT amount FROM contributions c WHERE c.wish_id = w.id AND c.user_id = ?1) AS my_amount,
-            w.received_at
+            w.received_at, pw.wish_id AS watched, pw.first_price, pw.last_price
      FROM wishes w JOIN users o ON o.id = w.owner_id
+     LEFT JOIN price_watch pw ON pw.wish_id = w.id
      WHERE w.owner_id != ?1
        AND (w.received_at IS NULL OR w.received_at >= strftime('%Y-01-01', 'now'))
        AND (
@@ -48,6 +55,9 @@ export async function onRequestGet({ env, data }) {
       // À plusieurs, seul l'organisateur achète.
       i_buy: w.reserved_by === data.me.id,
       removed: !!w.removed_at,
+      // Suivi des prix (pour celui qui achète) : null tant que la page n'a pas été relue.
+      price_watch:
+        w.reserved_by === data.me.id && w.url && !w.bought && !w.received_at && w.watched ? watchState(w) : null,
     };
   });
   const sum = (list) => Math.round(list.reduce((total, g) => total + (g.my_share || 0), 0) * 100) / 100;

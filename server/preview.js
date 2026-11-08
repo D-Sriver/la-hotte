@@ -254,3 +254,32 @@ export async function previewLink(pageUrl, env = {}, familyId = null) {
   const image = found.image || (match.thumbnail ? await fetchImage(match.thumbnail, pageUrl).catch(() => null) : null);
   return { ...found, price: match.price, image, price_source: match.source, price_exact: match.exact };
 }
+
+// Prix seul, en euros, lu dans les données structurées de la page (JSON-LD, balises meta, microdonnées).
+// Jamais d'IA ni de recherche payante : c'est ce que relit chaque matin le suivi des prix.
+export function structuredPrice(html) {
+  const product = productFromJsonLd(html);
+  const raw =
+    product.price ||
+    metaContent(html, ['product:price:amount', 'og:price:amount', 'price']) ||
+    priceFromMicrodata(html);
+  const currency =
+    product.currency || metaContent(html, ['product:price:currency', 'og:price:currency', 'priceCurrency']);
+  if (!raw || (currency && !/^(EUR|€)$/i.test(currency.trim()))) return null;
+  let text = String(raw).replace(/\s/g, '');
+  // « 1,299.99 » ou « 1.299,99 » : on enlève le séparateur des milliers.
+  if (text.includes(',') && text.includes('.'))
+    text = text.lastIndexOf(',') > text.lastIndexOf('.') ? text.replace(/\./g, '') : text.replace(/,/g, '');
+  const value = Number(text.replace(',', '.'));
+  return Number.isFinite(value) && value > 0 ? Math.round(value * 100) / 100 : null;
+}
+
+// Relit le prix d'une page produit ; null si la boutique bloque la lecture ou n'affiche pas son prix proprement.
+export async function fetchPagePrice(pageUrl) {
+  const response = await fetch(pageUrl, { headers: HEADERS, redirect: 'follow', signal: AbortSignal.timeout(8000) });
+  if (!response.ok || !(response.headers.get('content-type') || '').includes('html')) return null;
+  const { bytes } = await readLimited(response, PAGE_LIMIT);
+  const html = new TextDecoder().decode(bytes);
+  if (/<title>\s*(Just a moment|Access Denied|Attention Required)/i.test(html)) return null;
+  return structuredPrice(html);
+}

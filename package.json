@@ -18,7 +18,11 @@
     "test": "node --test --test-reporter=spec \"tests/**/*.test.js\"",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "errors": "wrangler d1 execute la-hotte --remote --command \"SELECT id, created_at, source, user_id, message, page, substr(detail, 1, 300) AS detail FROM error_log ORDER BY id DESC LIMIT 30\"",
+    "backup:list": "wrangler kv key list --namespace-id=b95046d8443046fc92131272233900cb --remote",
+    "backup:restore": "node scripts/restore-backup.mjs",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@fontsource/onest": "5.3.1",
@@ -31,6 +35,7 @@
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
+    "@playwright/test": "1.64.1",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "9.39.5",
     "eslint-plugin-react": "7.37.5",

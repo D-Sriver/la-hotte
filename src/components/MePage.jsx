@@ -3,6 +3,7 @@ import { api } from '../api.js';
 import WishList from './WishList.jsx';
 import AddWishForm from './AddWishForm.jsx';
 import IdeasPanel from './IdeasPanel.jsx';
+import SharePanel from './SharePanel.jsx';
 import Icon from './Icon.jsx';
 import Skeleton from './Skeleton.jsx';
 import { profileCompletion } from '../profile.js';
@@ -14,10 +15,12 @@ export default function MePage({ me }) {
   usePageTitle('Ma liste');
   const [wishes, setWishes] = useState(null);
   const [archived, setArchived] = useState([]);
+  const [shareToken, setShareToken] = useState(undefined);
   const load = useCallback(() => {
     api.me().then((d) => {
       setWishes(d.wishes);
       setArchived(d.archived || []);
+      setShareToken((current) => (current === undefined ? d.me.share_token : current));
     });
   }, []);
   useEffect(load, [load]);
@@ -83,6 +86,8 @@ export default function MePage({ me }) {
       )}
 
       <IdeasPanel person={{ ...me, is_me: true }} onAdded={load} />
+
+      {shareToken !== undefined && <SharePanel token={shareToken} />}
     </div>
   );
 }

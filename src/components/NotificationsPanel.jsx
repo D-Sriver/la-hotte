@@ -12,6 +12,11 @@ const KINDS = [
     label: 'Cagnottes',
     hint: 'Une nouvelle cagnotte dans la famille, ou quelqu’un qui rejoint la tienne.',
   },
+  {
+    key: 'prices',
+    label: 'Baisses de prix',
+    hint: 'Un cadeau que tu as réservé, pas encore acheté, devient moins cher.',
+  },
 ];
 
 function Switch({ checked, label, hint, disabled, onChange }) {
@@ -41,7 +46,7 @@ export default function NotificationsPanel({ me, onChanged }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState({ text: '', error: false });
 
-  const [choices, setChoices] = useState(me.notify || { reminders: true, messages: true, groups: true });
+  const [choices, setChoices] = useState(me.notify || { reminders: true, messages: true, groups: true, prices: true });
   const [saving, setSaving] = useState(null);
 
   // Enregistré tout de suite ; on revient en arrière si le serveur refuse.

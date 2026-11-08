@@ -2,6 +2,8 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
 import { prefetchHome } from './api.js';
+import { watchErrors } from './errors.js';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 // Polices hébergées sur le site (pas d'appel à Google) : latin, et latin étendu pour « œ » (cœur…).
 import '@fontsource/unbounded/latin-700.css';
 import '@fontsource/unbounded/latin-ext-700.css';
@@ -25,6 +27,8 @@ requestAnimationFrame(() =>
   }),
 );
 
+watchErrors();
+
 // Le service worker affiche les notifications (rappels de Noël, anniversaires…).
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
@@ -35,6 +39,8 @@ if (['', '#', '#/'].includes(window.location.hash)) prefetchHome();
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </React.StrictMode>,
 );
