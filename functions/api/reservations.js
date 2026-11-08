@@ -18,7 +18,7 @@ export async function onRequestGet({ env, data }) {
              WHERE m1.user_id = o.id) AS families,
             (SELECT COUNT(*) FROM contributions c WHERE c.wish_id = w.id) AS participant_count,
             (SELECT amount FROM contributions c WHERE c.wish_id = w.id AND c.user_id = ?1) AS my_amount,
-            w.received_at, pw.wish_id AS watched, pw.first_price, pw.last_price
+            w.received_at, w.occasion, w.thanked_at, pw.wish_id AS watched, pw.first_price, pw.last_price
      FROM wishes w JOIN users o ON o.id = w.owner_id
      LEFT JOIN price_watch pw ON pw.wish_id = w.id
      WHERE w.owner_id != ?1
@@ -55,6 +55,8 @@ export async function onRequestGet({ env, data }) {
       // À plusieurs, seul l'organisateur achète.
       i_buy: w.reserved_by === data.me.id,
       removed: !!w.removed_at,
+      occasion: w.occasion || 'christmas',
+      thanked: !!w.thanked_at,
       // Suivi des prix (pour celui qui achète) : null tant que la page n'a pas été relue.
       price_watch:
         w.reserved_by === data.me.id && w.url && !w.bought && !w.received_at && w.watched ? watchState(w) : null,

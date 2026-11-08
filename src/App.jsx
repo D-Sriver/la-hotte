@@ -11,6 +11,7 @@ import Icon from './components/Icon.jsx';
 import LogoutButton from './components/LogoutButton.jsx';
 import LoginScreen from './components/LoginScreen.jsx';
 import InstallPrompt from './components/InstallPrompt.jsx';
+import OfflineBanner from './components/OfflineBanner.jsx';
 import { gsap, useGSAP } from './motion.js';
 import { zoomBackHome } from './zoom.js';
 
@@ -305,6 +306,7 @@ export default function App() {
       </header>
       {/* Changer de famille recharge toutes les pages avec les bonnes personnes. */}
       <InstallPrompt />
+      <OfflineBanner />
       <main className="page" key={me.family.id}>
         <Suspense fallback={<Skeleton rows={4} />}>
           {route.page === 'home' && <Home me={me} />}

@@ -1,6 +1,7 @@
 import { json, fail, readJson } from '../../../../server/http.js';
 import { wishInFamily } from '../../../../server/wishes.js';
 import { familyMembers, notifyLater, ownerName, recipients } from '../../../../server/notify.js';
+import { OCCASIONS, occasionFor } from '../../../../server/occasion.js';
 
 /**
  * Tout ce qu'on peut faire sur le cadeau de quelqu'un d'autre :
@@ -9,7 +10,8 @@ import { familyMembers, notifyLater, ownerName, recipients } from '../../../../s
  * - join / leave : participer à un cadeau à plusieurs, ou s'en retirer ;
  * - amount  : changer ce qu'on met dans un cadeau à plusieurs ;
  * - bought  : cocher / décocher « acheté » (à plusieurs : l'organisateur seulement) ;
- * - given   : « offert » : le cadeau quitte les listes (archives).
+ * - given   : « offert » : le cadeau quitte les listes (archives) ;
+ * - occasion : pour Noël, son anniversaire ou autre chose (celui qui achète seulement).
  */
 export async function onRequestPost(context) {
   const { request, env, data, params } = context;
@@ -43,7 +45,11 @@ export async function onRequestPost(context) {
   switch (action) {
     case 'reserve': {
       if (free) {
-        await update("reserved_by = ?2, reserved_at = datetime('now'), group_gift = 0, bought = 0", me).run();
+        await update(
+          "reserved_by = ?2, reserved_at = datetime('now'), group_gift = 0, bought = 0, occasion = ?3",
+          me,
+          await occasionFor(db, wish.owner_id),
+        ).run();
         return json({ ok: true });
       }
       if (wish.reserved_by === me && !wish.group_gift) {
@@ -51,7 +57,7 @@ export async function onRequestPost(context) {
         if (wish.removed_at) await db.prepare('DELETE FROM wishes WHERE id = ?1').bind(wish.id).run();
         else
           await db.batch([
-            update('reserved_by = NULL, reserved_at = NULL, bought = 0'),
+            update('reserved_by = NULL, reserved_at = NULL, bought = 0, occasion = NULL'),
             db.prepare('DELETE FROM price_watch WHERE wish_id = ?1').bind(wish.id),
           ]);
         return json({ ok: true });
@@ -61,7 +67,11 @@ export async function onRequestPost(context) {
     case 'group': {
       if (!free && wish.reserved_by !== me) return fail(409, 'Déjà réservé par quelqu’un d’autre.');
       await db.batch([
-        update("reserved_by = ?2, reserved_at = COALESCE(reserved_at, datetime('now')), group_gift = 1", me),
+        update(
+          "reserved_by = ?2, reserved_at = COALESCE(reserved_at, datetime('now')), group_gift = 1, occasion = COALESCE(occasion, ?3)",
+          me,
+          await occasionFor(db, wish.owner_id),
+        ),
         addMe,
       ]);
       // Nouvelle cagnotte : toute la famille est prévenue (sauf la personne gâtée).
@@ -121,7 +131,7 @@ export async function onRequestPost(context) {
       if (!next && wish.removed_at) await db.prepare('DELETE FROM wishes WHERE id = ?1').bind(wish.id).run();
       else if (!next)
         await db.batch([
-          update('reserved_by = NULL, reserved_at = NULL, group_gift = 0, bought = 0'),
+          update('reserved_by = NULL, reserved_at = NULL, group_gift = 0, bought = 0, occasion = NULL'),
           db.prepare('DELETE FROM price_watch WHERE wish_id = ?1').bind(wish.id),
         ]);
       // L'organisateur s'en va : le plus ancien participant reprend le flambeau.
@@ -144,6 +154,13 @@ export async function onRequestPost(context) {
           wish.group_gift ? 'C’est l’organisateur qui s’occupe de l’achat.' : 'Réserve d’abord ce cadeau.',
         );
       await update("received_at = datetime('now'), bought = 1").run();
+      return json({ ok: true });
+    }
+    case 'occasion': {
+      if (wish.reserved_by !== me)
+        return fail(403, wish.group_gift ? 'C’est l’organisateur qui choisit.' : 'Réserve d’abord ce cadeau.');
+      if (!OCCASIONS.includes(body.occasion)) return fail(400, 'Occasion inconnue.');
+      await update('occasion = ?2', body.occasion).run();
       return json({ ok: true });
     }
     default:

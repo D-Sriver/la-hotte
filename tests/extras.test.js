@@ -161,3 +161,74 @@ test('liste partagée : ses envies seulement, sans réservation ni idée secrèt
   const gone = await publicList({ env: { DB: db }, params: { path: [token] } });
   assert.equal(gone.status, 404);
 });
+
+test('occasion : la fête la plus proche par défaut, modifiable par celui qui achète, invisible pour la personne gâtée', async () => {
+  const { defaultOccasion } = await import('../server/occasion.js');
+  const nov = new Date(Date.UTC(2026, 10, 8));
+  assert.equal(defaultOccasion('1990-11-20', nov), 'birthday');
+  assert.equal(defaultOccasion('1990-12-30', nov), 'christmas');
+  assert.equal(defaultOccasion(null, nov), 'christmas');
+
+  const velo = s.wish(alice, 'Vélo');
+  await call(reserve, {
+    db,
+    me: { id: bob, name: 'Bob' },
+    family: f1,
+    params: { id: velo },
+    body: { action: 'reserve' },
+  });
+  assert.equal(db.sqlite.prepare('SELECT occasion FROM wishes WHERE id = ?').get(velo).occasion, 'christmas');
+  const carolTries = await call(reserve, {
+    db,
+    me: { id: carol, name: 'Carol' },
+    family: f1,
+    params: { id: velo },
+    body: { action: 'occasion', occasion: 'birthday' },
+  });
+  assert.equal(carolTries.status, 403);
+  await call(reserve, {
+    db,
+    me: { id: bob, name: 'Bob' },
+    family: f1,
+    params: { id: velo },
+    body: { action: 'occasion', occasion: 'birthday' },
+  });
+  const { visibleWishes } = await import('../server/wishes.js');
+  assert.equal((await visibleWishes(db, alice, bob, f1))[0].occasion, 'birthday');
+  assert.ok(!('occasion' in (await visibleWishes(db, alice, alice, f1))[0]));
+
+  // Offert pour son anniversaire : n'apparaît pas dans le récap de Noël.
+  db.sqlite.prepare("UPDATE wishes SET received_at = '2026-12-24 10:00:00' WHERE id = ?").run(velo);
+  assert.deepEqual((await christmasRecap(db, alice, new Date(Date.UTC(2026, 11, 28)))).gifts, []);
+});
+
+test('merci : seulement la personne gâtée, une fois, visible de ceux qui ont offert', async () => {
+  const { onRequestPost: thanks } = await import('../functions/api/wishes/[id]/thanks.js');
+  const velo = s.wish(alice, 'Vélo', { reservedBy: bob, receivedAt: '2026-12-25 10:00:00' });
+  const notGiven = s.wish(alice, 'Livre', { reservedBy: bob });
+  const ctx = (me, id) => ({ db, me: { id: me, name: me === alice ? 'Alice' : 'Bob' }, family: f1, params: { id } });
+  assert.equal((await call(thanks, ctx(bob, velo))).status, 404);
+  assert.equal((await call(thanks, ctx(alice, notGiven))).status, 404);
+  assert.equal((await call(thanks, ctx(alice, velo))).body.ok, true);
+  assert.equal((await call(thanks, ctx(alice, velo))).body.already, true);
+  const { body } = await call(reservations, { db, me: bob, family: f1 });
+  assert.equal(body.given.find((g) => g.title === 'Vélo').thanked, true);
+});
+
+test('suivi des prix : Google Shopping une fois par semaine quand la boutique bloque, deux par matin', async () => {
+  const titles = ['A', 'B', 'C'];
+  for (const t of titles) setUrl(s.wish(alice, t, { reservedBy: bob }), `https://blocked.test/${t}`);
+  let searches = 0;
+  const searchShopping = async () => (searches++, 50);
+  const env = { DB: db, SERPAPI_KEY: 'x' };
+  const now = new Date(Date.UTC(2026, 10, 10, 7));
+  await watchPrices(env, { fetchPrice: async () => null, searchShopping, now });
+  assert.equal(searches, 2); // deux par matin au plus
+  await watchPrices(env, { fetchPrice: async () => null, searchShopping, now });
+  assert.equal(searches, 3); // le troisième, pas les deux déjà cherchés cette semaine
+  const rows = db.sqlite.prepare('SELECT source, last_price FROM price_watch').all();
+  assert.ok(rows.every((r) => r.source === 'shopping' && r.last_price === 50));
+  // La page redevient lisible : nouvelle source, on repart de son prix (pas de fausse baisse).
+  const res = await watchPrices(env, { fetchPrice: async () => 30, searchShopping, now });
+  assert.equal(res.alerts, 0);
+});

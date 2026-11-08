@@ -1,3 +1,5 @@
+import { announceFresh, announceStale, canKeep, keep, recall } from './offline.js';
+
 // En local (serveur en DEV_MODE), ?as=email@test.fr permet de jouer un autre membre de la famille.
 const devAs = new URLSearchParams(window.location.search).get('as');
 
@@ -38,10 +40,27 @@ async function failure(res) {
   return error;
 }
 
-async function request(path, options) {
-  const res = await send(path, options);
+const NO_NETWORK = 'Pas de connexion : réessaie quand le réseau revient.';
+
+async function request(path, options = {}) {
+  const readable = canKeep(path, options.method || 'GET');
+  let res;
+  try {
+    res = await send(path, options);
+  } catch (err) {
+    // Hors connexion : pour la lecture, la dernière version gardée sur cet appareil.
+    const kept = readable && recall(familyId, path);
+    if (kept) {
+      announceStale(kept.at);
+      return kept.data;
+    }
+    throw new Error(err instanceof TypeError ? NO_NETWORK : err.message);
+  }
+  announceFresh();
   if (!res.ok) throw await failure(res);
-  return res.json().catch(() => ({}));
+  const data = await res.json().catch(() => ({}));
+  if (readable) keep(familyId, path, data);
+  return data;
 }
 
 // Réponse ligne par ligne (une ligne JSON par événement) : onEvent est appelé pour chacune.
@@ -93,8 +112,9 @@ export const api = {
   addWish: (wish) => request('/wishes', { method: 'POST', body: wish }),
   updateWish: (id, wish) => request(`/wishes/${id}`, { method: 'PUT', body: wish }),
   deleteWish: (id) => request(`/wishes/${id}`, { method: 'DELETE' }),
-  // action : reserve, group, join, leave, amount ou bought (amount en euros, pour join et amount)
-  gift: (id, action, amount) => request(`/wishes/${id}/reserve`, { method: 'POST', body: { action, amount } }),
+  // action : reserve, group, join, leave, amount, bought, given ou occasion (extra : { amount } ou { occasion })
+  gift: (id, action, amount, extra = {}) =>
+    request(`/wishes/${id}/reserve`, { method: 'POST', body: { action, amount, ...extra } }),
   reservations: once('reservations', '/reservations'),
   messages: (id) => request(`/wishes/${id}/messages`),
   sendMessage: (id, body) => request(`/wishes/${id}/messages`, { method: 'POST', body: { body } }),
@@ -109,6 +129,7 @@ export const api = {
   pushTest: () => request('/push/test', { method: 'POST' }),
   // { reminders, messages, groups } : seuls les choix envoyés changent.
   setNotify: (choices) => request('/me/notifications', { method: 'PUT', body: choices }),
+  thank: (id) => request(`/wishes/${id}/thanks`, { method: 'POST' }),
   shareList: (enabled) => request('/me/share', { method: 'POST', body: { enabled } }),
   reportError: (report) => request('/errors', { method: 'POST', body: report }),
   preview: (url) => request('/preview', { method: 'POST', body: { url } }),

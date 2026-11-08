@@ -64,7 +64,7 @@ test('Carol lance une cagnotte, Bob participe, Alice ne voit rien', async ({ bro
   await bob.locator('.wish', { hasText: 'Appareil photo' }).getByRole('button', { name: 'Je participe' }).click();
   // Se retirer est rangé dans « Gérer ».
   const pot = bob.locator('.wish', { hasText: 'Appareil photo' });
-  await pot.getByRole('button', { name: /Plus d’actions/ }).click();
+  await pot.getByRole('button', { name: /^Gérer/ }).click();
   await expect(pot.getByRole('menuitem', { name: 'Me retirer de la cagnotte' })).toBeVisible();
 
   const alice = await browser.newPage();
@@ -76,7 +76,7 @@ test('Carol lance une cagnotte, Bob participe, Alice ne voit rien', async ({ bro
 test('Bob annule sa réservation depuis « Gérer », puis la reprend', async ({ page }) => {
   await open(page, 'bob', `p/${ids.alice}`);
   const velo = page.locator('.wish', { hasText: 'Vélo rouge' });
-  await velo.getByRole('button', { name: /Plus d’actions/ }).click();
+  await velo.getByRole('button', { name: /^Gérer/ }).click();
   await velo.getByRole('menuitem', { name: 'Annuler ma réservation' }).click();
   await expect(velo.getByRole('button', { name: 'Je réserve' })).toBeVisible();
   await velo.getByRole('button', { name: 'Je réserve' }).click();
@@ -119,4 +119,23 @@ test('premier passage : Dave crée sa famille, donne son prénom et arrive sur l
   await page.getByRole('button', { name: 'C’est parti' }).click();
   await expect(page.getByRole('heading', { name: /Qui on gâte/ })).toBeVisible();
   await expect(page.getByText(/Dave/).first()).toBeVisible(); // « dave » a pris sa majuscule
+});
+
+test('hors connexion : Bob rouvre « Ce que j’offre » sans réseau et voit la dernière version', async ({
+  page,
+  context,
+}) => {
+  await open(page, 'bob', 'cadeaux');
+  await page.getByText('Vélo rouge').first().waitFor();
+  // Le service worker prend la main, puis une visite en ligne garde l'application et les données.
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.reload();
+  await page.getByText('Vélo rouge').first().waitFor();
+  await page.waitForTimeout(1500); // pages préchargées au repos
+
+  await context.setOffline(true);
+  await page.reload();
+  await expect(page.getByText(/version du/)).toBeVisible();
+  await expect(page.getByText('Vélo rouge').first()).toBeVisible();
+  await context.setOffline(false);
 });

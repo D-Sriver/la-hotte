@@ -6,6 +6,7 @@ import PageHead from './PageHead.jsx';
 import { frameStyle, parseFrame } from '../photoFrame.js';
 import { usePageIntro } from '../motion.js';
 import { usePageTitle } from '../usePageTitle.js';
+import { OCCASION_LABEL } from './WishList.jsx';
 
 const euros = (n) =>
   `${n.toLocaleString('fr-FR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })} €`;
@@ -165,8 +166,15 @@ export default function GiftsPage({ familyId, onSwitchFamily }) {
                       : g.price
                         ? ''
                         : 'prix non indiqué'}
+                    {!g.received && <span className="occasion"> · {OCCASION_LABEL[g.occasion]}</span>}
                   </p>
                   {g.price_watch && <PriceWatch watch={g.price_watch} />}
+                  {g.thanked && (
+                    <p className="price-watch thanked">
+                      <Icon name="heart" size={14} />
+                      {person.name} t’a dit merci
+                    </p>
+                  )}
                 </div>
                 {g.received ? (
                   <span className="badge badge-taken">

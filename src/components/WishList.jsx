@@ -115,6 +115,19 @@ function MyAmount({ wish, busy, run }) {
   );
 }
 
+// Pour quelle occasion on offre (jamais montré à la personne gâtée).
+export const OCCASION_LABEL = {
+  christmas: 'Pour Noël',
+  birthday: 'Pour son anniversaire',
+  other: 'Autre occasion',
+};
+
+const OCCASION_MENU = {
+  christmas: 'C’est pour Noël',
+  birthday: 'C’est pour son anniversaire',
+  other: 'C’est pour une autre occasion',
+};
+
 // Les étapes pour offrir le cadeau de quelqu'un d'autre, selon où il en est : réserver, acheter, offrir.
 function GiftActions({ wish, busy, run }) {
   // Lancer une cagnotte engage (on achète, la famille est prévenue) : on le dit avant, dans la page.
@@ -528,6 +541,12 @@ function WishRow({ wish, onChanged }) {
                 C’est toi qui l’offres
               </span>
             )}
+            {wish.occasion && (wish.reserved_by_me || wish.participating) && (
+              <span className="badge badge-occasion">
+                <Icon name={wish.occasion === 'birthday' ? 'cake' : 'gift'} size={13} />
+                {OCCASION_LABEL[wish.occasion]}
+              </span>
+            )}
             {wish.removed && <span className="badge badge-warn">Retirée de sa liste : à toi de voir</span>}
             {!wish.removed && wish.edited_after_reservation && (
               <span className="badge badge-warn">Modifiée depuis la réservation</span>
@@ -595,12 +614,22 @@ function WishRow({ wish, onChanged }) {
               {!chatOpen && <Icon name="lock" size={13} />}
             </button>
           )}
-          {(wish.can_edit || canDelete || wish.mine || leave) && (
+          {(wish.can_edit || canDelete || wish.mine || leave || wish.reserved_by_me) && (
             <MoreMenu
-              label={`Plus d’actions pour « ${wish.title} »`}
+              label={`Gérer « ${wish.title} »`}
               disabled={busy}
               items={[
                 wish.can_edit && { label: 'Modifier', icon: 'pencil', onSelect: () => setEditing(true) },
+                // L'occasion se change ici (celui qui achète) : elle décide du récap de Noël et des rappels.
+                ...(wish.reserved_by_me
+                  ? Object.entries(OCCASION_LABEL)
+                      .filter(([key]) => key !== wish.occasion)
+                      .map(([key]) => ({
+                        label: OCCASION_MENU[key],
+                        icon: key === 'birthday' ? 'cake' : 'gift',
+                        onSelect: () => run(() => api.gift(wish.id, 'occasion', undefined, { occasion: key })),
+                      }))
+                  : []),
                 // Se désengager : rare, donc rangé ici plutôt qu'en bouton à côté des étapes.
                 leave && {
                   label: wish.group_gift ? 'Me retirer de la cagnotte' : 'Annuler ma réservation',

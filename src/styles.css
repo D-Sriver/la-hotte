@@ -306,7 +306,6 @@ a.tile:active {
 }
 .hero-hello {
   font-weight: 600;
-  opacity: 0.9;
 }
 .hero-days {
   margin-top: 0.4rem;
@@ -334,7 +333,6 @@ a.tile:active {
 .hero-sub {
   margin-top: 0.6rem;
   max-width: 18rem;
-  opacity: 0.9;
   text-wrap: pretty;
 }
 /* Le texte s'arrête avant le paquet 3D au lieu de passer dessous. */
@@ -820,7 +818,6 @@ a.tile:active {
   gap: 0.15rem 0.5rem;
   font-size: var(--fs-sm);
   font-weight: 600;
-  opacity: 0.85;
 }
 .page-head-stats span + span::before {
   content: '·';
@@ -828,7 +825,6 @@ a.tile:active {
 }
 .page-head-sub {
   font-size: var(--fs-sm);
-  opacity: 0.8;
   text-wrap: pretty;
 }
 .page-head-chip {
@@ -977,13 +973,14 @@ a.tile:active {
 }
 .recap-list li {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
   column-gap: 0.5rem;
   padding: 0.55rem 0.7rem;
   border-radius: var(--r-sm);
   background: var(--bg);
 }
-.recap-list .icon {
+.recap-list li > .icon {
   grid-row: span 2;
   align-self: center;
   color: var(--gold-mark);
@@ -992,9 +989,40 @@ a.tile:active {
   font-weight: 600;
   overflow-wrap: anywhere;
 }
+.recap-title,
+.recap-from {
+  grid-column: 2;
+}
 .recap-from {
   color: var(--ink-soft);
   font-size: var(--fs-sm);
+}
+/* Dire merci : à droite de chaque cadeau, discret ; une fois envoyé, un petit cœur. */
+.recap-thank,
+.recap-thanked {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.recap-thanked {
+  color: var(--ink-soft);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.thanked {
+  color: var(--ink-soft);
+}
+.recap-thanked .icon,
+.thanked .icon {
+  color: var(--red);
+}
+/* L'occasion d'une réservation : neutre, c'est une information, pas un état. */
+.badge-occasion {
+  background: var(--tile);
+  color: var(--ink-soft);
+  box-shadow: inset 0 0 0 1px var(--line);
 }
 .giving-list .is-bought .icon {
   color: var(--green);
@@ -2737,7 +2765,7 @@ textarea:focus {
   background: var(--green);
 }
 .tile-profile-hero .muted {
-  color: rgb(255 255 255 / 0.8);
+  color: #fff;
 }
 .tile-profile-hero .avatar {
   box-shadow: 0 0 0 4px rgb(255 255 255 / 0.3);
@@ -4002,4 +4030,22 @@ h1[tabindex='-1']:focus {
   .wish-tools .more {
     flex: 0 0 auto;
   }
+}
+
+/* Hors connexion : bandeau discret en haut de page, la liste reste lisible dessous. */
+.offline-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0 auto 1rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--r-inner);
+  background: var(--tile);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ink-soft);
+  font-size: var(--fs-sm);
+}
+.offline-banner span {
+  flex: 1 1 14rem;
 }

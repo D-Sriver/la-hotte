@@ -34,7 +34,7 @@ export async function visibleWishes(db, ownerId, viewerId, familyId, { archived 
       `SELECT w.id, w.title, w.url, w.price, w.note, w.favorite, ${PHOTOS_JSON} AS photos, w.created_at,
               w.added_by, a.name AS added_by_name,
               w.reserved_by, CASE WHEN rm.user_id IS NULL THEN NULL ELSE r.name END AS reserved_by_name,
-              w.group_gift, w.bought, w.removed_at, w.reserved_at,
+              w.group_gift, w.bought, w.removed_at, w.reserved_at, w.occasion,
               CASE WHEN w.edited_at > w.reserved_at THEN 1 ELSE 0 END AS edited_after_reservation,
               (SELECT json_group_array(json_object(
                         'id', u.id,
@@ -82,6 +82,7 @@ export async function visibleWishes(db, ownerId, viewerId, familyId, { archived 
       collected: participants.reduce((sum, p) => sum + (p.amount || 0), 0),
       target: priceValue(w.price),
       bought: !!w.bought,
+      occasion: w.reserved_by !== null ? w.occasion || 'christmas' : null,
       message_count: w.message_count,
       // Le propriétaire l'a retirée de sa liste, ou l'a changée, après la réservation.
       removed: !!w.removed_at,

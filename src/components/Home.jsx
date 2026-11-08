@@ -79,6 +79,12 @@ function InviteCard({ family, alone }) {
 
 // Du 26 décembre au 31 janvier : le secret est levé, chacun voit qui lui a offert quoi.
 function ChristmasRecap({ recap }) {
+  const [thanked, setThanked] = useState(() => new Set(recap.gifts.filter((g) => g.thanked).map((g) => g.id)));
+  const thank = (id) =>
+    api.thank(id).then(
+      () => setThanked((done) => new Set(done).add(id)),
+      () => {},
+    );
   return (
     <section className="tile tile-wide section christmas-recap">
       <h2 className="section-title">
@@ -95,6 +101,18 @@ function ChristmasRecap({ recap }) {
               {g.from ? `de ${g.from}` : ''}
               {g.secret ? ', hors de ta liste' : ''}
             </span>
+            {g.from &&
+              (thanked.has(g.id) ? (
+                <span className="recap-thanked">
+                  <Icon name="heart" size={14} />
+                  Merci envoyé
+                </span>
+              ) : (
+                <button className="button button-small button-quiet recap-thank" onClick={() => thank(g.id)}>
+                  <Icon name="heart" size={14} />
+                  Dire merci
+                </button>
+              ))}
           </li>
         ))}
       </ul>
