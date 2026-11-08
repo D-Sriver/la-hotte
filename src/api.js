@@ -130,6 +130,7 @@ export const api = {
   // { reminders, messages, groups } : seuls les choix envoyés changent.
   setNotify: (choices) => request('/me/notifications', { method: 'PUT', body: choices }),
   thank: (id) => request(`/wishes/${id}/thanks`, { method: 'POST' }),
+  calendar: (enabled) => request('/me/calendar', { method: 'POST', body: { enabled } }),
   shareList: (enabled) => request('/me/share', { method: 'POST', body: { enabled } }),
   reportError: (report) => request('/errors', { method: 'POST', body: report }),
   preview: (url) => request('/preview', { method: 'POST', body: { url } }),

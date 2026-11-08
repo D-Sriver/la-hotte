@@ -1,5 +1,5 @@
 import { fetchPagePrice } from './preview.js';
-import { notifyUser, pushConfigured } from './push.js';
+import { deliver } from './deliver.js';
 import { searchPrice } from './pricesearch.js';
 import { priceValue } from './wishes.js';
 
@@ -92,15 +92,13 @@ export async function watchPrices(
     if (drop && wish.notify_prices) alerts.push({ userId: wish.reserved_by, wish, from: first, to: price });
   }
 
-  if (pushConfigured(env)) {
-    for (const { userId, wish, from, to } of alerts) {
-      await notifyUser(env, userId, {
-        title: 'Prix en baisse',
-        body: `« ${wish.title} » pour ${wish.owner_name} : ${euros(to)} au lieu de ${euros(from)}.`,
-        url: '/#/cadeaux',
-        tag: `prix-${wish.id}`,
-      }).catch((err) => console.warn('prix', err.message));
-    }
+  for (const { userId, wish, from, to } of alerts) {
+    await deliver(env, userId, {
+      title: 'Prix en baisse',
+      body: `« ${wish.title} » pour ${wish.owner_name} : ${euros(to)} au lieu de ${euros(from)}.`,
+      url: '/#/cadeaux',
+      tag: `prix-${wish.id}`,
+    }).catch((err) => console.warn('prix', err.message));
   }
   return { checked: wishes.length, alerts: alerts.length };
 }

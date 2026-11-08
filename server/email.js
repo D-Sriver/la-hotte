@@ -13,10 +13,12 @@ export function emailLayout({ title, paragraphs, button }) {
     : '';
   return `<!doctype html><html lang="fr"><body style="margin:0;padding:24px;background:#eceef3;font-family:-apple-system,Segoe UI,sans-serif">
 <div style="max-width:520px;margin:0 auto;padding:28px;border-radius:24px;background:#fff">
-<p style="margin:0 0 18px;font-weight:800;font-size:18px;color:#e5383b">🎁 La Hotte</p>
+<p style="margin:0 0 18px;font-weight:800;font-size:18px;color:#d93236">La Hotte</p>
 <h1 style="margin:0 0 16px;font-size:22px;color:#141a2e">${escapeHtml(title)}</h1>${body}${cta}
 </div></body></html>`;
 }
+
+export const emailConfigured = (env) => !!(env.RESEND_API_KEY && env.EMAIL_FROM);
 
 export async function sendEmail(env, { to, subject, html, text }) {
   if (!env.RESEND_API_KEY || !env.EMAIL_FROM)

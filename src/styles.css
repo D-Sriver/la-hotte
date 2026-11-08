@@ -3994,6 +3994,7 @@ h1[tabindex='-1']:focus {
   gap: 0.5rem;
   margin-top: 0.75rem;
 }
+.calendar-panel > .button,
 .share-panel > .button {
   margin-top: 0.75rem;
 }
@@ -4048,4 +4049,8 @@ h1[tabindex='-1']:focus {
 }
 .offline-banner span {
   flex: 1 1 14rem;
+}
+
+.calendar-note {
+  margin-top: 0.6rem;
 }

@@ -19,6 +19,7 @@ const publicProfile = (u) => ({
     prices: !!u.notify_prices,
   },
   share_token: u.share_token || null,
+  calendar_token: u.calendar_token || null,
 });
 
 // AAAA-MM-JJ valide, sinon rien.

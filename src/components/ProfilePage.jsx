@@ -4,6 +4,7 @@ import ProfileForm from './ProfileForm.jsx';
 import LogoutButton from './LogoutButton.jsx';
 import FamiliesPanel from './FamiliesPanel.jsx';
 import NotificationsPanel from './NotificationsPanel.jsx';
+import CalendarPanel from './CalendarPanel.jsx';
 import { profileCompletion } from '../profile.js';
 import { gsap, useGSAP, usePageIntro, MOTION_OK } from '../motion.js';
 import { usePageTitle } from '../usePageTitle.js';
@@ -66,6 +67,8 @@ export default function ProfilePage({ me, onSaved, onFamiliesChanged }) {
       {/* Sur grand écran, à droite de « Mes familles » plutôt qu'en dessous. */}
       <div className="profile-side">
         <NotificationsPanel me={me} onChanged={(notify) => onSaved({ ...me, notify })} />
+
+        <CalendarPanel token={me.calendar_token} onChanged={(calendar_token) => onSaved({ ...me, calendar_token })} />
 
         <section className="tile section">
           <h2 className="section-title">Mon compte</h2>

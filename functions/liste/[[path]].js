@@ -1,6 +1,8 @@
 import { sharedList, sharedPhoto } from '../../server/share.js';
+import { birthdayCalendar } from '../../server/calendar.js';
 
 // Page publique d'une liste partagée hors de la famille : /liste/<jeton>, et ses photos /liste/<jeton>/photo/<n>.
+// Aussi l'agenda des anniversaires : /liste/agenda/<jeton>.ics (même règle Access, sans connexion).
 // Lecture seule, sans script, sans réservations. Hors de l'API : Cloudflare Access doit laisser passer /liste/
 // (règle « Bypass », voir README).
 const HEADERS = {
@@ -87,6 +89,18 @@ const notFound = () =>
 
 export async function onRequestGet({ env, params }) {
   const [token, kind, id] = [].concat(params.path || []);
+  // /liste/agenda/<jeton>.ics : les anniversaires, pour Google Agenda ou Calendrier.
+  if (token === 'agenda' && kind?.endsWith('.ics') && !id) {
+    const ics = await birthdayCalendar(env.DB, kind.slice(0, -4));
+    if (!ics) return new Response('Agenda introuvable', { status: 404, headers: { 'cache-control': 'no-store' } });
+    return new Response(ics, {
+      headers: {
+        'content-type': 'text/calendar; charset=utf-8',
+        'cache-control': 'private, max-age=3600',
+        'x-robots-tag': 'noindex',
+      },
+    });
+  }
   if (kind === 'photo') {
     const row = await sharedPhoto(env.DB, token, Number(id));
     if (!row) return new Response('Introuvable', { status: 404, headers: { 'cache-control': 'no-store' } });

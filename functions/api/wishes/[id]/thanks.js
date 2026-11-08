@@ -1,5 +1,5 @@
 import { json, fail } from '../../../../server/http.js';
-import { notifyLater } from '../../../../server/notify.js';
+import { deliver } from '../../../../server/deliver.js';
 
 // « Merci » depuis le récap de Noël : la personne gâtée remercie ceux qui lui ont offert ce cadeau.
 // Une seule fois par cadeau ; ceux qui ont offert le voient aussi dans « Ce que j'offre ».
@@ -19,11 +19,16 @@ export async function onRequestPost(context) {
   await db.prepare("UPDATE wishes SET thanked_at = datetime('now') WHERE id = ?1").bind(wish.id).run();
   const { results } = await db.prepare('SELECT user_id FROM contributions WHERE wish_id = ?1').bind(wish.id).all();
   const givers = [...new Set([wish.reserved_by, ...results.map((r) => r.user_id)])].filter((id) => id !== data.me.id);
-  notifyLater(context, givers, {
+  // Après la réponse : notification, ou email pour qui n'a pas les notifications.
+  const message = {
     title: `${data.me.name} te dit merci`,
     body: `Pour « ${wish.title} ».`,
     url: '/#/cadeaux',
     tag: `merci-${wish.id}`,
-  });
+  };
+  const work = Promise.all(
+    givers.map((id) => deliver(env, id, message).catch((err) => console.warn('merci', err.message))),
+  );
+  if (context.waitUntil) context.waitUntil(work);
   return json({ ok: true });
 }

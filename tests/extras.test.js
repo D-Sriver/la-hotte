@@ -232,3 +232,44 @@ test('suivi des prix : Google Shopping une fois par semaine quand la boutique bl
   const res = await watchPrices(env, { fetchPrice: async () => 30, searchShopping, now });
   assert.equal(res.alerts, 0);
 });
+
+test('prévenir : par email quand la personne n’a pas les notifications (si l’envoi est configuré)', async () => {
+  const { deliver } = await import('../server/deliver.js');
+  const message = { title: 'Prix en baisse', body: '« Vélo » : 80 €', url: '/#/cadeaux' };
+  assert.equal(await deliver({ DB: db }, bob, message), 0); // ni notifications ni emails : rien
+  const sent = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, init) => (sent.push({ url, body: JSON.parse(init.body) }), new Response('{}'));
+  try {
+    const env = {
+      DB: db,
+      RESEND_API_KEY: 'k',
+      EMAIL_FROM: 'La Hotte <hotte@exemple.fr>',
+      APP_URL: 'https://hotte.test',
+    };
+    assert.equal(await deliver(env, bob, message), 1);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+  assert.equal(sent[0].body.to[0], 'bob@test.fr');
+  assert.match(sent[0].body.text, /https:\/\/hotte\.test\/#\/cadeaux/);
+});
+
+test('agenda : les anniversaires de ses familles, en iCalendar, lien révocable', async () => {
+  const { onRequestPost: calendar } = await import('../functions/api/me/calendar.js');
+  db.sqlite.prepare("UPDATE users SET birthday = '1990-03-14' WHERE id = ?").run(bob);
+  db.sqlite.prepare("UPDATE users SET birthday = '1985-12-02' WHERE id = ?").run(alice);
+  const { body } = await call(calendar, { db, me: alice, body: { enabled: true } });
+  const token = body.calendar_token;
+  const res = await publicList({ env: { DB: db }, params: { path: ['agenda', `${token}.ics`] } });
+  assert.equal(res.headers.get('content-type'), 'text/calendar; charset=utf-8');
+  const ics = await res.text();
+  assert.match(ics, /SUMMARY:Anniversaire de Bob/);
+  assert.match(ics, /DTSTART;VALUE=DATE:\d{4}0314/);
+  assert.match(ics, /RRULE:FREQ=YEARLY/);
+  assert.ok(!ics.includes('Alice')); // pas son propre anniversaire
+  assert.ok(ics.split('\r\n').every((line) => new TextEncoder().encode(line).length <= 75));
+  await call(calendar, { db, me: alice, body: { enabled: false } });
+  const gone = await publicList({ env: { DB: db }, params: { path: ['agenda', `${token}.ics`] } });
+  assert.equal(gone.status, 404);
+});
