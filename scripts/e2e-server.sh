@@ -3,6 +3,9 @@
 # le site construit, et la connexion de dev (?as=email) activée. N'utilise ni la base de prod ni ta base locale.
 set -e
 rm -rf .wrangler/e2e
+# En CI (GitHub Actions), pas de compte Cloudflare : on retire la liaison Workers AI, dont les parcours
+# testés n'ont pas besoin (sinon wrangler exige un jeton d'API pour démarrer).
+if [ -n "$CI" ]; then sed -i '/^\[ai\]/,/^$/d' wrangler.toml; fi
 npx wrangler d1 execute la-hotte --local --persist-to .wrangler/e2e --file=schema.sql >/dev/null
 npx wrangler d1 migrations apply la-hotte --local --persist-to .wrangler/e2e >/dev/null
 npm run build >/dev/null
