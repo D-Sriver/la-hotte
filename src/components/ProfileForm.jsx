@@ -5,18 +5,29 @@ import Icon from './Icon.jsx';
 const FIELDS = [
   {
     key: 'likes',
+    icon: 'heart',
+    tone: 'red',
     label: 'Ce que tu aimes',
     hint: 'Passions, séries, couleurs, marques… plus c’est précis, mieux c’est.',
     rows: 4,
   },
   {
     key: 'owns',
+    icon: 'bag',
+    tone: 'gold',
     label: 'Ce que tu as déjà',
     hint: 'Pour éviter les doublons : collections, matériel, tomes possédés…',
     rows: 3,
   },
-  { key: 'dislikes', label: 'À éviter', hint: 'Ce qui ne te ferait pas plaisir.', rows: 2 },
-  { key: 'sizes', label: 'Tailles', hint: 'Vêtements, pointure, bague…', rows: 1 },
+  {
+    key: 'dislikes',
+    icon: 'ban',
+    tone: 'neutral',
+    label: 'À éviter',
+    hint: 'Ce qui ne te ferait pas plaisir.',
+    rows: 2,
+  },
+  { key: 'sizes', icon: 'ruler', tone: 'green', label: 'Tailles', hint: 'Vêtements, pointure, bague…', rows: 1 },
 ];
 
 const fromProfile = (initial) => ({
@@ -32,8 +43,14 @@ const fromProfile = (initial) => ({
 // quick : premier passage, juste le prénom et les goûts ; le reste se complète plus tard dans Profil.
 // Une rubrique remplie prend le ruban doré : on voit d'un coup d'œil ce que la famille sait déjà.
 const filledClass = (value) => `field${String(value || '').trim() ? ' field-filled' : ''}`;
-const FieldLabel = ({ children }) => (
+// Chaque rubrique a son icône, dans une couleur de la palette (au moins 3:1 sur son fond).
+const FieldLabel = ({ children, icon, tone = 'neutral' }) => (
   <span className="field-label">
+    {icon && (
+      <span className={`field-icon mark-${tone}`} aria-hidden="true">
+        <Icon name={icon} size={17} />
+      </span>
+    )}
     {children}
     <span className="field-done" aria-hidden="true">
       <Icon name="check" size={14} />
@@ -66,12 +83,14 @@ export default function ProfileForm({ initial, submitLabel = 'Enregistrer', quic
   return (
     <form className="form" onSubmit={submit}>
       <label className={filledClass(form.name)}>
-        <FieldLabel>Prénom</FieldLabel>
+        <FieldLabel icon="user">Prénom</FieldLabel>
         <input value={form.name} onChange={set('name')} required maxLength={60} autoComplete="given-name" />
       </label>
       {(quick ? FIELDS.slice(0, 1) : FIELDS).map((f) => (
         <label className={filledClass(form[f.key])} key={f.key}>
-          <FieldLabel>{f.label}</FieldLabel>
+          <FieldLabel icon={f.icon} tone={f.tone}>
+            {f.label}
+          </FieldLabel>
           <span className="field-hint">{f.hint}</span>
           {f.rows > 1 ? (
             <textarea rows={f.rows} value={form[f.key]} onChange={set(f.key)} />
@@ -85,12 +104,16 @@ export default function ProfileForm({ initial, submitLabel = 'Enregistrer', quic
       ) : (
         <>
           <label className={filledClass(form.budget_hint)}>
-            <FieldLabel>Budget idéal</FieldLabel>
+            <FieldLabel icon="wallet" tone="blue">
+              Budget idéal
+            </FieldLabel>
             <span className="field-hint">Une indication pour la famille, ex. « 20 à 50 € ».</span>
             <input value={form.budget_hint} onChange={set('budget_hint')} maxLength={60} />
           </label>
           <label className={filledClass(form.birthday)}>
-            <FieldLabel>Anniversaire</FieldLabel>
+            <FieldLabel icon="cake" tone="pink">
+              Anniversaire
+            </FieldLabel>
             <span className="field-hint">Pour que la famille y pense. Seuls le jour et le mois sont montrés.</span>
             <input
               type="date"

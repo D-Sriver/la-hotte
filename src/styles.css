@@ -57,6 +57,11 @@
   --warn-soft: #ffe0b2;
   --warn-ink: #6b3a00;
   --gold-deep: #d9921a;
+  --mark-red: #d93236; /* icônes des rubriques du profil : au moins 3:1 sur leur fond */
+  --mark-gold: #a86f0c;
+  --mark-green: #17845d;
+  --mark-blue: #3b5bdb;
+  --mark-pink: #c2417f;
   --gold-mark: #a86f0c; /* doré lisible sur fond clair (3,7:1), pour les petites marques */
   --gold-mid: #e4a52a;
   --gold-light: #ffd56b;
@@ -77,6 +82,11 @@
     --line: #272c45;
     --green-soft: #133527;
     --green-ink: #5fd6a0;
+    --mark-red: #ff7b7d;
+    --mark-gold: #f6b93b;
+    --mark-green: #5fd6a0;
+    --mark-blue: #8ea6ff;
+    --mark-pink: #f49ac1;
     --danger: #ff7b7d;
     --cream: #2a2416;
     --night: #26305c;
@@ -3926,4 +3936,32 @@ h1[tabindex='-1']:focus {
   .tile-form .field-filled .field-done {
     color: var(--gold);
   }
+}
+
+/* Icône colorée de chaque rubrique du profil, alignée sur son titre. */
+.tile-form .field-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.field-icon {
+  display: inline-flex;
+}
+.mark-red {
+  color: var(--mark-red);
+}
+.mark-gold {
+  color: var(--mark-gold);
+}
+.mark-green {
+  color: var(--mark-green);
+}
+.mark-blue {
+  color: var(--mark-blue);
+}
+.mark-pink {
+  color: var(--mark-pink);
+}
+.mark-neutral {
+  color: var(--ink-soft);
 }
