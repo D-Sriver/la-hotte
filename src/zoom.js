@@ -61,10 +61,10 @@ export function zoomInto(element, href, { color, target: selector = '[data-zoom-
         width: to.width,
         height: to.height,
         borderRadius: getComputedStyle(target).borderRadius,
-        duration: 0.6,
+        duration: 0.45,
         ease: 'power3.inOut',
       })
-      .to(layer, { opacity: 0, duration: 0.25, ease: 'power1.out' });
+      .to(layer, { opacity: 0, duration: 0.2, ease: 'power1.out' });
   };
 
   gsap
@@ -78,7 +78,7 @@ export function zoomInto(element, href, { color, target: selector = '[data-zoom-
         width: window.innerWidth,
         height: window.innerHeight,
         borderRadius: 0,
-        duration: 0.55,
+        duration: 0.45,
         ease: 'power4.inOut',
       },
       '<0.05',

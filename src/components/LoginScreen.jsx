@@ -98,7 +98,6 @@ export default function LoginScreen({ onLoggedIn }) {
           <br />
           Sans gâcher les surprises.
         </p>
-        <span className="login-snow" />
       </section>
 
       <section className="login-panel">

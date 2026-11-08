@@ -329,7 +329,7 @@ a.tile:active {
   border-radius: var(--r-pill);
   background: rgb(255 255 255 / 0.18);
   font-size: var(--fs-sm);
-  font-weight: 700;
+  font-weight: 600;
 }
 .hero-sub {
   margin-top: 0.6rem;
@@ -526,7 +526,7 @@ a.tile:active {
   background: rgb(20 26 46 / 0.75);
   color: #fff;
   font-size: var(--fs-xs);
-  font-weight: 700;
+  font-weight: 600;
   transform: translateX(-50%);
   pointer-events: none;
   white-space: nowrap;
@@ -774,7 +774,7 @@ a.tile:active {
   background: rgb(255 255 255 / 0.85);
   color: var(--ink-dark);
   font-size: var(--fs-sm);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .profile-side,
@@ -841,7 +841,7 @@ a.tile:active {
   background: rgb(255 255 255 / 0.6);
   color: inherit;
   font-size: var(--fs-sm);
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: none;
 }
 .page-head-chip:active {
@@ -928,7 +928,7 @@ a.tile:active {
   min-height: 40px;
   padding: 0 0.3rem 0 0.7rem;
   border-radius: var(--r-pill);
-  font-weight: 700;
+  font-weight: 600;
   font-size: var(--fs-sm);
   text-decoration: none;
 }
@@ -997,7 +997,7 @@ a.tile:active {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--ink-soft);
 }
 .invite-code {
@@ -1034,7 +1034,7 @@ a.tile:active {
   min-height: 1em;
   color: var(--green-ink);
   font-size: var(--fs-xs);
-  font-weight: 700;
+  font-weight: 600;
 }
 .invite-done:empty {
   display: none;
@@ -1493,64 +1493,6 @@ a.tile:active {
 }
 
 /* Étincelles qui scintillent autour du paquet. */
-.gift3d-sparkle {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  pointer-events: none;
-  background: #fff;
-  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
-  opacity: 0;
-  animation: sparkle 2.6s ease-in-out infinite;
-}
-.gift3d-sparkle:nth-of-type(1) {
-  top: 8%;
-  left: 10%;
-}
-.gift3d-sparkle:nth-of-type(2) {
-  top: 18%;
-  right: 6%;
-  width: 9px;
-  height: 9px;
-  animation-delay: 0.6s;
-}
-.gift3d-sparkle:nth-of-type(3) {
-  top: 52%;
-  left: 2%;
-  width: 8px;
-  height: 8px;
-  animation-delay: 1.2s;
-  background: var(--gold-shine);
-}
-.gift3d-sparkle:nth-of-type(4) {
-  top: 46%;
-  right: 0;
-  animation-delay: 1.8s;
-  background: var(--gold-shine);
-}
-.gift3d-sparkle:nth-of-type(5) {
-  top: 0;
-  left: 52%;
-  width: 10px;
-  height: 10px;
-  animation-delay: 2.2s;
-}
-@keyframes sparkle {
-  0%,
-  100% {
-    opacity: 0;
-    transform: scale(0.3) rotate(0deg);
-  }
-  40% {
-    opacity: 1;
-    transform: scale(1) rotate(90deg);
-  }
-  70% {
-    opacity: 0;
-    transform: scale(0.5) rotate(160deg);
-  }
-}
-
 .gift3d-shadow {
   position: absolute;
   bottom: 4px;
@@ -1832,7 +1774,7 @@ a.tile:active {
   background: var(--bg);
   font-family: var(--font-body);
   font-size: var(--fs-sm);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.7rem;
   text-align: center;
   font-variant-numeric: tabular-nums;
@@ -1985,7 +1927,7 @@ a.tile:active {
 .price {
   margin-right: 0.45rem;
   color: var(--ink);
-  font-weight: 700;
+  font-weight: 600;
 }
 .section:has(form.card) .empty-inline {
   display: none;
@@ -2012,7 +1954,7 @@ a.tile:active {
   padding: 0.15rem 0.55rem;
   border-radius: var(--r-pill);
   font-size: var(--fs-xs);
-  font-weight: 700;
+  font-weight: 600;
 }
 .badge-secret {
   background: var(--pink);
@@ -2134,7 +2076,7 @@ a.tile:active {
   box-shadow: 0 1px 2px rgb(20 26 46 / 0.06);
 }
 .chip strong {
-  font-weight: 700;
+  font-weight: 600;
 }
 .chip-dot {
   display: grid;
@@ -2217,7 +2159,7 @@ a.tile:active {
   width: 100%;
   min-height: 52px;
   font: inherit;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--ink);
   background: var(--bg);
   border: 2px dashed var(--line);
@@ -2308,7 +2250,7 @@ a.tile:active {
 }
 .text-link {
   color: var(--gold);
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: none;
 }
 .text-link:hover {
@@ -2359,7 +2301,7 @@ a.tile:active {
 }
 .idea-history summary {
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 600;
   color: rgb(255 255 255 / 0.85);
 }
 .idea-history .count {
@@ -2392,7 +2334,7 @@ a.tile:active {
   gap: 0.35rem;
 }
 .field-label {
-  font-weight: 700;
+  font-weight: 600;
   font-size: var(--fs-sm);
 }
 .field-hint {
@@ -2511,7 +2453,7 @@ textarea:focus {
   min-height: 48px;
   padding: 0.7rem 1.35rem;
   font: inherit;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--tile);
   background: var(--ink);
   border: 0;
@@ -2894,7 +2836,7 @@ textarea:focus {
 .code-done {
   min-height: 1.1em;
   font-size: var(--fs-xs);
-  font-weight: 700;
+  font-weight: 600;
 }
 .appbar-start {
   display: flex;
@@ -2921,7 +2863,7 @@ textarea:focus {
   background: transparent;
   color: inherit;
   font: inherit;
-  font-weight: 700;
+  font-weight: 600;
   font-size: var(--fs-sm);
   text-overflow: ellipsis;
   cursor: pointer;
@@ -2953,7 +2895,7 @@ textarea:focus {
   background: transparent;
   color: var(--ink-soft);
   font: inherit;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition:
     background-color 200ms ease,
@@ -2967,7 +2909,7 @@ textarea:focus {
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  font-weight: 700;
+  font-weight: 600;
 }
 .families {
   display: grid;
@@ -2990,7 +2932,7 @@ textarea:focus {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-weight: 700;
+  font-weight: 600;
   font-size: var(--fs-md);
 }
 .family-code {
@@ -3088,28 +3030,6 @@ textarea:focus {
   text-wrap: balance;
 }
 /* Neige qui tombe doucement derrière le paquet. */
-.login-snow {
-  position: absolute;
-  inset: -100px 0 0;
-  pointer-events: none;
-  opacity: 0.55;
-  background-image:
-    radial-gradient(circle, #fff 0 1.5px, transparent 2.5px), radial-gradient(circle, #fff 0 1px, transparent 2px),
-    radial-gradient(circle, rgb(255 255 255 / 0.7) 0 2px, transparent 3px);
-  background-size:
-    90px 90px,
-    60px 60px,
-    140px 140px;
-  background-position:
-    0 0,
-    30px 20px,
-    50px 70px;
-}
-@keyframes snow {
-  to {
-    transform: translateY(100px);
-  }
-}
 .login-panel {
   display: grid;
   align-content: center;
@@ -3150,7 +3070,7 @@ textarea:focus {
   border-top: 3px solid var(--line);
   color: var(--ink-soft);
   font-size: var(--fs-sm);
-  font-weight: 700;
+  font-weight: 600;
   counter-increment: step;
 }
 .login-steps li::before {
@@ -3213,7 +3133,7 @@ textarea:focus {
   background: none;
   color: var(--ink);
   font: inherit;
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
@@ -3328,7 +3248,7 @@ textarea:focus {
 }
 .chat-author {
   font-size: var(--fs-xs);
-  font-weight: 700;
+  font-weight: 600;
   color: var(--ink-soft);
 }
 .chat-body {
@@ -3476,7 +3396,7 @@ textarea:focus {
   background: rgb(255 255 255 / 0.85);
   color: var(--ink-dark);
   font-size: var(--fs-xs);
-  font-weight: 700;
+  font-weight: 600;
   justify-self: start;
   align-self: start;
 }
@@ -3748,7 +3668,7 @@ a.wish-photo:not(.is-framed):active img {
   gap: 0.15rem;
 }
 .switch-label {
-  font-weight: 700;
+  font-weight: 600;
 }
 .switch-row input.switch {
   appearance: none;

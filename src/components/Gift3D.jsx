@@ -15,7 +15,7 @@ function Faces({ names }) {
   ]);
 }
 
-// Un paquet cadeau en vraie 3D CSS : il flotte et tourne seul, s'incline vers le pointeur,
+// Un paquet cadeau en vraie 3D CSS : il s'incline vers le pointeur,
 // tremble d'impatience au survol, et sert de porte d'entrée vers « Ma liste » :
 // au clic, il explose en confettis, puis on plonge dedans.
 // decorative : simple décor (écran de connexion), sans clic ni lien.
@@ -50,7 +50,7 @@ export default function Gift3D({ decorative = false }) {
     burst(scene.current);
     setTimeout(() => burst(scene.current), 90);
     // On laisse le paquet exploser avant de plonger dedans.
-    setTimeout(() => zoomInto(scene.current, '#/moi', { color: '#f6b93b' }), 480);
+    setTimeout(() => zoomInto(scene.current, '#/moi', { color: '#f6b93b' }), 300);
   };
 
   const Tag = decorative ? 'div' : 'a';

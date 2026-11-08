@@ -138,7 +138,7 @@ export default function IdeasPanel({ person, onAdded }) {
         </div>
         <div className="form-actions">
           <button className="button button-accent" disabled={state.loading}>
-            <Icon name={state.loading ? 'search' : 'sparkle'} size={18} />
+            <Icon name={state.loading ? 'search' : 'gift'} size={18} />
             {state.loading ? words.busy : words.button}
           </button>
         </div>
