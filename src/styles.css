@@ -1933,8 +1933,18 @@ a.tile:active {
   flex: 1 1 10rem;
   min-width: 0;
 }
-.wish-actions:empty {
+.wish-actions:empty,
+.wish-steps:empty,
+.wish-tools:empty {
   display: none;
+}
+/* Étapes du cadeau puis outils : deux groupes qui restent ensemble quand la carte rétrécit. */
+.wish-steps,
+.wish-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
 }
 .wish-title {
   font-weight: 600;
@@ -3612,10 +3622,6 @@ a.wish-photo:not(.is-framed):active img {
   .wish-actions .icon-button {
     flex: 0 0 44px;
   }
-  .wish-actions .chat-toggle {
-    flex: 1 1 100%;
-    justify-content: center;
-  }
   .wish-actions .button-quiet {
     background: var(--tile);
   }
@@ -3962,4 +3968,38 @@ h1[tabindex='-1']:focus {
 }
 .share-panel > .button {
   margin-top: 0.75rem;
+}
+
+/* Carte étroite (colonne de droite, téléphone) : les étapes sur une rangée de boutons égaux,
+   les outils dessous (discuter, gérer). */
+.wish {
+  container-type: inline-size;
+}
+@container (max-width: 34rem) {
+  .wish-actions {
+    flex: 1 1 100%;
+    display: grid;
+    justify-content: stretch;
+    gap: 0.5rem;
+    margin-left: 0;
+  }
+  .wish-steps .button {
+    flex: 1 1 0;
+    justify-content: center;
+    min-height: 44px;
+  }
+  .wish-steps .confirm-group {
+    flex: 1 1 100%;
+  }
+  .wish-tools .button {
+    flex: 0 0 auto;
+    min-height: 44px;
+  }
+  .wish-tools .chat-toggle {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+  .wish-tools .more {
+    flex: 0 0 auto;
+  }
 }

@@ -62,14 +62,25 @@ test('Carol lance une cagnotte, Bob participe, Alice ne voit rien', async ({ bro
   const bob = await browser.newPage();
   await open(bob, 'bob', `p/${ids.alice}`);
   await bob.locator('.wish', { hasText: 'Appareil photo' }).getByRole('button', { name: 'Je participe' }).click();
-  await expect(
-    bob.locator('.wish', { hasText: 'Appareil photo' }).getByRole('button', { name: 'Je me retire' }),
-  ).toBeVisible();
+  // Se retirer est rangé dans « Gérer ».
+  const pot = bob.locator('.wish', { hasText: 'Appareil photo' });
+  await pot.getByRole('button', { name: /Plus d’actions/ }).click();
+  await expect(pot.getByRole('menuitem', { name: 'Me retirer de la cagnotte' })).toBeVisible();
 
   const alice = await browser.newPage();
   await open(alice, 'alice', 'moi');
   await expect(alice.getByText('Appareil photo')).toBeVisible();
   await expect(alice.getByText(/Cagnotte|Carol|Bob/)).toHaveCount(0);
+});
+
+test('Bob annule sa réservation depuis « Gérer », puis la reprend', async ({ page }) => {
+  await open(page, 'bob', `p/${ids.alice}`);
+  const velo = page.locator('.wish', { hasText: 'Vélo rouge' });
+  await velo.getByRole('button', { name: /Plus d’actions/ }).click();
+  await velo.getByRole('menuitem', { name: 'Annuler ma réservation' }).click();
+  await expect(velo.getByRole('button', { name: 'Je réserve' })).toBeVisible();
+  await velo.getByRole('button', { name: 'Je réserve' }).click();
+  await expect(velo.getByText('C’est toi qui l’offres')).toBeVisible();
 });
 
 test('« Ce que j’offre » : Bob voit son vélo et le marque acheté', async ({ page }) => {

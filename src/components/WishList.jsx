@@ -115,7 +115,7 @@ function MyAmount({ wish, busy, run }) {
   );
 }
 
-// Les boutons pour offrir le cadeau de quelqu'un d'autre, selon où il en est.
+// Les étapes pour offrir le cadeau de quelqu'un d'autre, selon où il en est : réserver, acheter, offrir.
 function GiftActions({ wish, busy, run }) {
   // Lancer une cagnotte engage (on achète, la famille est prévenue) : on le dit avant, dans la page.
   const [confirmingGroup, setConfirmingGroup] = useState(false);
@@ -186,15 +186,14 @@ function GiftActions({ wish, busy, run }) {
   if (wish.group_gift) {
     // Seul l'organisateur achète : lui seul coche « acheté » puis « offert ».
     if (wish.removed && !wish.participating) return null;
-    return wish.participating ? (
-      <>
-        {wish.reserved_by_me && givenButton}
-        {wish.reserved_by_me && boughtButton}
-        <button className="button button-small button-leave" disabled={busy} onClick={act('leave')}>
-          Je me retire
-        </button>
-      </>
-    ) : (
+    if (wish.participating)
+      return wish.reserved_by_me ? (
+        <>
+          {boughtButton}
+          {givenButton}
+        </>
+      ) : null;
+    return (
       <button className="button button-small button-go" disabled={busy} onClick={act('join', true)}>
         <Icon name="plus" size={16} />
         Je participe
@@ -204,11 +203,8 @@ function GiftActions({ wish, busy, run }) {
   if (wish.reserved_by_me) {
     return (
       <>
-        {givenButton}
         {boughtButton}
-        <button className="button button-small button-leave" disabled={busy} onClick={act('reserve')}>
-          Annuler
-        </button>
+        {givenButton}
       </>
     );
   }
@@ -478,6 +474,7 @@ function WishRow({ wish, onChanged }) {
   }
 
   const canDelete = wish.mine || wish.can_delete;
+  const leave = !wish.mine && (wish.group_gift ? wish.participating : wish.reserved_by_me);
   const host = wish.url && hostOf(wish.url);
   // Grisé seulement quand il n'y a plus rien à faire pour moi dessus.
   const taken = wish.reserved && !wish.reserved_by_me && !wish.group_gift;
@@ -535,7 +532,7 @@ function WishRow({ wish, onChanged }) {
             {!wish.removed && wish.edited_after_reservation && (
               <span className="badge badge-warn">Modifiée depuis la réservation</span>
             )}
-            {wish.bought && (
+            {wish.bought && !wish.reserved_by_me && (
               <span className="badge badge-bought">
                 <Icon name="bag" size={13} />
                 Acheté
@@ -573,50 +570,63 @@ function WishRow({ wish, onChanged }) {
           </button>
         </div>
       )}
+      {/* Deux rangées : les étapes du cadeau (réserver, acheté, offert), puis les outils (discuter, gérer). */}
       <div className="wish-actions">
-        {!wish.mine && <GiftActions wish={wish} busy={busy} run={run} />}
         {!wish.mine && (
-          // Discussion entre ceux qui offrent : un vrai bouton avec un texte, pas une icône à deviner.
-          <button
-            className={`button button-small button-quiet chat-toggle${chatOpen ? ' chat-toggle-open' : ''}`}
-            aria-expanded={chatOpen}
-            title="Discussion secrète entre ceux qui offrent : la personne gâtée ne la voit jamais"
-            onClick={() => setChatOpen(!chatOpen)}
-          >
-            <Icon name="chat" size={16} />
-            {chatOpen
-              ? 'Fermer'
-              : messageCount > 0
-                ? `${messageCount} message${messageCount > 1 ? 's' : ''}`
-                : 'Discuter en secret'}
-            {!chatOpen && <Icon name="lock" size={13} />}
-          </button>
+          <div className="wish-steps">
+            <GiftActions wish={wish} busy={busy} run={run} />
+          </div>
         )}
-        {(wish.can_edit || canDelete || wish.mine) && (
-          <MoreMenu
-            label={`Plus d’actions pour « ${wish.title} »`}
-            disabled={busy}
-            items={[
-              wish.can_edit && { label: 'Modifier', icon: 'pencil', onSelect: () => setEditing(true) },
-              wish.mine && {
-                label: 'Reçu, merci',
-                icon: 'check',
-                onSelect: () =>
-                  run(
-                    () => api.setReceived(wish.id, true),
-                    () => burst(row.current),
-                    true,
-                  ),
-              },
-              canDelete && {
-                label: 'Supprimer',
-                icon: 'trash',
-                danger: true,
-                onSelect: () => setConfirmingDelete(true),
-              },
-            ]}
-          />
-        )}
+        <div className="wish-tools">
+          {!wish.mine && (
+            // Discussion entre ceux qui offrent : un vrai bouton avec un texte, pas une icône à deviner.
+            <button
+              className={`button button-small button-quiet chat-toggle${chatOpen ? ' chat-toggle-open' : ''}`}
+              aria-expanded={chatOpen}
+              title="Discussion secrète entre ceux qui offrent : la personne gâtée ne la voit jamais"
+              onClick={() => setChatOpen(!chatOpen)}
+            >
+              <Icon name="chat" size={16} />
+              {chatOpen
+                ? 'Fermer'
+                : messageCount > 0
+                  ? `${messageCount} message${messageCount > 1 ? 's' : ''}`
+                  : 'Discuter en secret'}
+              {!chatOpen && <Icon name="lock" size={13} />}
+            </button>
+          )}
+          {(wish.can_edit || canDelete || wish.mine || leave) && (
+            <MoreMenu
+              label={`Plus d’actions pour « ${wish.title} »`}
+              disabled={busy}
+              items={[
+                wish.can_edit && { label: 'Modifier', icon: 'pencil', onSelect: () => setEditing(true) },
+                // Se désengager : rare, donc rangé ici plutôt qu'en bouton à côté des étapes.
+                leave && {
+                  label: wish.group_gift ? 'Me retirer de la cagnotte' : 'Annuler ma réservation',
+                  icon: 'back',
+                  onSelect: () => run(() => api.gift(wish.id, wish.group_gift ? 'leave' : 'reserve')),
+                },
+                wish.mine && {
+                  label: 'Reçu, merci',
+                  icon: 'check',
+                  onSelect: () =>
+                    run(
+                      () => api.setReceived(wish.id, true),
+                      () => burst(row.current),
+                      true,
+                    ),
+                },
+                canDelete && {
+                  label: 'Supprimer',
+                  icon: 'trash',
+                  danger: true,
+                  onSelect: () => setConfirmingDelete(true),
+                },
+              ]}
+            />
+          )}
+        </div>
       </div>
     </li>
   );
