@@ -71,6 +71,23 @@ Une base créée avant ce système (migrations 001 à 010 lancées à la main) d
 
 `npm run db:reset:lists` efface toutes les listes en ligne : ce n’est pas une migration, il ne se lance qu’à la main.
 
+## Surveiller et sauvegarder
+
+- **Erreurs** : `npm run errors` affiche les 30 dernières (navigateur et serveur). Avec le secret `ADMIN_EMAIL`
+  sur le Worker des rappels (`npx wrangler secret put ADMIN_EMAIL --config reminders/wrangler.toml`),
+  l'administrateur reçoit chaque matin une notification s'il y en a eu.
+- **Sauvegardes** : chaque nuit dans KV, 30 jours. `npm run backup:list`, puis
+  `npm run backup:restore -- AAAA-MM-JJ` écrit un fichier SQL à relire avant de l'exécuter (il remplace toute la base).
+  Pour un retour en arrière récent, D1 a aussi son Time Travel : `npx wrangler d1 time-travel restore la-hotte --timestamp=…`.
+- **Tests dans le navigateur** : `npm run test:e2e` (Playwright avec le Chrome installé, base locale neuve).
+
+## Liste partagée hors de la famille
+
+Chacun peut créer, dans « Ma liste », un lien en lecture seule (`/liste/<jeton>`) : ses envies, sans réservations ni
+idées secrètes. Avec Cloudflare Access, ajoute une application « Bypass » pour le chemin `la-hotte.pages.dev/liste`
+(Zero Trust → Access → Applications → Self-hosted, chemin `liste`, politique Action « Bypass », Include « Everyone »),
+sinon les invités tombent sur l'écran de connexion.
+
 ## Coût
 
 Tout est gratuit à cette échelle. Workers AI offre 10 000 « neurons » par jour sur le plan gratuit.
