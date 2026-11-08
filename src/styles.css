@@ -63,12 +63,7 @@
   --gold-pale: #fff1b8;
   --gold-glow: #fff8d6;
   --gold-halo: #fff4c2;
-  --cream-strong: #fff1cc;
-  --peach: #ffe9d6;
   --pine: #0f5c40;
-  --tint-red: #ffe1e1; /* fonds pastel des rubriques du profil (mode clair) */
-  --tint-pink: #fde0ec;
-  --tint-blue: #e1e7ff;
   color-scheme: light;
 }
 
@@ -2776,33 +2771,22 @@ textarea:focus {
   padding: 0.8rem 0.9rem;
   border-radius: var(--r-inner);
   background: var(--bg);
+  box-shadow: inset 0 0 0 1px var(--line);
   gap: 0.3rem;
 }
-.tile-form .field:nth-child(1) {
-  background: var(--tint-red);
-  grid-column: 1 / -1;
+/* Libellé et aide en haut, le champ prend la place restante : les cases d'une même rangée finissent ensemble. */
+.tile-form .field:has(.field-hint) {
+  grid-template-rows: auto auto 1fr;
 }
+.tile-form .field:nth-child(1),
 .tile-form .field:nth-child(2) {
-  background: var(--cream-strong);
   grid-column: 1 / -1;
-}
-.tile-form .field:nth-child(3) {
-  background: var(--green-soft);
-}
-.tile-form .field:nth-child(4) {
-  background: var(--tint-pink);
-}
-.tile-form .field:nth-child(5) {
-  background: var(--tint-blue);
-}
-.tile-form .field:nth-child(6) {
-  background: var(--peach);
 }
 .tile-form .field-label {
   color: var(--ink-dark);
 }
 .tile-form .field-hint {
-  color: #4d5468;
+  color: var(--ink-soft);
 }
 .tile-form input,
 .tile-form textarea {
@@ -2826,26 +2810,8 @@ textarea:focus {
   }
 }
 @media (prefers-color-scheme: dark) {
-  .tile-form .field:nth-child(n) {
-    background: rgb(255 255 255 / 0.06);
-  }
-  .tile-form .field:nth-child(1) {
-    box-shadow: inset 4px 0 0 var(--red);
-  }
-  .tile-form .field:nth-child(2) {
-    box-shadow: inset 4px 0 0 var(--gold);
-  }
-  .tile-form .field:nth-child(3) {
-    box-shadow: inset 4px 0 0 var(--green);
-  }
-  .tile-form .field:nth-child(4) {
-    box-shadow: inset 4px 0 0 var(--pink);
-  }
-  .tile-form .field:nth-child(5) {
-    box-shadow: inset 4px 0 0 #6d8bff;
-  }
-  .tile-form .field:nth-child(6) {
-    box-shadow: inset 4px 0 0 #ff9d5c;
+  .tile-form .field {
+    background: rgb(255 255 255 / 0.04);
   }
   .tile-form .field-label {
     color: var(--ink);
