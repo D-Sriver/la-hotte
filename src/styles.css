@@ -2452,6 +2452,9 @@ a.tile:active {
 }
 .idea-history .count {
   margin-left: 0.4rem;
+  /* Le panneau est sombre dans les deux thèmes : un fond clair rendait le chiffre blanc illisible. */
+  background: rgb(255 255 255 / 0.16);
+  color: #fff;
 }
 .loading-line {
   display: flex;
