@@ -211,6 +211,9 @@ p {
     bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
     z-index: var(--z-menu);
     transform: translateX(-50%);
+    /* left: 50% ne laisse que la moitié de l'écran : sans cela, la barre se serre et « Ma liste » passe à la ligne. */
+    width: max-content;
+    max-width: calc(100vw - 16px);
     padding: 6px;
     box-shadow:
       0 10px 30px -8px rgb(20 26 46 / 0.35),
@@ -224,9 +227,27 @@ p {
     padding: 0 0.6rem;
     font-size: var(--fs-xs);
     justify-content: center;
+    white-space: nowrap;
   }
   .page {
     padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px) + 2rem) !important;
+  }
+}
+
+/* Très petit écran (≤ 429 px) : icônes seules, le texte reste lu par les lecteurs d'écran. */
+@media (max-width: 429px) {
+  .tab span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .tab {
+    min-width: 56px;
   }
 }
 
@@ -1807,8 +1828,10 @@ a.tile:active {
 
 .section-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
   margin-bottom: 0.75rem;
 }
 .section-title {
@@ -1955,9 +1978,9 @@ a.tile:active {
   background: var(--bg);
 }
 .view-switch button {
-  min-width: 44px;
+  min-width: 40px;
   min-height: 36px;
-  padding: 0 0.7rem;
+  padding: 0 0.6rem;
   border: 0;
   border-radius: var(--r-pill);
   background: transparent;
