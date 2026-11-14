@@ -32,6 +32,8 @@ npm run lint                     # ESLint (erreurs réelles, règles des hooks R
 npm run format                   # Prettier (mise en forme du code)
 ```
 
+`npm run db:reset:local` : repart d'une base locale neuve (à lancer si le site local plante sur « no such column »).
+
 Ajoute `?as=bjarni@test.fr` à l'URL pour jouer un autre membre (uniquement avec `DEV_MODE=1`).
 
 ## Mettre en ligne

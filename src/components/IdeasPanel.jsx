@@ -90,6 +90,23 @@ export default function IdeasPanel({ person, onAdded }) {
     }
   }
 
+  const [verifying, setVerifying] = useState({});
+  const [verifyError, setVerifyError] = useState('');
+
+  // « Vérifier en boutique » : une recherche pour retrouver le produit, le résultat reste sur l'idée.
+  async function verify(idea) {
+    setVerifyError('');
+    setVerifying((prev) => ({ ...prev, [idea.id]: true }));
+    try {
+      const { verified, found_price, found_shop, found_url } = await api.verifyIdea(idea.id);
+      patch(idea.id, { verified, found_price, found_shop, found_url });
+    } catch (err) {
+      setVerifyError(err.message);
+    } finally {
+      setVerifying((prev) => ({ ...prev, [idea.id]: false }));
+    }
+  }
+
   async function rate(idea, value) {
     const rating = idea.rating === value ? null : value;
     patch(idea.id, { rating });
@@ -101,7 +118,16 @@ export default function IdeasPanel({ person, onAdded }) {
   }
 
   const card = (idea) => (
-    <IdeaCard key={idea.id} idea={idea} forMe={forMe} saving={!!saving[idea.id]} onKeep={keep} onRate={rate} />
+    <IdeaCard
+      key={idea.id}
+      idea={idea}
+      forMe={forMe}
+      saving={!!saving[idea.id]}
+      checking={!!verifying[idea.id]}
+      onKeep={keep}
+      onRate={rate}
+      onVerify={verify}
+    />
   );
   const older = history.filter((idea) => !state.ideas.some((i) => i.id === idea.id));
 
@@ -155,9 +181,9 @@ export default function IdeasPanel({ person, onAdded }) {
           {pick(words.lines)}
         </p>
       )}
-      {state.error && (
+      {(state.error || verifyError) && (
         <p className="error" role="alert">
-          {state.error}
+          {state.error || verifyError}
         </p>
       )}
       {state.remaining !== null && <p className="muted small">Recherches restantes aujourd’hui : {state.remaining}</p>}
@@ -186,17 +212,56 @@ export default function IdeasPanel({ person, onAdded }) {
   );
 }
 
-function IdeaCard({ idea, forMe, saving, onKeep, onRate }) {
+function IdeaCard({ idea, forMe, saving, checking, onKeep, onRate, onVerify }) {
   return (
     <li className="idea">
       <div className="idea-body">
         <p className="wish-title">{idea.title}</p>
         <p className="wish-meta">{[idea.price, idea.shop].filter(Boolean).join(', ')}</p>
+        <p className="idea-badges">
+          {idea.verified === 1 ? (
+            <span className="idea-badge idea-badge-found">
+              <Icon name="check" size={13} />
+              Trouvé en boutique
+            </span>
+          ) : idea.verified === 0 ? (
+            <span className="idea-badge idea-badge-missing">Introuvable en boutique</span>
+          ) : idea.certain ? (
+            <span className="idea-badge">Produit connu</span>
+          ) : (
+            <span className="idea-badge">À vérifier</span>
+          )}
+        </p>
+        {idea.verified === 1 && (
+          <p className="idea-found">
+            {[idea.found_shop && `Chez ${idea.found_shop}`, idea.found_price].filter(Boolean).join(' · ')}
+            {idea.found_url && (
+              <>
+                {' '}
+                <a className="text-link" href={idea.found_url} target="_blank" rel="noopener noreferrer">
+                  Voir
+                </a>
+              </>
+            )}
+          </p>
+        )}
         {idea.why && <p className="idea-why">{idea.why}</p>}
         <div className="idea-actions">
-          <a className="text-link" href={idea.search_url} target="_blank" rel="noopener noreferrer">
-            Chercher en ligne
-          </a>
+          <span className="idea-links">
+            <a className="text-link" href={idea.search_url} target="_blank" rel="noopener noreferrer">
+              Chercher en ligne
+            </a>
+            {idea.verified === null && (
+              <button
+                type="button"
+                className="text-link idea-verify"
+                disabled={checking}
+                onClick={() => onVerify(idea)}
+              >
+                {checking ? 'Vérification…' : 'Vérifier en boutique'}
+              </button>
+            )}
+          </span>
           <span className="idea-buttons">
             <button
               className={`idea-rate${idea.rating === 1 ? ' is-on' : ''}`}

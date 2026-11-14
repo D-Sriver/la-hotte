@@ -62,3 +62,11 @@ export function crossSiteProblem(request) {
   if (type && !type.toLowerCase().startsWith('application/json')) return 'Requête refusée : format inattendu.';
   return null;
 }
+
+// Un jour saisi (AAAA-MM-JJ) devenu une date de base de données ; null si ce n'est pas un vrai jour.
+export function cleanDay(value) {
+  const day = String(value ?? '');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return null;
+  const parsed = new Date(`${day}T12:00:00Z`);
+  return Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== day ? null : `${day} 12:00:00`;
+}

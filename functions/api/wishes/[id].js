@@ -1,11 +1,11 @@
-import { json, fail, readJson, clean, cleanUrl } from '../../../server/http.js';
+import { json, fail, readJson, clean, cleanUrl, cleanDay } from '../../../server/http.js';
 import { checkPhotos, savePhotos } from '../../../server/photos.js';
 
 // Modifier : seulement ce qu'on a ajouté soi-même.
 export async function onRequestPut({ request, env, data, params }) {
   const body = await readJson(request);
   if (!body) return fail(400, 'Données illisibles.');
-  const wish = await env.DB.prepare('SELECT id, owner_id, added_by, removed_at FROM wishes WHERE id = ?1')
+  const wish = await env.DB.prepare('SELECT id, owner_id, added_by, removed_at, received_at FROM wishes WHERE id = ?1')
     .bind(Number(params.id))
     .first();
   if (!wish || wish.added_by !== data.me.id || wish.removed_at)
@@ -28,6 +28,12 @@ export async function onRequestPut({ request, env, data, params }) {
   )
     .bind(title, cleanUrl(body.url), clean(body.price, 40), clean(body.note, 500), favorite, wish.id)
     .run();
+  // Cadeau déjà reçu : de la part de qui, et à quelle date.
+  if (wish.received_at && wish.owner_id === data.me.id) {
+    await env.DB.prepare('UPDATE wishes SET received_from = ?1, received_at = COALESCE(?2, received_at) WHERE id = ?3')
+      .bind(clean(body.received_from, 60) || null, cleanDay(body.received_on), wish.id)
+      .run();
+  }
   if (body.photos !== undefined) {
     const error = await savePhotos(env.DB, wish.id, body.photos);
     if (error) return fail(400, error);

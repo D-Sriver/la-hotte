@@ -6,6 +6,7 @@ import Skeleton from './Skeleton.jsx';
 import WishList from './WishList.jsx';
 import AddWishForm from './AddWishForm.jsx';
 import IdeasPanel from './IdeasPanel.jsx';
+import { useListView, ViewSwitch } from './ListView.jsx';
 import { usePageIntro } from '../motion.js';
 import { daysUntilBirthday, toneOf } from '../fun.js';
 import { zoomBackHome } from '../zoom.js';
@@ -22,6 +23,7 @@ const PROFILE_ROWS = [
 export default function PersonPage({ id }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
+  const { view, choose, wide } = useListView();
 
   usePageTitle(data?.person?.name);
   const load = useCallback(() => {
@@ -97,6 +99,7 @@ export default function PersonPage({ id }) {
           <h2 className="section-title">
             Sa liste<span className="count">{wishes.length}</span>
           </h2>
+          <ViewSwitch view={view} wide={wide} onChoose={choose} />
         </div>
         {!person.is_me && (
           <p className="notice">
@@ -108,6 +111,7 @@ export default function PersonPage({ id }) {
           wishes={wishes}
           emptyText="Rien pour l’instant. Des idées t’attendent juste en dessous."
           onChanged={load}
+          view={view}
         />
         <AddWishForm ownerId={person.id} forSomeoneElse onAdded={load} />
       </section>

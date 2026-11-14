@@ -19,7 +19,7 @@ const shopName = (host) =>
   );
 
 // Plafond global (palier gratuit SerpApi) et plafond par famille (pour partager équitablement).
-async function underMonthlyLimit(env, familyId) {
+export async function underMonthlyLimit(env, familyId) {
   const limit = Number(env.PRICE_SEARCHES_PER_MONTH) || 200;
   const familyLimit = Number(env.FAMILY_PRICE_SEARCHES_PER_MONTH) || 40;
   const row = await env.DB.prepare(
@@ -72,4 +72,66 @@ export async function searchPrice(env, title, pageUrl, familyId) {
   const data = await response.json();
   const results = [...(data.shopping_results || []), ...(data.inline_shopping_results || [])];
   return pickPrice(results, new URL(pageUrl).hostname);
+}
+
+const STOP_WORDS = new Set([
+  'pour',
+  'avec',
+  'dans',
+  'les',
+  'des',
+  'une',
+  'the',
+  'and',
+  'officiel',
+  'officielle',
+  'acheter',
+]);
+
+// Les résultats dont le titre reprend l'essentiel de ce qu'on cherche (sinon Google remplit avec autre chose).
+export function matchingResults(results, query) {
+  const words = String(query || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .split(/[^a-z0-9]+/)
+    .filter((w) => w.length >= 3 && !STOP_WORDS.has(w));
+  if (!words.length) return [];
+  const needed = Math.ceil(words.length * 0.6);
+  return results.filter((r) => {
+    const title = normalize(r.title);
+    return words.filter((w) => title.includes(w)).length >= needed;
+  });
+}
+
+/**
+ * Le produit d'une idée de l'IA existe-t-il en boutique ? Une recherche Google Shopping (1 du quota mensuel).
+ * Renvoie { status: 'unavailable' | 'limit' | 'none' | 'found', price, shop, url }.
+ */
+export async function verifyProduct(env, query, familyId) {
+  if (!env.SERPAPI_KEY) return { status: 'unavailable' };
+  if (!(await underMonthlyLimit(env, familyId))) return { status: 'limit' };
+  await env.DB.prepare('INSERT INTO price_searches (family_id) VALUES (?1)')
+    .bind(familyId ?? null)
+    .run();
+  const params = new URLSearchParams({
+    engine: 'google_shopping',
+    q: query,
+    gl: 'fr',
+    hl: 'fr',
+    google_domain: 'google.fr',
+    api_key: env.SERPAPI_KEY,
+  });
+  const response = await fetch(`https://serpapi.com/search.json?${params}`, { signal: AbortSignal.timeout(12000) });
+  if (!response.ok) throw new Error(`SerpApi ${response.status}`);
+  const data = await response.json();
+  const found = matchingResults([...(data.shopping_results || []), ...(data.inline_shopping_results || [])], query);
+  if (!found.length) return { status: 'none' };
+  const picked = pickPrice(found, '');
+  return {
+    status: 'found',
+    price: picked?.price || null,
+    shop: picked?.source || found[0].source || null,
+    url: found[0].product_link || found[0].link || null,
+  };
 }

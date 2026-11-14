@@ -6,6 +6,7 @@ import PhotoFramer from './PhotoFramer.jsx';
 import { formatFrame, parseFrame } from '../photoFrame.js';
 
 const EMPTY = { title: '', url: '', price: '', note: '', favorite: false };
+const today = () => new Date().toLocaleDateString('sv-SE'); // AAAA-MM-JJ, à l'heure de l'appareil
 
 // Ce qui a été tapé dans « Lien », rendu utilisable : « amazon.fr/truc » → https://amazon.fr/truc ; sinon null.
 export function asLink(text) {
@@ -22,8 +23,10 @@ let nextKey = 0;
  * Photos : une liste ordonnée (la première est la couverture) ; une photo déjà enregistrée n'est
  * jamais renvoyée, seulement son numéro et son recadrage.
  */
-export default function WishForm({ ownerId, wish, forSomeoneElse, received, onDone, onCancel }) {
+export default function WishForm({ ownerId, wish, forSomeoneElse, received: receivedProp, onDone, onCancel }) {
   const editing = !!wish;
+  // Un cadeau déjà reçu (ajouté comme tel, ou modifié depuis les archives) a en plus : de qui, et quand.
+  const received = receivedProp || !!wish?.received_at;
   const [form, setForm] = useState(() =>
     editing
       ? {
@@ -32,8 +35,10 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, received, onDo
           price: wish.price || '',
           note: wish.note || '',
           favorite: wish.favorite,
+          received_from: wish.received_from || '',
+          received_on: wish.received_at?.slice(0, 10) || today(),
         }
-      : EMPTY,
+      : { ...EMPTY, received_from: '', received_on: today() },
   );
   // Chaque photo : { key, id } si déjà enregistrée, ou { key, data } si nouvelle ; plus son recadrage.
   const [photos, setPhotos] = useState(() =>
@@ -127,6 +132,8 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, received, onDo
     const leftover = form.url.trim() && !link ? form.url.trim() : '';
     const payload = {
       ...form,
+      received_from: received ? form.received_from : '',
+      received_on: received ? form.received_on : '',
       url: link || '',
       note: leftover ? [form.note.trim(), `(${leftover})`].filter(Boolean).join(' ') : form.note,
       photos: photos.map((p) =>
@@ -213,6 +220,20 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, received, onDo
           <input value={form.note} onChange={set('note')} placeholder="Couleur, taille, édition…" maxLength={500} />
         </label>
       </div>
+      {received && (
+        <div className="field-row">
+          <label className="field field-grow">
+            <span className="field-label">
+              De la part de <span className="muted small">(facultatif)</span>
+            </span>
+            <input value={form.received_from} onChange={set('received_from')} placeholder="ex. Mamie" maxLength={60} />
+          </label>
+          <label className="field">
+            <span className="field-label">Reçu le</span>
+            <input type="date" value={form.received_on} onChange={set('received_on')} max={today()} required />
+          </label>
+        </div>
+      )}
       <div className="field">
         <span className="field-label">
           Photos{photos.length > 1 && <span className="muted small"> · la première sert de couverture</span>}

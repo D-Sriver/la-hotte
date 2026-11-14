@@ -1,7 +1,11 @@
-import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api.js';
 import WishList from './WishList.jsx';
 import AddWishForm from './AddWishForm.jsx';
+import ReceivedItem from './ReceivedItem.jsx';
+import { useListView, ViewSwitch } from './ListView.jsx';
+import ListTools from './ListTools.jsx';
+import { arrangeWishes } from '../listTools.js';
 import IdeasPanel from './IdeasPanel.jsx';
 import SharePanel from './SharePanel.jsx';
 import Icon from './Icon.jsx';
@@ -11,49 +15,14 @@ import PageHead from './PageHead.jsx';
 import { usePageIntro } from '../motion.js';
 import { usePageTitle } from '../usePageTitle.js';
 
-const VIEWS = [
-  { id: '1', label: '1 colonne', short: '1' },
-  { id: '2', label: '2 colonnes', short: '2' },
-  { id: '3', label: '3 colonnes', short: '3' },
-  { id: 'compact', label: 'Liste compacte, sans images', short: 'Compact' },
-];
-// Trois colonnes ne tiennent lisiblement qu'à partir de 480 px de large.
-const WIDE_QUERY = '(min-width: 480px)';
-const subscribeWide = (notify) => {
-  const query = window.matchMedia(WIDE_QUERY);
-  query.addEventListener('change', notify);
-  return () => query.removeEventListener('change', notify);
-};
-const isWide = () => window.matchMedia(WIDE_QUERY).matches;
-
-const VIEW_KEY = 'la-hotte-vue-liste';
-
-// Le choix d'affichage reste sur cet appareil ; sans stockage, on retombe sur une colonne.
-function readView() {
-  try {
-    const saved = localStorage.getItem(VIEW_KEY);
-    return VIEWS.some((v) => v.id === saved) ? saved : '1';
-  } catch {
-    return '1';
-  }
-}
-
 export default function MePage({ me }) {
   usePageTitle('Ma liste');
   const [wishes, setWishes] = useState(null);
   const [archived, setArchived] = useState([]);
-  const [chosenView, setView] = useState(readView);
-  const wide = useSyncExternalStore(subscribeWide, isWide, () => true);
-  // Un « 3 colonnes » mémorisé retombe sur 2 colonnes quand l'écran est trop étroit.
-  const view = chosenView === '3' && !wide ? '2' : chosenView;
-  const chooseView = (id) => {
-    setView(id);
-    try {
-      localStorage.setItem(VIEW_KEY, id);
-    } catch {
-      // Stockage indisponible : le choix vaut pour cette visite seulement.
-    }
-  };
+  const { view, choose, wide } = useListView();
+  const [query, setQuery] = useState('');
+  const [sort, setSort] = useState('default');
+  const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [shareToken, setShareToken] = useState(undefined);
   const load = useCallback(() => {
     api.me().then((d) => {
@@ -66,6 +35,8 @@ export default function MePage({ me }) {
 
   const { done, total } = profileCompletion(me);
   const count = wishes?.length;
+  const shown = wishes && arrangeWishes(wishes, { sort, onlyFavorites, query });
+  const filtering = !!query.trim() || onlyFavorites;
   const scope = usePageIntro(wishes !== null);
 
   return (
@@ -88,26 +59,32 @@ export default function MePage({ me }) {
 
       <section className="tile section">
         <div className="section-head">
-          <h2 className="section-title">Mes envies{wishes ? <span className="count">{wishes.length}</span> : null}</h2>
-          <div className="view-switch" role="group" aria-label="Affichage de la liste">
-            {VIEWS.filter((v) => v.id !== '3' || wide).map((v) => (
-              <button
-                key={v.id}
-                type="button"
-                aria-pressed={view === v.id}
-                aria-label={v.label}
-                title={v.label}
-                onClick={() => chooseView(v.id)}
-              >
-                {v.short}
-              </button>
-            ))}
-          </div>
+          <h2 className="section-title">
+            Mes envies
+            {wishes ? (
+              <span className="count">{filtering ? `${shown.length} sur ${wishes.length}` : wishes.length}</span>
+            ) : null}
+          </h2>
+          <ViewSwitch view={view} wide={wide} onChoose={choose} />
         </div>
+        {wishes?.length >= 3 && (
+          <ListTools
+            query={query}
+            onQuery={setQuery}
+            sort={sort}
+            onSort={setSort}
+            onlyFavorites={onlyFavorites}
+            onFavorites={setOnlyFavorites}
+          />
+        )}
         {wishes ? (
           <WishList
-            wishes={wishes}
-            emptyText="Liste vide. Ajoute une envie, sinon ce sera la surprise totale."
+            wishes={shown}
+            emptyText={
+              filtering
+                ? 'Aucune envie ne correspond.'
+                : 'Liste vide. Ajoute une envie, sinon ce sera la surprise totale.'
+            }
             onChanged={load}
             view={view}
           />
@@ -127,27 +104,7 @@ export default function MePage({ me }) {
         </p>
         <ul className="archive-list">
           {archived.map((w) => (
-            <li key={w.id} className="archive-item">
-              {w.photos?.length > 0 && (
-                <img className="archive-photo" src={api.photoUrl(w.id, w.photos[0].id)} alt="" loading="lazy" />
-              )}
-              <span className="archive-text">
-                <span className="archive-title">{w.title}</span>
-                {w.price && <span className="muted small"> · {w.price}</span>}
-                {w.note && <span className="muted small archive-note">{w.note}</span>}
-                {w.url && (
-                  <a className="small archive-link" href={w.url} target="_blank" rel="noopener noreferrer">
-                    Voir le lien
-                  </a>
-                )}
-              </span>
-              <button
-                className="button button-small button-quiet"
-                onClick={() => api.setReceived(w.id, false).then(load)}
-              >
-                Remettre dans ma liste
-              </button>
-            </li>
+            <ReceivedItem key={w.id} wish={w} onChanged={load} />
           ))}
         </ul>
         <AddWishForm ownerId={me.id} received onAdded={load} />

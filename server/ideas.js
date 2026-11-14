@@ -3,7 +3,8 @@
 
 import { searchUrl } from './ai.js';
 
-const COLUMNS = 'id, title, why, price, shop, search_url, rating, kept, created_at';
+const COLUMNS =
+  'id, title, why, price, shop, search_url, rating, kept, created_at, certain, verified, found_price, found_shop, found_url';
 
 // Pour soi : uniquement ses propres recherches. Pour un proche : celles de la famille affichée.
 function scope(personId, viewerId, familyId) {
@@ -17,6 +18,7 @@ const SHOPPING_LINK = 'https://www.google.com/search?tbm=shop&q=';
 const shape = (row) => ({
   ...row,
   kept: !!row.kept,
+  certain: !!row.certain,
   search_url: row.search_url?.startsWith(SHOPPING_LINK)
     ? searchUrl(decodeURIComponent(row.search_url.slice(SHOPPING_LINK.length)))
     : row.search_url,
@@ -34,8 +36,8 @@ export async function ideaHistory(db, personId, viewerId, familyId, limit = 40) 
 export async function saveIdea(db, { personId, viewerId, familyId }, idea) {
   const row = await db
     .prepare(
-      `INSERT INTO ai_ideas (person_id, asked_by, family_id, title, why, price, shop, search_url)
-       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) RETURNING ${COLUMNS}`,
+      `INSERT INTO ai_ideas (person_id, asked_by, family_id, title, why, price, shop, search_url, certain)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9) RETURNING ${COLUMNS}`,
     )
     .bind(
       personId,
@@ -46,6 +48,7 @@ export async function saveIdea(db, { personId, viewerId, familyId }, idea) {
       idea.price,
       idea.shop,
       idea.search_url,
+      idea.certain ? 1 : 0,
     )
     .first();
   return shape(row);

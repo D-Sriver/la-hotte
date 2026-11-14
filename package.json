@@ -8,6 +8,7 @@
     "build": "vite build",
     "db:local": "wrangler d1 execute la-hotte --local --file=schema.sql && wrangler d1 migrations apply la-hotte --local",
     "db:remote": "wrangler d1 execute la-hotte --remote --file=schema.sql && wrangler d1 migrations apply la-hotte --remote",
+    "db:reset:local": "./scripts/reset-local-db.sh",
     "db:migrate": "wrangler d1 migrations apply la-hotte --remote",
     "db:migrate:local": "wrangler d1 migrations apply la-hotte --local",
     "db:reset:lists": "wrangler d1 execute la-hotte --remote --file=scripts/reset-lists.sql",

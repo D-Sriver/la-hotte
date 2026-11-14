@@ -13,7 +13,7 @@ export async function visibleWishes(db, ownerId, viewerId, familyId, { archived 
   if (ownerId === viewerId) {
     const { results } = await db
       .prepare(
-        `SELECT w.id, w.title, w.url, w.price, w.note, w.favorite, ${PHOTOS_JSON} AS photos, w.created_at, w.received_at
+        `SELECT w.id, w.title, w.url, w.price, w.note, w.favorite, ${PHOTOS_JSON} AS photos, w.created_at, w.received_at, w.received_from
          FROM wishes w WHERE w.owner_id = ?1 AND w.added_by = ?1 AND w.family_id IS NULL AND w.removed_at IS NULL
            AND w.${receivedFilter}
          ORDER BY ${archived ? 'w.received_at DESC' : 'w.favorite DESC, w.created_at DESC'}`,

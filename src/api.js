@@ -143,5 +143,6 @@ export const api = {
   // onEvent reçoit { idea }, puis { done, remaining } ou { error }.
   findIdeas: (query, onEvent) => stream('/ideas', { method: 'POST', body: query }, onEvent),
   ideaHistory: (personId) => request(`/ideas?person_id=${personId}`),
+  verifyIdea: (id) => request(`/ideas/${id}/verify`, { method: 'POST' }),
   rateIdea: (id, change) => request(`/ideas/${id}`, { method: 'PUT', body: change }),
 };

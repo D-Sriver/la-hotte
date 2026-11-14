@@ -1,4 +1,4 @@
-import { json, fail, readJson, clean, cleanUrl } from '../../../server/http.js';
+import { json, fail, readJson, clean, cleanUrl, cleanDay } from '../../../server/http.js';
 import { checkPhotos, savePhotos } from '../../../server/photos.js';
 import { personInFamily } from '../../../server/wishes.js';
 
@@ -20,8 +20,8 @@ export async function onRequestPost({ request, env, data }) {
     return fail(404, 'Personne introuvable dans cette famille.');
 
   const wish = await env.DB.prepare(
-    `INSERT INTO wishes (owner_id, added_by, title, url, price, note, favorite, family_id, received_at)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, CASE WHEN ?9 THEN datetime('now') END) RETURNING id`,
+    `INSERT INTO wishes (owner_id, added_by, title, url, price, note, favorite, family_id, received_at, received_from)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, CASE WHEN ?9 THEN COALESCE(?10, datetime('now')) END, ?11) RETURNING id`,
   )
     .bind(
       ownerId,
@@ -34,6 +34,8 @@ export async function onRequestPost({ request, env, data }) {
       // Ses envies sont pour toutes ses familles ; une idée secrète reste dans la famille affichée.
       forMe ? null : data.family.id,
       received ? 1 : 0,
+      cleanDay(body.received_on),
+      received ? clean(body.received_from, 60) || null : null,
     )
     .first();
   if (photos) await savePhotos(env.DB, wish.id, photos);

@@ -1706,7 +1706,53 @@ a.tile:active {
   .gifts-page > .section:not(.ideas) {
     grid-column: 1 / -1;
   }
-  .gifts-page .wish-list {
+  .gifts-page > .list-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .list-search {
+    flex: 1 1 10rem;
+    min-height: 40px;
+    width: auto;
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--r-pill);
+  }
+  .list-sort select {
+    min-height: 40px;
+    padding: 0 0.9rem;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: var(--bg);
+    color: var(--ink);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+  .list-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 40px;
+    padding: 0 0.9rem;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: var(--bg);
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .list-chip[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--tile);
+  }
+  .view-row {
+    grid-column: 1 / -1;
+  }
+  .gifts-page .wish-list-1 {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
   }
@@ -1969,6 +2015,10 @@ a.tile:active {
 }
 .wish-list-compact .wish {
   padding: 0.5rem 0.75rem;
+}
+.view-row {
+  display: flex;
+  justify-content: flex-end;
 }
 .view-switch {
   display: flex;
@@ -2385,6 +2435,51 @@ a.tile:active {
   margin-top: 0.3rem;
   font-size: var(--fs-sm);
   text-wrap: pretty;
+}
+.idea-badges {
+  margin: 0.35rem 0 0;
+}
+/* Le panneau des idées est sombre dans les deux thèmes : couleurs posées sur fond marine. */
+.idea-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--r-pill);
+  background: rgb(255 255 255 / 0.14);
+  color: rgb(255 255 255 / 0.9);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+.idea-badge-found {
+  background: rgb(95 214 160 / 0.2);
+  color: #8be9bf;
+}
+.idea-badge-missing {
+  background: rgb(255 123 125 / 0.2);
+  color: #ffb4b5;
+}
+.idea-found {
+  margin: 0.3rem 0 0;
+  font-size: var(--fs-sm);
+  color: rgb(255 255 255 / 0.85);
+}
+.idea-links {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.9rem;
+  align-items: center;
+}
+.idea-verify {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+.idea-verify:disabled {
+  opacity: 0.6;
+  cursor: progress;
 }
 .idea-actions {
   display: flex;
@@ -3549,6 +3644,14 @@ textarea:focus {
   display: grid;
   gap: 2px;
   min-width: 0;
+}
+.archive-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.archive-editing {
+  grid-column: 1 / -1;
 }
 .archive-link {
   color: var(--ink-soft);

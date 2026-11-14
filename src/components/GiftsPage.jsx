@@ -4,6 +4,7 @@ import Icon from './Icon.jsx';
 import Skeleton from './Skeleton.jsx';
 import PageHead from './PageHead.jsx';
 import { frameStyle, parseFrame } from '../photoFrame.js';
+import { useListView, ViewSwitch } from './ListView.jsx';
 import { usePageIntro } from '../motion.js';
 import { usePageTitle } from '../usePageTitle.js';
 import { OCCASION_LABEL } from './WishList.jsx';
@@ -102,6 +103,7 @@ export default function GiftsPage({ familyId, onSwitchFamily }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(null);
+  const { view, choose, wide } = useListView();
   const load = useCallback(() => {
     api
       .reservations()
@@ -181,6 +183,12 @@ export default function GiftsPage({ familyId, onSwitchFamily }) {
         </section>
       )}
 
+      {byPerson.length > 0 && (
+        <div className="view-row">
+          <ViewSwitch view={view} wide={wide} onChoose={choose} />
+        </div>
+      )}
+
       {byPerson.map((person) => (
         <section key={person.id} className="tile section">
           <div className="section-head">
@@ -207,10 +215,10 @@ export default function GiftsPage({ familyId, onSwitchFamily }) {
             budget={data.budgets?.[person.id] ?? null}
             onChange={(amount) => setData((d) => ({ ...d, budgets: { ...d.budgets, [person.id]: amount } }))}
           />
-          <ul className="wish-list">
+          <ul className={`wish-list wish-list-${view}`}>
             {person.gifts.map((g) => (
               <li key={g.id} className={`wish${g.bought || g.received ? ' wish-bought' : ''}`}>
-                {g.cover && (
+                {view !== 'compact' && g.cover && (
                   <span className={`wish-photo wish-photo-box${g.cover.frame ? ' is-framed' : ''}`}>
                     <img
                       src={api.photoUrl(g.id, g.cover.id)}
