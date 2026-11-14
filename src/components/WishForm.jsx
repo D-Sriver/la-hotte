@@ -22,7 +22,7 @@ let nextKey = 0;
  * Photos : une liste ordonnée (la première est la couverture) ; une photo déjà enregistrée n'est
  * jamais renvoyée, seulement son numéro et son recadrage.
  */
-export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCancel }) {
+export default function WishForm({ ownerId, wish, forSomeoneElse, received, onDone, onCancel }) {
   const editing = !!wish;
   const [form, setForm] = useState(() =>
     editing
@@ -135,7 +135,7 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
     };
     try {
       if (editing) await api.updateWish(wish.id, payload);
-      else await api.addWish({ ...payload, owner_id: ownerId });
+      else await api.addWish({ ...payload, owner_id: ownerId, received: !!received });
       onDone();
     } catch (err) {
       setError(err.message);
@@ -159,7 +159,9 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
         <span className="field-label">Quoi</span>
         <input
           value={form.title}
-          placeholder={forSomeoneElse ? 'ex. un pull bien chaud' : 'ex. un sécateur'}
+          placeholder={
+            forSomeoneElse ? 'ex. un pull bien chaud' : received ? 'ex. une écharpe en laine' : 'ex. un sécateur'
+          }
           onChange={set('title')}
           required
           maxLength={200}
@@ -258,7 +260,7 @@ export default function WishForm({ ownerId, wish, forSomeoneElse, onDone, onCanc
           )}
         </div>
       </div>
-      {!forSomeoneElse && (
+      {!forSomeoneElse && !received && (
         <label className="check">
           <input
             type="checkbox"

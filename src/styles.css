@@ -1929,6 +1929,56 @@ a.tile:active {
   border-radius: var(--r-inner);
   background: var(--bg);
 }
+/* Affichage choisi sur « Ma liste » : 2 ou 3 colonnes (grands écrans), ou compact sans photos. */
+@media (min-width: 40.01rem) {
+  .wish-list-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .wish-list-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .wish-list-2 .wish,
+  .wish-list-3 .wish {
+    align-items: flex-start;
+    align-content: flex-start;
+  }
+}
+.wish-list-compact {
+  gap: 4px;
+}
+.wish-list-compact .wish {
+  padding: 0.5rem 0.75rem;
+}
+.view-switch {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--r-pill);
+  background: var(--bg);
+}
+.view-switch button {
+  min-width: 44px;
+  min-height: 36px;
+  padding: 0 0.7rem;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+.view-switch button[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--tile);
+}
+@media (max-width: 40rem) {
+  .view-switch .view-wide {
+    display: none;
+  }
+}
+
 /* Photo du cadeau : en grand, au-dessus du texte, sur fond blanc (les photos produit le sont souvent). */
 .wish-photo {
   flex: 1 1 100%;
@@ -2857,6 +2907,10 @@ textarea:focus {
     background: var(--bg);
     color: var(--ink);
   }
+  .tile-form input:focus,
+  .tile-form textarea:focus {
+    background: var(--bg);
+  }
 }
 
 /* ---------- Transition « entonnoir » (voir zoom.js) ---------- */
@@ -3463,8 +3517,23 @@ textarea:focus {
 }
 .archive-title {
   font-weight: 600;
-  text-decoration: line-through;
-  text-decoration-color: var(--green);
+}
+.archive-photo {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--r-sm);
+  object-fit: cover;
+  flex: none;
+}
+.archive-text {
+  flex: 1 1 10rem;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.archive-link {
+  color: var(--ink-soft);
+  text-decoration: underline;
 }
 .person-birthday {
   display: inline-flex;

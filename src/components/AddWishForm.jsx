@@ -2,14 +2,14 @@ import { useState } from 'react';
 import Icon from './Icon.jsx';
 import WishForm from './WishForm.jsx';
 
-export default function AddWishForm({ ownerId, forSomeoneElse, onAdded }) {
+export default function AddWishForm({ ownerId, forSomeoneElse, received, onAdded }) {
   const [open, setOpen] = useState(false);
 
   if (!open) {
     return (
       <button className="add-button" onClick={() => setOpen(true)}>
         <Icon name="plus" size={20} />
-        {forSomeoneElse ? 'Ajouter une idée' : 'Ajouter une envie'}
+        {forSomeoneElse ? 'Ajouter une idée' : received ? 'Ajouter un cadeau reçu' : 'Ajouter une envie'}
       </button>
     );
   }
@@ -18,6 +18,7 @@ export default function AddWishForm({ ownerId, forSomeoneElse, onAdded }) {
     <WishForm
       ownerId={ownerId}
       forSomeoneElse={forSomeoneElse}
+      received={received}
       onDone={() => {
         setOpen(false);
         onAdded();

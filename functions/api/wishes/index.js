@@ -14,12 +14,14 @@ export async function onRequestPost({ request, env, data }) {
   if (photoError) return fail(400, photoError);
 
   const forMe = ownerId === data.me.id;
+  // Un cadeau déjà reçu, saisi à la main : il va directement dans ses archives.
+  const received = forMe && body.received === true;
   if (!forMe && !(await personInFamily(env.DB, ownerId, data.family.id)))
     return fail(404, 'Personne introuvable dans cette famille.');
 
   const wish = await env.DB.prepare(
-    `INSERT INTO wishes (owner_id, added_by, title, url, price, note, favorite, family_id)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) RETURNING id`,
+    `INSERT INTO wishes (owner_id, added_by, title, url, price, note, favorite, family_id, received_at)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, CASE WHEN ?9 THEN datetime('now') END) RETURNING id`,
   )
     .bind(
       ownerId,
@@ -28,9 +30,10 @@ export async function onRequestPost({ request, env, data }) {
       cleanUrl(body.url),
       clean(body.price, 40),
       clean(body.note, 500),
-      forMe && body.favorite ? 1 : 0,
+      forMe && body.favorite && !received ? 1 : 0,
       // Ses envies sont pour toutes ses familles ; une idée secrète reste dans la famille affichée.
       forMe ? null : data.family.id,
+      received ? 1 : 0,
     )
     .first();
   if (photos) await savePhotos(env.DB, wish.id, photos);

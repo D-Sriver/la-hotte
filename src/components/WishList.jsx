@@ -430,7 +430,7 @@ function collapse(element) {
   });
 }
 
-function WishRow({ wish, onChanged }) {
+function WishRow({ wish, compact, onChanged }) {
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -494,7 +494,9 @@ function WishRow({ wish, onChanged }) {
 
   return (
     <li ref={row} className={`wish${taken ? ' wish-taken' : ''}${wish.favorite ? ' wish-favorite' : ''}`}>
-      {wish.photos?.length > 0 && <PhotoCarousel wishId={wish.id} photos={wish.photos} title={wish.title} />}
+      {!compact && wish.photos?.length > 0 && (
+        <PhotoCarousel wishId={wish.id} photos={wish.photos} title={wish.title} />
+      )}
       <div className="wish-main">
         <p className="wish-title">
           {wish.url ? (
@@ -661,14 +663,15 @@ function WishRow({ wish, onChanged }) {
   );
 }
 
-export default function WishList({ wishes, emptyText, onChanged }) {
+// view : '1' | '2' | '3' colonnes avec photos, ou 'compact' (une colonne, sans photos).
+export default function WishList({ wishes, emptyText, onChanged, view = '1' }) {
   // Les envies arrivent en cascade, et de nouveau quand on en ajoute une.
   const list = useStagger(wishes.length);
   if (!wishes.length) return <p className="empty-inline">{emptyText}</p>;
   return (
-    <ul className="wish-list" ref={list}>
+    <ul className={`wish-list wish-list-${view}`} ref={list}>
       {wishes.map((w) => (
-        <WishRow key={w.id} wish={w} onChanged={onChanged} />
+        <WishRow key={w.id} wish={w} compact={view === 'compact'} onChanged={onChanged} />
       ))}
     </ul>
   );
