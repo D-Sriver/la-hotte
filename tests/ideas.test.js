@@ -73,7 +73,7 @@ test('le lecteur ignore la réflexion, les accolades dans le texte et les doublo
 test('le lecteur fabrique un lien de recherche et coupe les textes trop longs', () => {
   const [idea] = ideaReader().push(JSON.stringify([{ title: 'x'.repeat(500), search: 'jeu de société' }]));
   assert.equal(idea.title.length, 200);
-  assert.equal(idea.search_url, 'https://www.google.com/search?tbm=shop&q=jeu%20de%20soci%C3%A9t%C3%A9');
+  assert.equal(idea.search_url, 'https://www.google.com/search?q=jeu%20de%20soci%C3%A9t%C3%A9%20acheter');
 });
 
 test('findIdeas lit le flux, et retombe sur une réponse classique si le flux est vide', async () => {

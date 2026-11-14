@@ -108,6 +108,9 @@ function parseIdeas(text) {
   }
 }
 
+// Recherche web (pas l'onglet Shopping de Google, presque vide pour les produits de niche) + « acheter » : on tombe sur des boutiques.
+export const searchUrl = (query) => `https://www.google.com/search?q=${encodeURIComponent(`${query} acheter`)}`;
+
 // Une idée telle que renvoyée au site (on ne fait pas confiance à la forme donnée par le modèle).
 export function cleanIdea(idea) {
   if (!idea || typeof idea.title !== 'string' || !idea.title.trim()) return null;
@@ -117,7 +120,7 @@ export function cleanIdea(idea) {
     why: String(idea.why || '').slice(0, 400),
     price: String(idea.price || '').slice(0, 40),
     shop: String(idea.where || idea.shop || '').slice(0, 120),
-    search_url: `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(query)}`,
+    search_url: searchUrl(query),
   };
 }
 

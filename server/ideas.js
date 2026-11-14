@@ -1,6 +1,8 @@
 // Idées proposées par l'IA, gardées pour les retrouver et pour que l'IA ne se répète pas.
 // Même règle de secret que les idées secrètes : la personne ne voit jamais celles cherchées pour elle par les autres.
 
+import { searchUrl } from './ai.js';
+
 const COLUMNS = 'id, title, why, price, shop, search_url, rating, kept, created_at';
 
 // Pour soi : uniquement ses propres recherches. Pour un proche : celles de la famille affichée.
@@ -10,7 +12,15 @@ function scope(personId, viewerId, familyId) {
     : { where: 'person_id = ?1 AND family_id = ?2 AND asked_by != ?1', binds: [personId, familyId] };
 }
 
-const shape = (row) => ({ ...row, kept: !!row.kept });
+// Les idées gardées avant le changement de recherche pointent encore vers l'onglet Shopping : on les redirige.
+const SHOPPING_LINK = 'https://www.google.com/search?tbm=shop&q=';
+const shape = (row) => ({
+  ...row,
+  kept: !!row.kept,
+  search_url: row.search_url?.startsWith(SHOPPING_LINK)
+    ? searchUrl(decodeURIComponent(row.search_url.slice(SHOPPING_LINK.length)))
+    : row.search_url,
+});
 
 export async function ideaHistory(db, personId, viewerId, familyId, limit = 40) {
   const { where, binds } = scope(personId, viewerId, familyId);
