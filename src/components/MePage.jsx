@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { api } from '../api.js';
 import WishList from './WishList.jsx';
 import AddWishForm from './AddWishForm.jsx';
@@ -12,11 +12,20 @@ import { usePageIntro } from '../motion.js';
 import { usePageTitle } from '../usePageTitle.js';
 
 const VIEWS = [
-  { id: '1', label: '1 colonne', short: '1', wide: false },
-  { id: '2', label: '2 colonnes', short: '2', wide: true },
-  { id: '3', label: '3 colonnes', short: '3', wide: true },
-  { id: 'compact', label: 'Liste compacte, sans images', short: 'Compact', wide: false },
+  { id: '1', label: '1 colonne', short: '1' },
+  { id: '2', label: '2 colonnes', short: '2' },
+  { id: '3', label: '3 colonnes', short: '3' },
+  { id: 'compact', label: 'Liste compacte, sans images', short: 'Compact' },
 ];
+// Trois colonnes ne tiennent lisiblement qu'à partir de 480 px de large.
+const WIDE_QUERY = '(min-width: 480px)';
+const subscribeWide = (notify) => {
+  const query = window.matchMedia(WIDE_QUERY);
+  query.addEventListener('change', notify);
+  return () => query.removeEventListener('change', notify);
+};
+const isWide = () => window.matchMedia(WIDE_QUERY).matches;
+
 const VIEW_KEY = 'la-hotte-vue-liste';
 
 // Le choix d'affichage reste sur cet appareil ; sans stockage, on retombe sur une colonne.
@@ -33,7 +42,10 @@ export default function MePage({ me }) {
   usePageTitle('Ma liste');
   const [wishes, setWishes] = useState(null);
   const [archived, setArchived] = useState([]);
-  const [view, setView] = useState(readView);
+  const [chosenView, setView] = useState(readView);
+  const wide = useSyncExternalStore(subscribeWide, isWide, () => true);
+  // Un « 3 colonnes » mémorisé retombe sur 2 colonnes quand l'écran est trop étroit.
+  const view = chosenView === '3' && !wide ? '2' : chosenView;
   const chooseView = (id) => {
     setView(id);
     try {
@@ -78,11 +90,10 @@ export default function MePage({ me }) {
         <div className="section-head">
           <h2 className="section-title">Mes envies{wishes ? <span className="count">{wishes.length}</span> : null}</h2>
           <div className="view-switch" role="group" aria-label="Affichage de la liste">
-            {VIEWS.map((v) => (
+            {VIEWS.filter((v) => v.id !== '3' || wide).map((v) => (
               <button
                 key={v.id}
                 type="button"
-                className={v.wide ? 'view-wide' : undefined}
                 aria-pressed={view === v.id}
                 aria-label={v.label}
                 title={v.label}

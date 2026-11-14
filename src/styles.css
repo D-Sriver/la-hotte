@@ -1929,19 +1929,17 @@ a.tile:active {
   border-radius: var(--r-inner);
   background: var(--bg);
 }
-/* Affichage choisi sur « Ma liste » : 2 ou 3 colonnes (grands écrans), ou compact sans photos. */
-@media (min-width: 40.01rem) {
-  .wish-list-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .wish-list-3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .wish-list-2 .wish,
-  .wish-list-3 .wish {
-    align-items: flex-start;
-    align-content: flex-start;
-  }
+/* Affichage choisi sur « Ma liste » : 2 ou 3 colonnes, ou compact sans photos. */
+.wish-list-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.wish-list-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.wish-list-2 .wish,
+.wish-list-3 .wish {
+  align-items: flex-start;
+  align-content: flex-start;
 }
 .wish-list-compact {
   gap: 4px;
@@ -1972,11 +1970,6 @@ a.tile:active {
 .view-switch button[aria-pressed='true'] {
   background: var(--ink);
   color: var(--tile);
-}
-@media (max-width: 40rem) {
-  .view-switch .view-wide {
-    display: none;
-  }
 }
 
 /* Photo du cadeau : en grand, au-dessus du texte, sur fond blanc (les photos produit le sont souvent). */
@@ -4364,4 +4357,42 @@ h1[tabindex='-1']:focus {
   align-items: center;
   gap: 0.5rem;
   text-decoration: none;
+}
+
+/* Téléphone, 2 ou 3 colonnes : cartes serrées, photo basse, crayon et poubelle sous le texte. */
+@media (max-width: 40rem) {
+  .wish-list-2,
+  .wish-list-3 {
+    gap: 6px;
+  }
+  .wish-list-2 .wish,
+  .wish-list-3 .wish {
+    gap: 0.4rem;
+    padding: 0.5rem;
+  }
+  .wish-list-2 .wish:not(:has(.wish-actions .button)) .wish-main,
+  .wish-list-3 .wish:not(:has(.wish-actions .button)) .wish-main {
+    padding-right: 0;
+  }
+  .wish-list-2 .wish:not(:has(.wish-actions .button)) .wish-actions,
+  .wish-list-3 .wish:not(:has(.wish-actions .button)) .wish-actions {
+    position: static;
+    background: none;
+  }
+  .wish-list-2 .wish-photo-box,
+  .wish-list-2 .carousel-track {
+    max-height: 120px;
+  }
+  .wish-list-3 .wish-photo-box,
+  .wish-list-3 .carousel-track {
+    max-height: 80px;
+  }
+  .wish-list-2 .wish-title,
+  .wish-list-3 .wish-title {
+    overflow-wrap: anywhere;
+  }
+  .wish-list-3 .wish-title,
+  .wish-list-3 .wish-meta {
+    font-size: var(--fs-sm);
+  }
 }
