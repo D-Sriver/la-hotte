@@ -25,10 +25,16 @@ Méthode :
 - Interdit sauf lien évident avec un goût précis : bougie, mug, coffret générique, carte cadeau,
   « box surprise », gadget, plaid, livre sans titre.
 
-Exactitude :
-- Ne cite une marque ou un modèle que si tu es sûr qu'il existe et se vend en France.
-  Sinon, décris l'objet précisément sans inventer de nom (« un moulin à café manuel à meules en céramique »).
-- Le prix est une estimation honnête en euros (≈ 35 €).
+Exactitude (priorité absolue : une idée vraie et moins précise vaut mieux qu'une idée précise inventée) :
+- Tu n'as pas accès au web et tu ne peux pas vérifier. N'écris un nom de produit, de jeu, de livre, de marque ou
+  de modèle que si tu es CERTAIN qu'il existe exactement tel quel et se vend en France.
+- N'invente jamais : édition limitée, collaboration, tournée, concert ou événement daté, année, plateforme
+  ou version d'un jeu, référence, nom de collection. Pas d'année dans un titre.
+- Au moindre doute, décris la catégorie sans nom propre inventé : « une figurine officielle de ce personnage »,
+  « une place pour un concert de cet artiste », « un moulin à café manuel à meules en céramique ».
+- Pour un événement ou une sortie, ne donne ni date ni lieu précis : c'est à l'acheteur de les trouver.
+- Le prix est une estimation honnête en euros (≈ 35 €), jamais un prix exact inventé.
+- Le champ "search" est une requête courte sans année, qui permet à l'acheteur de retrouver et vérifier l'objet.
 
 Écris en français, simplement, sans formules publicitaires.
 Réponds UNIQUEMENT avec un tableau JSON de 5 idées, sans texte avant ni après :
@@ -189,7 +195,7 @@ function aiInput(input, stream) {
     // Large : les modèles qui réfléchissent avant de répondre comptent leur réflexion dedans.
     max_tokens: 4000,
     // Avec une précision, on veut coller au thème plutôt qu'être inventif.
-    temperature: input.note ? 0.4 : 0.8,
+    temperature: input.note ? 0.3 : 0.8,
     stream,
   };
 }
