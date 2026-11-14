@@ -5,12 +5,21 @@
 const SYSTEM = `Tu es la personne de la famille qui a toujours LA bonne idée de cadeau.
 Ton but : des idées auxquelles l'acheteur n'aurait pas pensé seul, mais qui tombent juste.
 
+Précision de l'acheteur (si elle est donnée) : c'est la consigne principale, elle passe avant tout le reste.
+- Les 5 idées doivent toutes porter directement sur ce qu'elle désigne : le même personnage, artiste, univers,
+  licence, sport ou thème. Pas de produit « voisin » (une autre série, un autre artiste, un abonnement générique,
+  un kit de loisir sans rapport).
+- Prends le mot au sens le plus courant dans la culture populaire (« Miku » = Hatsune Miku, « Zelda » = la série de
+  jeux). Propose des produits de cet univers : figurines, vêtements, goodies officiels, jeux, musique, livres, places.
+- Si tu connais peu ce thème, reste sur des produits que tu sais exister plutôt que de dériver vers autre chose.
+- Dans ce cas, le goût de la personne ne sert qu'à choisir le style et le prix ; la variété passe après.
+
 Méthode :
 - Pars des goûts précis de la personne et de sa liste d'envies : elles disent son style, son niveau
   (débutant ou passionné) et les prix qu'elle trouve normaux. Creuse un goût plutôt que de rester en surface
   (pour « aime le café », pas « un paquet de café » mais un moulin manuel, un abonnement de torréfacteur, etc.).
 - Varie les types : des objets précis, au moins une expérience ou activité (atelier, place, sortie, cours),
-  et au moins un petit plaisir qui se consomme ou se partage.
+  et au moins un petit plaisir qui se consomme ou se partage (sauf si la précision de l'acheteur l'interdit).
 - Respecte le budget. Évite ce qu'elle possède déjà, ce qu'elle n'aime pas, ce qui est sur sa liste
   et les cadeaux déjà reçus.
 - Interdit sauf lien évident avec un goût précis : bougie, mug, coffret générique, carte cadeau,
@@ -39,12 +48,13 @@ function buildPrompt({ person, wishes, received, history = [], budget, note, occ
       ? `C'est ${person.name} qui cherche des idées pour sa propre liste : dans "why", parle-lui directement en la tutoyant (« Tu pourras… »).`
       : `C'est un proche qui cherche un cadeau pour ${person.name} : dans "why", parle de ${person.name} par son prénom.`,
     `Propose 5 idées de cadeaux pour ${person.name}${OCCASIONS[occasion] ? ` ${OCCASIONS[occasion]}` : ''}.`,
+    note && `PRÉCISION DE L'ACHETEUR (à respecter pour les 5 idées, avant tout le reste) : ${note}`,
     `Ce qu'il/elle aime : ${person.likes || 'non précisé'}`,
     `À éviter : ${person.dislikes || 'rien de précisé'}`,
     `Possède déjà : ${person.owns || 'non précisé'}`,
     `Tailles : ${person.sizes || 'non précisé'}`,
     `Budget : ${budget || person.budget_hint || 'libre, raisonnable'}`,
-  ];
+  ].filter(Boolean);
   if (wishes.length)
     lines.push(
       `Sa liste d'envies (ne pas reproposer, mais s'en inspirer) :\n${wishes.map((w) => `- ${wishLine(w)}`).join('\n')}`,
@@ -61,7 +71,7 @@ function buildPrompt({ person, wishes, received, history = [], budget, note, occ
     lines.push(`Idées déjà proposées qui ont plu (même esprit, mais ne pas les répéter) : ${liked.join(' ; ')}`);
   if (disliked.length) lines.push(`Idées déjà proposées jugées à côté (éviter ce genre) : ${disliked.join(' ; ')}`);
   if (others.length) lines.push(`Idées déjà proposées (ne pas reproposer) : ${others.join(' ; ')}`);
-  if (note) lines.push(`Précision de la personne qui offre : ${note}`);
+  if (note) lines.push(`Rappel : les 5 idées doivent toutes porter sur « ${note} ».`);
   return lines.join('\n');
 }
 
@@ -178,7 +188,8 @@ function aiInput(input, stream) {
     ],
     // Large : les modèles qui réfléchissent avant de répondre comptent leur réflexion dedans.
     max_tokens: 4000,
-    temperature: 0.8,
+    // Avec une précision, on veut coller au thème plutôt qu'être inventif.
+    temperature: input.note ? 0.4 : 0.8,
     stream,
   };
 }
